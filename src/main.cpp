@@ -11,9 +11,6 @@
 #include "outputs/neoPixelBusOutput.h"
 #include "lib/UDPFast/UDPFast.h"
 
-#define ETH_CLK_MODE ETH_CLOCK_GPIO17_OUT
-#define ETH_PHY_POWER 12
-
 // #include <../.pio/libdeps/esp32-poe/NeoPixelBus_ID547/src/NeoPixelBus.h>
 //#include <NeoPixelBus.h>
 

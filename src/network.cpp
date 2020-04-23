@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <ETH.h>
 #include "network.h"
 
 const unsigned int nodeid = 123; 
