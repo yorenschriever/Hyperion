@@ -1,0 +1,40 @@
+
+
+8x 60fps uitgestuurd met 486 leds
+
+
+geupload vanuit arduino 
+Packets: 154, Dropped: 9,  Busy: 22. Success: 123
+elapsed: 517, #channels: 8, AVG FPS: 29 (miss: 20%)
+Free heap: 238328
+strip size: 486
+Packets: 156, Dropped: 15,  Busy: 13. Success: 128
+elapsed: 515, #channels: 8, AVG FPS: 31 (miss: 17%)
+Free heap: 233532
+strip size: 486
+Packets: 141, Dropped: 12,  Busy: 2. Success: 127
+elapsed: 533, #channels: 8, AVG FPS: 29 (miss: 9%)
+Free heap: 243112
+strip size: 486
+Packets: 140, Dropped: 17,  Busy: 2. Success: 121
+elapsed: 519, #channels: 8, AVG FPS: 29 (miss: 13%)
+Free heap: 243112
+strip size: 486
+
+
+met platformio / espidf
+Packets: 239, Dropped: 96,  Busy: 0. Success: 143
+elapsed: 500, #channels: 8, AVG FPS: 35 (miss: 40%)
+Free heap: 180084
+strip size: 486
+Packets: 240, Dropped: 95,  Busy: 0. Success: 145
+elapsed: 500, #channels: 8, AVG FPS: 36 (miss: 39%)
+Free heap: 181688
+strip size: 486
+Packets: 239, Dropped: 95,  Busy: 0. Success: 144
+elapsed: 500, #channels: 8, AVG FPS: 36 (miss: 39%)
+Free heap: 180092
+strip size: 486
+
+je ziet hier dat de packetcount klopt (240) en de fps nu op 36 zit.
+op de arduino klopte de packetcount niet, wat er op wijst dat er al in een eerdere laag packets weggegooid worden
