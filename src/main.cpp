@@ -106,7 +106,7 @@ void setup() {
 
   //stopAllSockets();
 
-  setupOta();
+  //setupOta();
 
   Serial.printf("max udp connections: %d",MEMP_NUM_NETCONN);
 }
@@ -143,23 +143,19 @@ void loop() {
     for (int i=0;i<cb;i+=3) 
       out[index]->SetPixelColor(i/3, data[i],data[i+1],data[i+2]); 
 
-    //currently the calculations are the bottleneck, so i only check here if we are ready to send.
-    //if there are more processing steps in between, we might want to check earlier on if we need to skip this frame.
     if (!out[index]->Ready()){
       busy++;
       continue;
     }
 
     out[index]->Show();
-    //if (index==0)
-    //  for(int index2=0;index2<numOutputs;index2++)
-    //    out[index2]->Show();
     
     success++;
     channelActive[index]=true;
   }
 
-    handleOta();
+    //handleOta();
+  delay(1); //temp fix to silence the watchdog. still have to find out how to properly pet it.
 }
 
 

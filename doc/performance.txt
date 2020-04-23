@@ -1,0 +1,27 @@
+
+Gemeten in het oude arduino project (etherledEsp32_v11_ota)
+
+ zonder netwerk, 500 leds
+ 6 outputs: 59 fps, = theoretical maximum
+ 7 outputs: 52fps
+ 8 outputs: 45fps
+ 
+ met netwerk: 490 leds (MTU), data sent at 60fps
+ 6 outputs: 52 fps
+ 7 outputs: 45 fps
+ 8 outputs: 40 fps
+ 
+ met netwerk: 300 leds (5m strip), data sent at 60fps
+ 6 outputs: 57 fps
+ 7 outputs: 55 fps
+ 8 outputs: 55 fps
+ 
+ met netwerk: 256 leds, data sent at 60fps
+ 8 outputs: 58 fps
+ 
+ met netwerk: 250 leds, data sent at 60fps
+ 8 outputs: 59 fps
+ 
+ Alles met neopixel RMT gedaan, want dit is het snelst. 
+ De andere methods (fastled en combineren RMT+i2s maakt het langzamer in de zonder netwerk tests)
+ 
