@@ -7,6 +7,7 @@ set(app_sources
 
 	"main.cpp"
 	"lib/UDPFast/UDPFast.cpp"
+	"lib/dmx/dmx.cpp"
 )
 
 idf_component_register(SRCS ${app_sources} INCLUDE_DIRS ".")

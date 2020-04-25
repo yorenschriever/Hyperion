@@ -10,6 +10,7 @@
 
 #include "outputs/neoPixelBusOutput.h"
 #include "outputs/pwmOutput.h"
+#include "outputs/dmxOutput.h"
 #include "lib/UDPFast/UDPFast.h"
 
 
@@ -25,7 +26,7 @@ void animate(byte r, byte g, byte b);
 
 // NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip(PixelCount, PixelPin);
 
-const int numOutputs = 9;
+const int numOutputs = 8;
 #define forEach(output) for(int index=0;index<numOutputs;index++)
 
 volatile int packets=0;
@@ -43,10 +44,11 @@ Output* out[numOutputs] = {
   new NeoPixelBusOutput<NeoEsp32Rmt2800KbpsMethod>(14),
   new NeoPixelBusOutput<NeoEsp32Rmt3800KbpsMethod>(2),
   new NeoPixelBusOutput<NeoEsp32Rmt4800KbpsMethod>(15),
-  new NeoPixelBusOutput<NeoEsp32Rmt5800KbpsMethod>(32),
+  //new NeoPixelBusOutput<NeoEsp32Rmt5800KbpsMethod>(32), //cant use together with dmx
   new NeoPixelBusOutput<NeoEsp32Rmt6800KbpsMethod>(0),
   new NeoPixelBusOutput<NeoEsp32Rmt7800KbpsMethod>(33),
-  new PWMOutput()
+  //new PWMOutput()
+  new DMXOutput()
 };
 
 UDPFast* udp[numOutputs] = {
@@ -58,7 +60,7 @@ UDPFast* udp[numOutputs] = {
   new UDPFast(),
   new UDPFast(),
   new UDPFast(),
-  new UDPFast(),
+  //new UDPFast(),
 };
 
 
@@ -92,7 +94,7 @@ void setup() {
     out[index]->Begin();
     out[index]->setGammaCurve(gamma8);
   }
-  out[8]->setGammaCurve(gamma12);
+  //out[8]->setGammaCurve(gamma12);
 
   Serial.println("Starting network");
   clearall();
