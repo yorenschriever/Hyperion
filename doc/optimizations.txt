@@ -1,0 +1,4 @@
+places to optimize:
+
+udp on core 1 / 0
+empty udp queue without all the memcpy (but with counting missed packets)

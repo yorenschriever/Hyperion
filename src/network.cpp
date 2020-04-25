@@ -14,8 +14,11 @@ byte flipByte(byte c);
 bool config_eth(IPAddress local_ip, IPAddress gateway, IPAddress subnet);
 
 void NetworkBegin(){
-  WiFi.onEvent(EthEvent);
+  //This delay makes sure that not all nodes will startup at exactly the same time when you flip the master power switch
+  //Routers were having trouble when a large amount of nodes started communicating at exactly the same time.
   delay(100 + flipByte(nodeid)*5); 
+
+  WiFi.onEvent(EthEvent);
   ETH.begin();
   
   bool staticip = config_eth(ip,gateway,subnet);

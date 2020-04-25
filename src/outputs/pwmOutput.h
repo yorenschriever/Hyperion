@@ -1,10 +1,8 @@
 #pragma once
 
+#include "Output.h"
 #include <Arduino.h>
-#include "output.h"
-
 #include <Wire.h>
-//#include <Adafruit_PWMServoDriver.h>
 
 #define PCA9685_I2C_ADDRESS 0x40      /**< Default PCA9685 I2C Slave Address */
 #define PCA9685_MODE1 0x00      /**< Mode Register 1 */
@@ -19,9 +17,12 @@
 #define MODE1_RESTART 0x80 /**< Restart enabled */
 #define PCA9685_PRESCALE 0xFE     /**< Prescaler for PWM output frequency */
 
-const byte PWM_LED_ORDER[] = {8,9,10,11,1,0,5,4,3,7,6,2};
+                            //  1  2  3  4  5  6  7  8  9  10 11 12
+//const byte PWM_LED_ORDER[] = {8, 9 ,10,11,1 ,0 ,5 ,4 ,3 ,7 ,6 ,2 }; //numbering pn pcb
+const byte PWM_LED_ORDER[] =   {5, 4, 3,10, 9 ,8 ,7 ,6 ,2 ,0 ,1 ,11 }; //numbering on backside
 
-//Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+#define SDAPIN 13
+#define SCLPIN 16
 
 class PWMOutput : public Output {
   public:
@@ -54,7 +55,7 @@ class PWMOutput : public Output {
     void Begin() override 
     {
       while(this->busy);
-      _i2c->begin();
+      _i2c->begin(SDAPIN,SCLPIN);
       this->reset();
 
       //this->setPWMFreq(1500);
