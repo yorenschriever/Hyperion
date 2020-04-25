@@ -26,7 +26,7 @@ void animate(byte r, byte g, byte b);
 
 // NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip(PixelCount, PixelPin);
 
-const int numOutputs = 8;
+const int numOutputs = 9;
 #define forEach(output) for(int index=0;index<numOutputs;index++)
 
 volatile int packets=0;
@@ -45,10 +45,11 @@ Output* out[numOutputs] = {
   new NeoPixelBusOutput<NeoEsp32Rmt3800KbpsMethod>(2),
   new NeoPixelBusOutput<NeoEsp32Rmt4800KbpsMethod>(15),
   //new NeoPixelBusOutput<NeoEsp32Rmt5800KbpsMethod>(32), //cant use together with dmx
+  new DMXOutput(),
   new NeoPixelBusOutput<NeoEsp32Rmt6800KbpsMethod>(0),
   new NeoPixelBusOutput<NeoEsp32Rmt7800KbpsMethod>(33),
-  //new PWMOutput()
-  new DMXOutput()
+  new PWMOutput()
+  
 };
 
 UDPFast* udp[numOutputs] = {
@@ -60,7 +61,7 @@ UDPFast* udp[numOutputs] = {
   new UDPFast(),
   new UDPFast(),
   new UDPFast(),
-  //new UDPFast(),
+  new UDPFast(),
 };
 
 
@@ -94,7 +95,7 @@ void setup() {
     out[index]->Begin();
     out[index]->setGammaCurve(gamma8);
   }
-  //out[8]->setGammaCurve(gamma12);
+  out[8]->setGammaCurve(gamma12);
 
   Serial.println("Starting network");
   clearall();
@@ -110,7 +111,7 @@ void setup() {
 
   //stopAllSockets();
 
-  //setupOta();
+  setupOta();
 
   Serial.printf("max udp connections: %d",MEMP_NUM_NETCONN);
 }
@@ -158,8 +159,7 @@ void loop() {
     channelActive[index]=true;
   }
 
-    //handleOta();
-    delay(1); //temp fix to silence the watchdog. still have to find out how to properly pet it.
+    handleOta();
 }
 
 
