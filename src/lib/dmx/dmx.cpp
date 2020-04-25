@@ -165,16 +165,18 @@ portMUX_TYPE myMutex = portMUX_INITIALIZER_UNLOCKED;
 void DMX::Write(uint8_t* data, int length, bool wait)
 {
     const char nullBuf = 0;
-    //uart_write_bytes_with_break(DMX_UART_NUM, &nullBuf,1, 25); //break time is in bit length
+    uart_write_bytes_with_break(DMX_UART_NUM, &nullBuf,1, 25); //break time is in bit length
   
-    uart_wait_tx_done(DMX_UART_NUM,100);
-    taskENTER_CRITICAL(&myMutex);
-    uart_set_line_inverse(DMX_UART_NUM, UART_INVERSE_TXD);
-    ets_delay_us(92);
-    uart_set_line_inverse(DMX_UART_NUM, UART_INVERSE_DISABLE);
-    ets_delay_us(12);
-    uart_write_bytes(DMX_UART_NUM, (const char*) data, 10);
-    taskEXIT_CRITICAL(&myMutex);
+    //https://github.com/espressif/esp-idf/issues/703
+    // this solution is only making it worse. somehow it changes some butes (eg channel 10 is always off)
+    // uart_wait_tx_done(DMX_UART_NUM,100);
+    // taskENTER_CRITICAL(&myMutex);
+    // uart_set_line_inverse(DMX_UART_NUM, UART_INVERSE_TXD);
+    // ets_delay_us(92);
+    // uart_set_line_inverse(DMX_UART_NUM, UART_INVERSE_DISABLE);
+    // ets_delay_us(12);
+    // uart_write_bytes(DMX_UART_NUM, (const char*) data, 10);
+    // taskEXIT_CRITICAL(&myMutex);
     
     uart_write_bytes(DMX_UART_NUM,  &nullBuf, 1); //send the start byte (0)
     uart_write_bytes(DMX_UART_NUM, (const char*) data, length);

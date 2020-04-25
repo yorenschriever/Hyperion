@@ -74,6 +74,8 @@ class DMXOutput : public Output {
             int frontBufferLen =  always512 ? universeSize : this2->bufferLen;
             memcpy(frontBuffer, this2->buffer, frontBufferLen);
             DMX::Write(frontBuffer, frontBufferLen, true);
+            if (always512)
+              delay(20); //need this to make 32ch dmx decoder work
 
             this2->busy=false;
         }
