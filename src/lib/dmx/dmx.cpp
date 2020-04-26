@@ -160,7 +160,7 @@ void DMX::uart_event_task(void *pvParameters)
     }
 }
 
-portMUX_TYPE myMutex = portMUX_INITIALIZER_UNLOCKED;
+//portMUX_TYPE myMutex = portMUX_INITIALIZER_UNLOCKED;
 
 void DMX::Write(uint8_t* data, int length, bool wait)
 {

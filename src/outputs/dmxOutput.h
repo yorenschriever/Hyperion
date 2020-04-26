@@ -34,7 +34,8 @@ class DMXOutput : public Output {
     
     void Begin() override 
     {
-        xTaskCreate(SendDMXAsync,"SendDMXAsync",10000,this,1,NULL);
+        //xTaskCreate(SendDMXAsync,"SendDMXAsync",10000,this,1,NULL);
+        xTaskCreatePinnedToCore(SendDMXAsync,"SendDMXAsync",10000,this,1,NULL,1);
     }
     
     void Clear() 

@@ -12,6 +12,7 @@
 #include "outputs/pwmOutput.h"
 #include "outputs/dmxOutput.h"
 #include "lib/UDPFast/UDPFast.h"
+#include "lib/display/display.h"
 
 
 // #include <../.pio/libdeps/esp32-poe/NeoPixelBus_ID547/src/NeoPixelBus.h>
@@ -89,6 +90,9 @@ void setup() {
     gamma12[i] = pow(((indancescentBase + (float)i/255.*(1.-indancescentBase))),gammaCorrection12)*4096;
   }
   
+  Display::Initialize(); //initialize before outputs
+  delay(200);
+
   Serial.println("Starting outputs");
   forEach(output)
   {
@@ -107,13 +111,14 @@ void setup() {
     udp[index]->begin(startPort+index);
 
   Serial.println("Done");
-  xTaskCreate(DisplayFps,"DisplayFps",3000,NULL,0,NULL);
-
+  //xTaskCreate(DisplayFps,"DisplayFps",3000,NULL,0,NULL);
+  xTaskCreatePinnedToCore(DisplayFps,"DisplayFPS",3000,NULL,0,NULL,0);
   //stopAllSockets();
 
   setupOta();
 
   Serial.printf("max udp connections: %d",MEMP_NUM_NETCONN);
+
 }
 
 void loop() {
@@ -215,6 +220,9 @@ void DisplayFps( void * parameter )
     Serial.printf("elapsed: %d, #channels: %d, AVG FPS: %d (miss: %d%%)\n",(int)elapsedTime,activeChannels, (int)fps, (int)misses);
     Serial.printf("Free heap: %d\n",ESP.getFreeHeap());
     Serial.printf("strip size: %d\n",stripsize);
+
+    Display::setFPS(fps);
+
     delay(500);
   }
   vTaskDelete( NULL );
