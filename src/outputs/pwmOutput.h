@@ -137,8 +137,10 @@ class PWMOutput : public Output {
 
 
 
-    static void SendAsync(void* param)
+    static void SendAsync(void* param) //todo 2 functions: the background task and the actual sending part
     { 
+      uint8_t buffer[12*4+1];
+      buffer[0] = PCA9685_LED0_ON_L;
       PWMOutput* this2 = (PWMOutput*) param;
       while(true){
         if (xSemaphoreTake(this2->dirtySemaphore,0)) //wait for show() to be called
@@ -147,19 +149,18 @@ class PWMOutput : public Output {
 
           //Serial.println("d");
 
-          if(xSemaphoreTake( i2cMutex, ( TickType_t ) 10 ) != pdTRUE ){
-            vTaskDelete( NULL );
-            continue; //wait wait most 10 ticks (ms) to get the semaphore, otherwise give up
-          }
 
+//this2->busy=true;
 //Serial.println("s");
 
             memcpy(this2->valuesBuf,this2->values,sizeof(this2->valuesBuf));
             
 
-            this2->_i2c->setClock(1000000);
-            this2->_i2c->beginTransmission(PCA9685_I2C_ADDRESS);
-            this2->_i2c->write(PCA9685_LED0_ON_L);
+            
+            //this2->_i2c->setClock(400000);
+            
+            //this2->_i2c->beginTransmission(PCA9685_I2C_ADDRESS);
+            //this2->_i2c->write(PCA9685_LED0_ON_L);
 
             int edgepos=0;
             bool cascadedPWm=false;
@@ -167,14 +168,14 @@ class PWMOutput : public Output {
 
             unsigned int on, off;
             
-            uint8_t buffer[12*4];
+            
 
             for (int i=0;i<12;i++){
 
               int gammaCorrected = this2->gammaCurve[this2->valuesBuf[i]];
-              if (gammaCorrected==4096) {
+              if (gammaCorrected >= 4096) {
                 //this led is fully on, no pwm
-                on = 1<<4;
+                on = 1<<12;
                 off = 0;
               } else if (cascadedPWm) {
                 //we start at the off-end of the previous led, to flatten out current
@@ -190,26 +191,31 @@ class PWMOutput : public Output {
                 on = 0;
                 off = gammaCorrected; 
               }
-              this2->_i2c->write(on);
-              this2->_i2c->write(on >> 8);
-              this2->_i2c->write(off);
-              this2->_i2c->write(off >> 8);
-              // buffer[i*4+0]=on;
-              // buffer[i*4+1]=on>>8;
-              // buffer[i*4+2]=off;
-              // buffer[i*4+3]=off>8;
+              // this2->_i2c->write(on);
+              // this2->_i2c->write(on >> 8);
+              // this2->_i2c->write(off);
+              // this2->_i2c->write(off >> 8);
+              buffer[i*4+1]=(on % 0xff);
+              buffer[i*4+2]=(on >> 8);
+              buffer[i*4+3]=(off % 0xff);
+              buffer[i*4+4]=(off >> 8);
             }
 
             //this2->_i2c->write(buffer,sizeof(buffer));
-            this2->_i2c->endTransmission();
+            //this2->_i2c->endTransmission();
 
-            this2->busy=false;
-            //this2->dirty=false;
+            if(xSemaphoreTake( i2cMutex, ( TickType_t ) 10 ) != pdTRUE ){
+              this2->busy=false;
+              continue; //wait wait most 10 ticks (ms) to get the semaphore, otherwise give up
+            }
+
+            this2->_i2c->setClock(1000000);
+            this2->_i2c->writeTransmission(PCA9685_I2C_ADDRESS, buffer, sizeof(buffer),true);
 
             xSemaphoreGive( i2cMutex );
-
+            this2->busy=false;
           }
-          delay(1);
+          delay(5);
       }
       
       //vTaskDelete( NULL );
