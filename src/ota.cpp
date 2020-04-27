@@ -5,6 +5,7 @@
 #include <ESPmDNS.h>
 #include <Update.h>
 #include "ota.h"
+#include "debug.h"
 
 WebServer otaserver(81);
 //
@@ -42,28 +43,31 @@ void setupOta()
 //      stopped=true;
 //    }
     
-    //Serial.println("update");
+    //Debug.println("update");
     HTTPUpload& upload = otaserver.upload();
     if (upload.status == UPLOAD_FILE_START) {
-      Serial.printf("Update: %s\n", upload.filename.c_str());
+      Debug.printf("Update: %s\n", upload.filename.c_str());
       if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { //start with max available size
-        Update.printError(Serial);
+        //Update.printError(Debug);
+        //TODO
       }
     } else if (upload.status == UPLOAD_FILE_WRITE) {
       /* flashing firmware to ESP*/
       static int decimate=0;
       if (decimate++%20==0) {
-        Serial.printf("progress: %d\n",upload.totalSize);
-        Serial.println(otaserver.header("Content-Length"));
+        Debug.printf("progress: %d\n",upload.totalSize);
+        Debug.println(otaserver.header("Content-Length"));
       }
       if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
-        Update.printError(Serial);
+        //Update.printError(Debug);
+        //TODO
       }
     } else if (upload.status == UPLOAD_FILE_END) {
       if (Update.end(true)) { //true to set the size to the current progress
-        Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
+        Debug.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
       } else {
-        Update.printError(Serial);
+        //Update.printError(Debug);
+        //TODO
       }
     }
   });

@@ -144,24 +144,10 @@ class PWMOutput : public Output {
       PWMOutput* this2 = (PWMOutput*) param;
       while(true){
         if (xSemaphoreTake(this2->dirtySemaphore,0)) //wait for show() to be called
-        //if (this2->dirty)
         {
-
-          //Serial.println("d");
-
-
-//this2->busy=true;
-//Serial.println("s");
 
             memcpy(this2->valuesBuf,this2->values,sizeof(this2->valuesBuf));
             
-
-            
-            //this2->_i2c->setClock(400000);
-            
-            //this2->_i2c->beginTransmission(PCA9685_I2C_ADDRESS);
-            //this2->_i2c->write(PCA9685_LED0_ON_L);
-
             int edgepos=0;
             bool cascadedPWm=false;
             bool pcaCascaded = false;

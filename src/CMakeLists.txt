@@ -13,6 +13,8 @@ set(app_sources
 	"lib/display/Adafruit_GFX.cpp"
 	"lib/display/Adafruit_SSD1306.cpp"
 	"lib/rotary/rotary.cpp"
+	"lib/midi/midi.cpp"
+	"lib/apcmini/apcmini.cpp"
 )
 
 idf_component_register(SRCS ${app_sources} INCLUDE_DIRS ".")

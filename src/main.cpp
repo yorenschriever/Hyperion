@@ -7,13 +7,16 @@
 
 #include "ota.h"
 #include "network.h"
+#include "debug.h"
 
 #include "outputs/neoPixelBusOutput.h"
 #include "outputs/pwmOutput.h"
 #include "outputs/dmxOutput.h"
+#include "outputs/apcminiOutput.h"
 #include "lib/UDPFast/UDPFast.h"
 #include "lib/display/display.h"
 #include "lib/rotary/rotary.h"
+#include "lib/apcmini/apcmini.h"
 
 // #include <../.pio/libdeps/esp32-poe/NeoPixelBus_ID547/src/NeoPixelBus.h>
 //#include <NeoPixelBus.h>
@@ -49,6 +52,7 @@ Output* out[numOutputs] = {
   new DMXOutput(),
   new NeoPixelBusOutput<NeoEsp32Rmt6800KbpsMethod>(0),
   new NeoPixelBusOutput<NeoEsp32Rmt7800KbpsMethod>(33),
+  //new APCMiniOutput(),
   new PWMOutput()
   
 };
@@ -80,16 +84,14 @@ uint16_t gamma12rot[256];
 
 const unsigned int startPort = 9611; 
 
-void click() { Serial.println("click"); }
-void press() { Serial.println("press"); }
-void release() { Serial.println("release"); }
-void longpress() { Serial.println("longpress"); }
-void rotate(int amount) { Serial.printf("rotate: %d\n", amount); }
+void click() { Debug.println("click"); }
+void press() { Debug.println("press"); }
+void release() { Debug.println("release"); }
+void longpress() { Debug.println("longpress"); }
+void rotate(int amount) { Debug.printf("rotate: %d\n", amount); }
 
 void setup() {
-  Serial.begin(115200);
-  Serial.println("Code started");
-  //delay(500);
+  Debug.begin(115200);
 
   for(int i=0;i<256; i++)
   {
@@ -100,16 +102,16 @@ void setup() {
   
   Rotary::Initialize();
   Rotary::setLut(gamma12rot,gamma12rot,gamma12rot);
-  // Rotary::onClick(click);
-  // Rotary::onPress(press);
-  // Rotary::onRelease(release);
-  // Rotary::onLongPress(longpress);
-  // Rotary::onRotate(rotate);
+  Rotary::onClick(click);
+  Rotary::onPress(press);
+  Rotary::onRelease(release);
+  Rotary::onLongPress(longpress);
+  Rotary::onRotate(rotate);
 
   Display::Initialize(); //initialize before outputs
   delay(200);
 
-  Serial.println("Starting outputs");
+  Debug.println("Starting outputs");
   forEach(output)
   {
     out[index]->Begin();
@@ -117,23 +119,24 @@ void setup() {
   }
   out[8]->setGammaCurve(gamma12);
 
-  Serial.println("Starting network");
+  Debug.println("Starting network");
   clearall();
   NetworkBegin();
   clearall();
 
-  Serial.println("Starting inputs");
+  Debug.println("Starting inputs");
   forEach(output)
     udp[index]->begin(startPort+index);
 
-  Serial.println("Done");
+  Debug.println("Done");
   
-  //xTaskCreatePinnedToCore(DisplayFps,"DisplayFPS",3000,NULL,0,NULL,0);
+  xTaskCreatePinnedToCore(DisplayFps,"DisplayFPS",3000,NULL,0,NULL,0);
 
   setupOta();
 
-  Serial.printf("max udp connections: %d",MEMP_NUM_NETCONN);
+  Debug.printf("max udp connections: %d",MEMP_NUM_NETCONN);
 
+  APCMini::Initialize();
 }
 
 void loop() {
@@ -184,6 +187,7 @@ void loop() {
     static byte color;
     color += Rotary::getRotation();
     Rotary::setWheel(color);
+
 }
 
 
@@ -226,7 +230,7 @@ void DisplayFps( void * parameter )
     float fps = activeChannels==0? 0 : (float)1000.*success/(elapsedTime)/activeChannels;
     float misses = packets==0? 0 : 100.0*(dropped+busy)/packets;
 
-    Serial.printf("Packets: %d, Dropped: %d,  Busy: %d. Success: %d\n",packets,dropped, busy, success);
+    Debug.printf("Packets: %d, Dropped: %d,  Busy: %d. Success: %d\n",packets,dropped, busy, success);
     
     packets=0;
     dropped=0;
@@ -236,9 +240,9 @@ void DisplayFps( void * parameter )
     forEach(output)
       channelActive[index]=false;
 
-    Serial.printf("elapsed: %d, #channels: %d, AVG FPS: %d (miss: %d%%)\n",(int)elapsedTime,activeChannels, (int)fps, (int)misses);
-    Serial.printf("Free heap: %d\n",ESP.getFreeHeap());
-    Serial.printf("strip size: %d\n",stripsize);
+    Debug.printf("elapsed: %d, #channels: %d, AVG FPS: %d (miss: %d%%)\n",(int)elapsedTime,activeChannels, (int)fps, (int)misses);
+    Debug.printf("Free heap: %d\n",ESP.getFreeHeap());
+    Debug.printf("strip size: %d\n",stripsize);
 
     Display::setFPS(fps);
 

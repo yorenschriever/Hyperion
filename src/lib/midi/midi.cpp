@@ -1,0 +1,113 @@
+#include "midi.h"
+#include "driver/uart.h"
+#include "freertos/FreeRTOS.h"
+
+QueueHandle_t Midi::midi_rx_queue;
+
+#define NOTEON 0x90
+#define NOTEOFF 0x80
+#define CONTROLLERCHANGE 0xB0
+
+Midi::MidiEvent3 Midi::noteOnHandler=NULL;
+Midi::MidiEvent3 Midi::noteOffHandler=NULL;
+Midi::MidiEvent3 Midi::controllerChangeHandler=NULL;
+
+void Midi::Initialize()
+{
+    // configure UART for DMX
+    uart_config_t uart_config =
+    {
+        .baud_rate = 31250,
+        .data_bits = UART_DATA_8_BITS,
+        .parity = UART_PARITY_DISABLE,
+        .stop_bits = UART_STOP_BITS_2,
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE
+    };
+
+    ESP_ERROR_CHECK(uart_param_config(MIDI_UART_NUM, &uart_config));
+
+    // Set pins for UART
+    //uart_set_pin(MIDI_UART_NUM, MIDI_SERIAL_OUTPUT_PIN, MIDI_SERIAL_INPUT_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+
+    // install queue
+    uart_driver_install(MIDI_UART_NUM, MIDI_BUF_SIZE * 2, MIDI_BUF_SIZE * 2, 20, &midi_rx_queue, 0);
+
+    // create receive task
+    xTaskCreate(uart_event_task, "Midi", 2048, NULL, 1, NULL);
+}
+
+void Midi::uart_event_task(void *pvParameters)
+{
+    byte messageposition=0;
+    byte message[4];
+    while(true)
+    {
+        delay(5);
+        uint8_t data[128];
+        int length = 0;
+        ESP_ERROR_CHECK(uart_get_buffered_data_len(MIDI_UART_NUM, (size_t*)&length));
+        if (length==0)
+            continue;
+
+        length = uart_read_bytes(MIDI_UART_NUM, data, length, 100);
+
+        for(int i=0; i<length; i++){
+            if (data[i] >= B10000000){ //detect start of a message, start filling the buffer
+                message[0] = data[i];
+                messageposition=1;
+            } else if (messageposition < sizeof(message)){ //otherwise: store bytes untill buffer is full
+                message[messageposition] = data[i];
+                messageposition++;
+            }
+
+            if ((message[0] & 0xF0) == NOTEON && messageposition==3 && noteOnHandler)
+                noteOnHandler(message[0] & 0x0F, message[1], message[2]);
+
+            if ((message[0] & 0xF0) == NOTEOFF && messageposition==3 && noteOffHandler)
+                noteOffHandler(message[0] & 0x0F, message[1], message[2]);
+
+            if ((message[0] & 0xF0) == CONTROLLERCHANGE && messageposition==3 && controllerChangeHandler)
+                controllerChangeHandler(message[0] & 0x0F, message[1], message[2]);
+        }
+    }
+
+}
+
+void Midi::sendNoteOn(uint8_t channel, uint8_t note, uint8_t velocity){
+    uint8_t buffer[3];
+    buffer[0] = NOTEON | channel;
+    buffer[1] = note;
+    buffer[2] = velocity;
+    uart_write_bytes(MIDI_UART_NUM, (const char*)buffer, sizeof(buffer));
+}
+
+void Midi::sendNoteOff(uint8_t channel, uint8_t note, uint8_t velocity){
+    uint8_t buffer[3];
+    buffer[0] = NOTEOFF | channel;
+    buffer[1] = note;
+    buffer[2] = velocity;
+    uart_write_bytes(MIDI_UART_NUM, (const char*)buffer, sizeof(buffer));
+}
+
+void Midi::sendControllerChange(uint8_t channel, uint8_t controller, uint8_t value){
+    uint8_t buffer[3];
+    buffer[0] = CONTROLLERCHANGE | channel;
+    buffer[1] = controller;
+    buffer[2] = value;
+    uart_write_bytes(MIDI_UART_NUM, (const char*)buffer, sizeof(buffer));
+}
+
+bool Midi::waitTxDone()
+{
+    return uart_wait_tx_done(MIDI_UART_NUM, 500);
+}
+
+void Midi::onNoteOn(MidiEvent3 handler){
+    noteOnHandler = handler;
+}
+void Midi::onNoteOff(MidiEvent3 handler){
+    noteOffHandler = handler;
+}
+void Midi::onControllerChange(MidiEvent3 handler){
+    controllerChangeHandler = handler;
+}

@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "network.h"
+#include "debug.h"
 
 const unsigned int nodeid = 123; 
 
@@ -22,18 +23,18 @@ void NetworkBegin(){
   ETH.begin();
   
   bool staticip = config_eth(ip,gateway,subnet);
-  Serial.print(staticip?"static ip configured":"static ip failed");
+  Debug.print(staticip?"static ip configured":"static ip failed");
 
   while (!eth_connected) {
-    Serial.print(".");
+    Debug.print(".");
     //animate(0,0,50);
     delay(50);
   }
-  Serial.println("");
+  Debug.println("");
 
-  Serial.println("Eth connected");
-  Serial.println("IP address: ");
-  Serial.println(ETH.localIP());
+  Debug.println("Eth connected");
+  Debug.println("IP address: ");
+  Debug.println(ETH.localIP());
 }
 
 boolean networkIsConnected()
@@ -55,35 +56,35 @@ void EthEvent(WiFiEvent_t event)
 {
   switch (event) {
     case SYSTEM_EVENT_ETH_START:
-      Serial.println("ETH Started");
+      Debug.println("ETH Started");
       //set eth hostname here
       char buf[20];
       sprintf(buf,"Led ip= %d",nodeid);
       ETH.setHostname(buf);
       break;
     case SYSTEM_EVENT_ETH_CONNECTED:
-      Serial.println("ETH Connected");
+      Debug.println("ETH Connected");
       //eth_connected = true;
       break;
     case SYSTEM_EVENT_ETH_GOT_IP:
-      Serial.print("ETH MAC: ");
-      Serial.print(ETH.macAddress());
-      Serial.print(", IPv4: ");
-      Serial.print(ETH.localIP());
+      Debug.print("ETH MAC: ");
+      Debug.print(ETH.macAddress());
+      Debug.print(", IPv4: ");
+      Debug.print(ETH.localIP());
       if (ETH.fullDuplex()) {
-        Serial.print(", FULL_DUPLEX");
+        Debug.print(", FULL_DUPLEX");
       }
-      Serial.print(", ");
-      Serial.print(ETH.linkSpeed());
-      Serial.println("Mbps");
+      Debug.print(", ");
+      Debug.print(ETH.linkSpeed());
+      Debug.println("Mbps");
       eth_connected = true;
       break;
     case SYSTEM_EVENT_ETH_DISCONNECTED:
-      Serial.println("ETH Disconnected");
+      Debug.println("ETH Disconnected");
       eth_connected = false;
       break;
     case SYSTEM_EVENT_ETH_STOP:
-      Serial.println("ETH Stopped");
+      Debug.println("ETH Stopped");
       eth_connected = false;
       break;
     default:
