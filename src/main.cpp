@@ -13,7 +13,7 @@
 #include "outputs/dmxOutput.h"
 #include "lib/UDPFast/UDPFast.h"
 #include "lib/display/display.h"
-
+#include "lib/rotary/rotary.h"
 
 // #include <../.pio/libdeps/esp32-poe/NeoPixelBus_ID547/src/NeoPixelBus.h>
 //#include <NeoPixelBus.h>
@@ -75,6 +75,7 @@ const float indancescentBase=0.2;
 
 uint16_t gamma8[256];
 uint16_t gamma12[256];
+uint16_t gamma12rot[256];
 
 const unsigned int startPort = 9611; 
 
@@ -86,10 +87,13 @@ void setup() {
   for(int i=0;i<256; i++)
   {
     gamma8[i] = pow((float)i/255.,gammaCorrection8)*255;
-    //gamma12[i] = pow((float)i/255.,gammaCorrection12)*4096; //4096 here, because the pca can also have a full on value, so 2^12+1 combinations are possible
+    gamma12rot[i] = pow((float)i/255.,gammaCorrection12)*4096; //4096 here, because the pca can also have a full on value, so 2^12+1 combinations are possible
     gamma12[i] = pow(((indancescentBase + (float)i/255.*(1.-indancescentBase))),gammaCorrection12)*4096;
   }
   
+  Rotary::Initialize();
+  Rotary::setLut(gamma12rot,gamma12rot,gamma12rot);
+
   Display::Initialize(); //initialize before outputs
   delay(200);
 
@@ -165,6 +169,9 @@ void loop() {
   }
 
     handleOta();
+
+    static byte color;
+    Rotary::setWheel(color++);
 }
 
 
