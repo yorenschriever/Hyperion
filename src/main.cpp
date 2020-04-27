@@ -71,6 +71,7 @@ uint8_t data[MTU]; //i used to malloc this, but the MTU is 1500, so i just set i
 
 const float gammaCorrection8 = 2; //1.6 looks less quantized when dimming. 2.5 gives prettier colours. 2 is a compromise
 const float gammaCorrection12 = 2.5;
+const float gammaCorrection12rot = 2; //2 looks best with the roataryled. 
 const float indancescentBase=0.2;
 
 uint16_t gamma8[256];
@@ -78,6 +79,12 @@ uint16_t gamma12[256];
 uint16_t gamma12rot[256];
 
 const unsigned int startPort = 9611; 
+
+void click() { Serial.println("click"); }
+void press() { Serial.println("press"); }
+void release() { Serial.println("release"); }
+void longpress() { Serial.println("longpress"); }
+void rotate(int amount) { Serial.printf("rotate: %d\n", amount); }
 
 void setup() {
   Serial.begin(115200);
@@ -87,12 +94,17 @@ void setup() {
   for(int i=0;i<256; i++)
   {
     gamma8[i] = pow((float)i/255.,gammaCorrection8)*255;
-    gamma12rot[i] = pow((float)i/255.,gammaCorrection12)*4096; //4096 here, because the pca can also have a full on value, so 2^12+1 combinations are possible
+    gamma12rot[i] = pow((float)i/255.,gammaCorrection12rot)*4096; //4096 here, because the pca can also have a full on value, so 2^12+1 combinations are possible
     gamma12[i] = pow(((indancescentBase + (float)i/255.*(1.-indancescentBase))),gammaCorrection12)*4096;
   }
   
   Rotary::Initialize();
   Rotary::setLut(gamma12rot,gamma12rot,gamma12rot);
+  // Rotary::onClick(click);
+  // Rotary::onPress(press);
+  // Rotary::onRelease(release);
+  // Rotary::onLongPress(longpress);
+  // Rotary::onRotate(rotate);
 
   Display::Initialize(); //initialize before outputs
   delay(200);
@@ -115,9 +127,8 @@ void setup() {
     udp[index]->begin(startPort+index);
 
   Serial.println("Done");
-  //xTaskCreate(DisplayFps,"DisplayFps",3000,NULL,0,NULL);
-  xTaskCreatePinnedToCore(DisplayFps,"DisplayFPS",3000,NULL,0,NULL,0);
-  //stopAllSockets();
+  
+  //xTaskCreatePinnedToCore(DisplayFps,"DisplayFPS",3000,NULL,0,NULL,0);
 
   setupOta();
 
@@ -171,7 +182,8 @@ void loop() {
     handleOta();
 
     static byte color;
-    Rotary::setWheel(color++);
+    color += Rotary::getRotation();
+    Rotary::setWheel(color);
 }
 
 
