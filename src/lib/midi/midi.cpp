@@ -1,6 +1,7 @@
 #include "midi.h"
 #include "driver/uart.h"
 #include "freertos/FreeRTOS.h"
+#include "debug.h"
 
 //https://www.midi.org/specifications/item/table-1-summary-of-midi-message
 
@@ -13,9 +14,16 @@ QueueHandle_t Midi::midi_rx_queue;
 Midi::MidiEvent3 Midi::noteOnHandler=NULL;
 Midi::MidiEvent3 Midi::noteOffHandler=NULL;
 Midi::MidiEvent3 Midi::controllerChangeHandler=NULL;
+bool Midi::started=false;
 
 void Midi::Initialize()
 {
+
+    #ifdef DEBUGSERIAL
+        Debug.println("USB midi driver is not installed because the debugger is already using this serial port to print debug data. Incoming and outgoing midi data is ignored.");
+        return;
+    #endif
+
     // configure UART for DMX
     uart_config_t uart_config =
     {
@@ -32,7 +40,9 @@ void Midi::Initialize()
     //uart_set_pin(MIDI_UART_NUM, MIDI_SERIAL_OUTPUT_PIN, MIDI_SERIAL_INPUT_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 
     // install queue
-    uart_driver_install(MIDI_UART_NUM, MIDI_BUF_SIZE * 2, MIDI_BUF_SIZE * 2, 20, &midi_rx_queue, 0);
+    started = uart_driver_install(MIDI_UART_NUM, MIDI_BUF_SIZE * 2, MIDI_BUF_SIZE * 2, 20, &midi_rx_queue, 0 ) == ESP_OK;
+    if (!started)
+        return;
 
     // create receive task
     xTaskCreate(uart_event_task, "Midi", 2048, NULL, 1, NULL);
@@ -76,6 +86,8 @@ void Midi::uart_event_task(void *pvParameters)
 }
 
 void Midi::sendNoteOn(uint8_t channel, uint8_t note, uint8_t velocity){
+    if (!started)
+        return;
     uint8_t buffer[3];
     buffer[0] = NOTEON | channel;
     buffer[1] = note;
@@ -84,6 +96,8 @@ void Midi::sendNoteOn(uint8_t channel, uint8_t note, uint8_t velocity){
 }
 
 void Midi::sendNoteOff(uint8_t channel, uint8_t note, uint8_t velocity){
+    if (!started)
+        return;
     uint8_t buffer[3];
     buffer[0] = NOTEOFF | channel;
     buffer[1] = note;
@@ -92,6 +106,8 @@ void Midi::sendNoteOff(uint8_t channel, uint8_t note, uint8_t velocity){
 }
 
 void Midi::sendControllerChange(uint8_t channel, uint8_t controller, uint8_t value){
+    if (!started)
+        return;
     uint8_t buffer[3];
     buffer[0] = CONTROLLERCHANGE | channel;
     buffer[1] = controller;

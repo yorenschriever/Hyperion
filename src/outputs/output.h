@@ -15,6 +15,7 @@ class Output {
     void setGammaCurve(uint16_t* curve){
       this->gammaCurve = curve;
     }
+    int getLength(){ return length; }
     
   protected:
     

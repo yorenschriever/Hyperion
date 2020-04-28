@@ -181,5 +181,8 @@ void DMX::Write(uint8_t* data, int length, bool wait)
     uart_write_bytes(DMX_UART_NUM,  &nullBuf, 1); //send the start byte (0)
     uart_write_bytes(DMX_UART_NUM, (const char*) data, length);
     if (wait)
-        uart_wait_tx_done(DMX_UART_NUM, 100); //wait till completed. at most 100 RTOS ticks (=100ms?)
+    {
+        vTaskDelay(1 / portTICK_PERIOD_MS); //wait a little the the tx has time to start https://www.esp32.com/viewtopic.php?t=10469 
+        uart_wait_tx_done(DMX_UART_NUM, 500); //wait till completed. at most 100 RTOS ticks (=100ms?)
+    }
 }

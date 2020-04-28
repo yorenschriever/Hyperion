@@ -29,6 +29,7 @@ class Midi {
     private:
         static QueueHandle_t midi_rx_queue;
         static void uart_event_task(void *pvParameters);    // Event task
+        static bool started;
 
         static MidiEvent3 noteOnHandler;
         static MidiEvent3 noteOffHandler;

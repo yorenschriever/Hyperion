@@ -6,7 +6,7 @@
 
 #define NUMBUTTONS 64
 
-//this is merely a peculiarity. it outputs the led data on the apc mini.
+//this is merely a peculiarity. it outputs the patterns on the leds of the apc mini.
 //it was used to test the midi interface
 //it's not really stable. for that to happen you should create an async thread to send the midi data, just like in dmxoutput
 

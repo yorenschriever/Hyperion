@@ -7,8 +7,6 @@
 const int universeSize = 512;
 const bool always512 = true; //always send the entire universe, instead of only the channels that were provided from the input
 
-
-
 class DMXOutput : public Output {
   public:
   
@@ -29,13 +27,14 @@ class DMXOutput : public Output {
     
     void Show() 
     { 
-        this->dirty=true;
+        this->busy=true;
+        xSemaphoreGive(dirtySemaphore);
     }
     
     void Begin() override 
     {
-        //xTaskCreate(SendDMXAsync,"SendDMXAsync",10000,this,1,NULL);
-        xTaskCreatePinnedToCore(SendDMXAsync,"SendDMXAsync",10000,this,1,NULL,1);
+      dirtySemaphore = xSemaphoreCreateBinary();
+      xTaskCreatePinnedToCore(SendDMXAsync,"SendDMXAsync",10000,this,1,NULL,1);
     }
     
     void Clear() 
@@ -51,8 +50,7 @@ class DMXOutput : public Output {
   private: 
     uint8_t buffer[universeSize+1];
     int bufferLen=0;
-
-    volatile boolean dirty=false;
+    xSemaphoreHandle dirtySemaphore;
     volatile boolean busy=false;
 
     static void SendDMXAsync(void* param)
@@ -64,22 +62,16 @@ class DMXOutput : public Output {
 
         while(true)
         {
-            if (!this2->dirty){
-                delay(1);
-                continue;
-            }
-            this2->dirty=false;
+            if (!xSemaphoreTake(this2->dirtySemaphore,0))
+              continue;
 
-            this2->busy=true;
-            
             int frontBufferLen =  always512 ? universeSize : this2->bufferLen;
             memcpy(frontBuffer, this2->buffer, frontBufferLen);
             DMX::Write(frontBuffer, frontBufferLen, true);
-            if (always512)
-              delay(20); //need this to make 32ch dmx decoder work
-
+            
             this2->busy=false;
         }
+
         
     }
 };

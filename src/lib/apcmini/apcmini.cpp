@@ -3,6 +3,7 @@
 
 bool APCMini::allFlash=false;
 bool APCMini::allStatus[width*height];
+uint8_t APCMini::faders[numfaders];
 
 void APCMini::Initialize()
 {
@@ -26,9 +27,13 @@ void APCMini::handleNoteOn(uint8_t channel, uint8_t note, uint8_t velocity)
     handleKeyPress(note,velocity>0);
 }
 
-void APCMini::handleControllerChange(uint8_t channel, uint8_t note, uint8_t velocity){
+void APCMini::handleControllerChange(uint8_t channel, uint8_t controller, uint8_t value){
     if (channel != midichannel)
         return;
+    int fadernum = controller - firstfader;
+    if (fadernum < 0 || fadernum >= numfaders)
+        return;
+    faders[fadernum] = value;
 }
 
 
@@ -43,7 +48,7 @@ void APCMini::handleKeyPress(uint8_t note, bool ison)
     }
 
     int flashBorder = allFlash ? (height * width) : (flashrows * width);
-    if (note >= 0 && note < flashBorder){
+    if (note < flashBorder){
         setNote(note,ison, false);
     } else if (ison && note <= (height+1)*width) { 
         //a button was pressed, not released 
@@ -95,4 +100,18 @@ void APCMini::releaseGroup(uint8_t note, bool recursiveCall)
     byte bottom = note%width;
     for (byte i=bottom; i < height*width; i+=width)
         setNote(i,false, false);
+}
+
+bool APCMini::getStatus(uint8_t col, uint8_t row)
+{
+    if (col >= width || row >= height) 
+        return false;
+    return allStatus[(height-row)*width+row];
+}
+
+bool APCMini::getFader(uint8_t col)
+{
+    if (col >= numfaders)
+        return 0;
+    return faders[col];
 }
