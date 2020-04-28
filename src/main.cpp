@@ -18,6 +18,7 @@
 #include "lib/display/display.h"
 #include "lib/rotary/rotary.h"
 #include "lib/apcmini/apcmini.h"
+#include "patterns/patterns.h"
 
 void DisplayFps( void * parameter );
 void clearall();
@@ -48,10 +49,11 @@ Input* in[numOutputs] = {
   new UDPInput(9614),
   new UDPInput(9615),
   //new UDPInput(9616),
-  new ApcminiInput(),
+  new ApcminiInput(90, 0, new Pattern[8] {sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
   new UDPInput(9617),
   new UDPInput(9618),
-  new UDPInput(9619)
+  //new UDPInput(9619)
+  new ApcminiInput(3*12, 1, new Pattern[8] {sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
 };
 
 const int MTU = 1500;
@@ -118,7 +120,7 @@ void setup() {
 
   Debug.printf("max udp connections: %d\n",MEMP_NUM_NETCONN);
 
-  APCMini::Initialize();
+  //APCMini::Initialize();
 }
 
 void loop() {
@@ -127,6 +129,10 @@ void loop() {
   {
 
     //check if the output is done sending the previous message
+    //TODO i dont know where to put this check 
+    //if sending is the bottleneck, then i dont want to needlessly precalculate frames
+    //if calculating is the bottleneck, then i want to precalculate the frame while we are waiting for the send to complete
+    //is it possible to do the pre calculations with low prio?
     if (!out[index]->Ready())
       continue;
     

@@ -17,7 +17,7 @@ class APCMini {
 
         //(0,0) = top left, (7,7) is bottom right.
         static bool getStatus(uint8_t col, uint8_t row);
-        static bool getFader(uint8_t col);
+        static uint8_t getFader(uint8_t col);
 
     private:
         APCMini();

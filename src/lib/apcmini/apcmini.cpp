@@ -11,6 +11,9 @@ void APCMini::Initialize()
     Midi::onNoteOn(handleNoteOn);
     Midi::onNoteOff(handleNoteOff);
     Midi::onControllerChange(handleControllerChange);
+
+    for (int i=0;i<numfaders; i++)
+        faders[i]=127;
 }
 
 void APCMini::handleNoteOff(uint8_t channel, uint8_t note, uint8_t velocity)
@@ -28,6 +31,7 @@ void APCMini::handleNoteOn(uint8_t channel, uint8_t note, uint8_t velocity)
 }
 
 void APCMini::handleControllerChange(uint8_t channel, uint8_t controller, uint8_t value){
+
     if (channel != midichannel)
         return;
     int fadernum = controller - firstfader;
@@ -106,10 +110,10 @@ bool APCMini::getStatus(uint8_t col, uint8_t row)
 {
     if (col >= width || row >= height) 
         return false;
-    return allStatus[(height-row)*width+row];
+    return allStatus[(height-row-1)*width+col];
 }
 
-bool APCMini::getFader(uint8_t col)
+uint8_t APCMini::getFader(uint8_t col)
 {
     if (col >= numfaders)
         return 0;

@@ -24,6 +24,10 @@ void Midi::Initialize()
         return;
     #endif
 
+    //no need to configure it twice.
+    if (started)
+        return;
+
     // configure UART for DMX
     uart_config_t uart_config =
     {
@@ -72,14 +76,17 @@ void Midi::uart_event_task(void *pvParameters)
                 messageposition++;
             }
 
-            if ((message[0] & 0xF0) == NOTEON && messageposition==3 && noteOnHandler)
-                noteOnHandler(message[0] & 0x0F, message[1], message[2]);
+            uint8_t channel = message[0] & 0x0F;
+            uint8_t messagetype = message[0] & 0xF0;
 
-            if ((message[0] & 0xF0) == NOTEOFF && messageposition==3 && noteOffHandler)
-                noteOffHandler(message[0] & 0x0F, message[1], message[2]);
+            if (messagetype == NOTEON && messageposition==3 && noteOnHandler)
+                noteOnHandler(channel, message[1], message[2]);
 
-            if ((message[0] & 0xF0) == CONTROLLERCHANGE && messageposition==3 && controllerChangeHandler)
-                controllerChangeHandler(message[0] & 0x0F, message[1], message[2]);
+            if (messagetype == NOTEOFF && messageposition==3 && noteOffHandler)
+                noteOffHandler(channel, message[1], message[2]);
+
+            if (messagetype == CONTROLLERCHANGE && messageposition==3 && controllerChangeHandler)
+                controllerChangeHandler(channel, message[1], message[2]);
         }
     }
 

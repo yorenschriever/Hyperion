@@ -5,6 +5,8 @@
 #include <lib/dmx/dmx.h>
 
 const int universeSize = 512;
+
+//TODO: this could become a user setting
 const bool always512 = true; //always send the entire universe, instead of only the channels that were provided from the input
 
 class DMXOutput : public Output {
