@@ -11,6 +11,7 @@ void APCMini::Initialize()
 
 void APCMini::handleNoteOff(uint8_t channel, uint8_t note, uint8_t velocity)
 {
+    //handle as a noteon with velocity 0
     handleNoteOn(channel, note, 0);
 }
 

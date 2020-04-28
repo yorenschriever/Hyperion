@@ -2,6 +2,8 @@
 #include "driver/uart.h"
 #include "freertos/FreeRTOS.h"
 
+//https://www.midi.org/specifications/item/table-1-summary-of-midi-message
+
 QueueHandle_t Midi::midi_rx_queue;
 
 #define NOTEON 0x90
@@ -43,7 +45,7 @@ void Midi::uart_event_task(void *pvParameters)
     while(true)
     {
         delay(5);
-        uint8_t data[128];
+        uint8_t data[MIDI_BUF_SIZE];
         int length = 0;
         ESP_ERROR_CHECK(uart_get_buffered_data_len(MIDI_UART_NUM, (size_t*)&length));
         if (length==0)
@@ -97,9 +99,9 @@ void Midi::sendControllerChange(uint8_t channel, uint8_t controller, uint8_t val
     uart_write_bytes(MIDI_UART_NUM, (const char*)buffer, sizeof(buffer));
 }
 
-bool Midi::waitTxDone()
+bool Midi::waitTxDone(int timeout)
 {
-    return uart_wait_tx_done(MIDI_UART_NUM, 500);
+    return uart_wait_tx_done(MIDI_UART_NUM, timeout) == ESP_OK;
 }
 
 void Midi::onNoteOn(MidiEvent3 handler){
