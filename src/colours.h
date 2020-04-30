@@ -77,7 +77,7 @@ public:
     operator Monochrome();
     operator Monochrome12();
 
-    uint8_t R = 0, G = 0, B = 0;
+    uint8_t R, G, B;
 };
 
 class RGB12 : Colour

@@ -51,11 +51,11 @@ class ApcminiInput : public Input{
                 }
             }
             
-            memcpy(dataPtr,leddata, length);
+            memcpy(dataPtr,leddata, length * sizeof(T));
 
             usedframecount++;
 
-            return length;
+            return length * sizeof(T);
         }
 
     private:
