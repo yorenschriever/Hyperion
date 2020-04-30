@@ -16,10 +16,18 @@ class DMXOutput : public Output {
 
     }
     
+    //depricated
     void SetPixelColor(int index, uint8_t r,uint8_t g,uint8_t b) override 
     { 
        if (index<universeSize)
           this->buffer[index] = (r+g+b)/3;
+    }
+
+    //index and size are in bytes
+    void SetData(uint8_t* data, int size, int index)
+    {
+      if (index + size < universeSize)
+        memcpy(this->buffer + index, data, size);
     }
 
     boolean Ready()
@@ -45,13 +53,14 @@ class DMXOutput : public Output {
         this->buffer[i]=0;
     }
 
+    //length is in bytes
     void SetLength(int len) override {
-        this->bufferLen = min(len,universeSize);
+        this->length = min(len,universeSize);
     }
 
   private: 
     uint8_t buffer[universeSize+1];
-    int bufferLen=0;
+    int length=0;
     xSemaphoreHandle dirtySemaphore;
     volatile boolean busy=false;
 
@@ -67,7 +76,7 @@ class DMXOutput : public Output {
             if (!xSemaphoreTake(this2->dirtySemaphore,0))
               continue;
 
-            int frontBufferLen =  always512 ? universeSize : this2->bufferLen;
+            int frontBufferLen =  always512 ? universeSize : this2->length;
             memcpy(frontBuffer, this2->buffer, frontBufferLen);
             DMX::Write(frontBuffer, frontBufferLen, true);
             

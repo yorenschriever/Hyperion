@@ -1,0 +1,1 @@
+The png images contain metadata so they can be edited in draw.io 

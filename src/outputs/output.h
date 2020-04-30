@@ -8,6 +8,7 @@ class Output {
 
     virtual void SetLength(int len) =0; 
     virtual void SetPixelColor(int index, uint8_t r,uint8_t g,uint8_t b)= 0; 
+    virtual void SetData(uint8_t* data, int size, int index);
     virtual void Show() = 0; 
     virtual void Begin() = 0;
     virtual void Clear() = 0;
