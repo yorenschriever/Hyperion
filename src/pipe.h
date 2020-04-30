@@ -50,7 +50,7 @@ public:
 
     //Transfer function that can convert between colour representations and apply LUTs
     template <class T, class U>
-    static void transfer(uint8_t *data, int length, Output *out, uint16_t **lut)
+    static int transfer(uint8_t *data, int length, Output *out, uint16_t **lut)
     {
         //tell the output the new length so it can allocate enough space for the data
         //we are going to send
@@ -76,7 +76,7 @@ public:
             //pixel. cant we dump the entire byte array in one go?
             out->SetData((uint8_t *)&outcol,sizeof(U),i*sizeof(U));
         }
-        return numPixels
+        return numPixels;
     }
 
     int getNumPixels() {

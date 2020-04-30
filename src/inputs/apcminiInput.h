@@ -28,10 +28,10 @@ class ApcminiInput : public Input{
                     patternfunc = patterns[i];
             }
 
-            if (!patternfunc){
+            if (!patternfunc){                
+                //stop sending new empty frames if we already have sent an empty frame because no patterns were selected, 
+                //tell the pipe that we dont have anything to process.
                 if (alloff) 
-                    //stop sending new empty frames if we already have sent an empty frame because no patterns were selected, 
-                    //tell the pipe that we dont have anything to process.
                     return 0;
                 
                 //load empty colour if no pattern is selected. this will set everything to black after you unselected

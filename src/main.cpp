@@ -53,11 +53,11 @@ Pipe pipes[] = {
         Pipe::transfer<RGB,RGB>,
         RGBGamma8),
 
-    Pipe(
-        new UDPInput(9612),
-        new NeoPixelBusOutput<NeoEsp32Rmt1800KbpsMethod>(4),
-        Pipe::transfer<RGB,RGB>,
-        RGBGamma8),
+    // Pipe(
+    //     new UDPInput(9612),
+    //     new NeoPixelBusOutput<NeoEsp32Rmt1800KbpsMethod>(4),
+    //     Pipe::transfer<RGB,RGB>,
+    //     RGBGamma8),
 
     Pipe(
         new UDPInput(9613),
@@ -102,6 +102,26 @@ Pipe pipes[] = {
         new PWMOutput(),
         Pipe::transfer<RGB,Monochrome12>,
         RGBGamma12),
+
+    Pipe(
+        new ApcminiInput<Monochrome>(
+            12, //width of the pattern, in pixels
+            1,  //button column on the apc to listen to (0-7)
+            //the patterns to attach to the buttons
+            new Pattern<Monochrome>[8]{sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
+        new PWMOutput(),
+        Pipe::transfer<Monochrome,Monochrome12>,
+        RGBGamma12),
+
+    // Pipe(
+    //     new ApcminiInput<Monochrome>(
+    //         16, //width of the pattern, in pixels
+    //         3,  //button column on the apc to listen to (0-7)
+    //         //the patterns to attach to the buttons
+    //         new Pattern<RGB>[8]{sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
+    //     new NeoPixelBusOutput<NeoEsp32Rmt1800KbpsMethod>(4),
+    //     Pipe::transfer<RGB,RGB>,
+    //     RGBGamma),
 
 };
 
