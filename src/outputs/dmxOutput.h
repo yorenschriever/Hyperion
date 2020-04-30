@@ -12,6 +12,7 @@ const bool always512 = true; //always send the entire universe, instead of only 
 class DMXOutput : public Output {
   public:
   
+    //todo add argument for start channel
     DMXOutput() {
 
     }
@@ -26,7 +27,7 @@ class DMXOutput : public Output {
     //index and size are in bytes
     void SetData(uint8_t* data, int size, int index)
     {
-      if (index + size < universeSize)
+      if (index + size <= universeSize)
         memcpy(this->buffer + index, data, size);
     }
 

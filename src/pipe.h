@@ -35,22 +35,21 @@ public:
         if (datalength == 0)
             return;
 
-        //pipe->handleData(data, datalength);
         this->converter(data, datalength, out, lut);
 
         out->Show();
     }
 
-    void handleData(uint8_t *data, int length)
-    {
-        this->converter(data, length, out, lut);
-    }
+    // void handleData(uint8_t *data, int length)
+    // {
+    //     this->converter(data, length, out, lut);
+    // }
 
     //Basic transfer function without bells and whistles
     static void transfer(uint8_t *data, int length, Output *out, uint16_t **lut)
     {
+        //todo ask for max output capacity, only transfer that many
         out->SetLength(length);
-        //out->setPixel(data,0,length);
         out->SetData(data,length,0);
     }
 
@@ -60,6 +59,7 @@ public:
     {
         //tell the output the new length so it can allocate enough space for the data
         //we are going to send
+        //todo ask for max output capacity, only transfer that many
         out->SetLength(length / sizeof(T) * sizeof(U));
 
         for (int i = 0; i < length / sizeof(T); i++)
@@ -79,7 +79,6 @@ public:
             //Pass the data to the output
             //TODO why provide the data pixel by pixel als have a function call overhead for each
             //pixel. cant we dump the entire byte array in one go?
-            //out->setPixel((uint8_t *)&outcol,i,sizeof(U));
             out->SetData((uint8_t *)&outcol,sizeof(U),i*sizeof(U));
         }
     }

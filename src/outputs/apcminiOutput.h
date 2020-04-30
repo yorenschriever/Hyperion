@@ -18,10 +18,17 @@ class APCMiniOutput : public Output {
 
     }
     
+    //depricated
     void SetPixelColor(int index, uint8_t r,uint8_t g,uint8_t b) override 
     { 
        if (index<NUMBUTTONS)
           this->buffer[index] = (r+g+b)/3;
+    }
+
+    void SetData(uint8_t* data, int size, int index)
+    {
+      if (index + size <= NUMBUTTONS)
+        memcpy(this->buffer + index, data, size);
     }
 
     boolean Ready()

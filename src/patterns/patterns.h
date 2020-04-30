@@ -32,7 +32,7 @@ inline Monochrome randomFadePattern(int index, int width, Monochrome* lastValue)
 inline Monochrome meteorPattern(int index, int width, Monochrome* lastValue){
     int lastSelfvalue = lastValue[index].L;
     int lastNeighbourvalue = lastValue[(index+1) % width].L;
-    if (random(0,1000) < 1)
+    if (random(0,300) < 1)
         return 255;
     return max(max(lastSelfvalue-25,lastNeighbourvalue-10),0);
 }

@@ -39,48 +39,71 @@ uint16_t *RGBGamma12[] = {gamma12, gamma12, gamma12};
 
 Pipe pipes[] = {
     Pipe(
-        new ApcminiInput<Monochrome>(30, 0, new Pattern<Monochrome>[8]{sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
-        new DMXOutput(),
-        Pipe::transfer<Monochrome, Monochrome>,
-        NULL)
-    // Pipe(Out(),Pipe::transfer<Monochrome,RGB>,RGBGamma),
-    // Pipe(Out(),Pipe::transfer<RGB,Monochrome>,RGBGamma),
-    // Pipe(Out(),Pipe::transfer,RGBGamma),
-    // Pipe(Out(),Pipe::transfer<RGB,RGB12>,RGBGamma12)
+        //create an apcmini input that creates monochome patterns
+        new ApcminiInput<Monochrome>(
+            30, //width of the pattern
+            0,  //button column on the apc to listen to (0-7)
+            //the patterns to attach to the buttons
+            new Pattern<Monochrome>[8]{sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
+        new DMXOutput()),
+
+    Pipe(
+        new UDPInput(9611),
+        new NeoPixelBusOutput<NeoEsp32Rmt0800KbpsMethod>(5),
+        Pipe::transfer<RGB,RGB>,
+        RGBGamma),
+
+    Pipe(
+        new UDPInput(9612),
+        new NeoPixelBusOutput<NeoEsp32Rmt1800KbpsMethod>(4),
+        Pipe::transfer<RGB,RGB>,
+        RGBGamma),
+
+    Pipe(
+        new UDPInput(9613),
+        new NeoPixelBusOutput<NeoEsp32Rmt2800KbpsMethod>(14),
+        Pipe::transfer<RGB,RGB>,
+        RGBGamma),
+
+    Pipe(
+        new UDPInput(9614),
+        new NeoPixelBusOutput<NeoEsp32Rmt3800KbpsMethod>(2),
+        Pipe::transfer<RGB,RGB>,
+        RGBGamma),
+
+    Pipe(
+        new UDPInput(9615),
+        new NeoPixelBusOutput<NeoEsp32Rmt4800KbpsMethod>(15),
+        Pipe::transfer<RGB,RGB>,
+        RGBGamma),
+
+    // //Shared with DMX!
+    // Pipe(
+    //     new UDPInput(9616),
+    //     new NeoPixelBusOutput<NeoEsp32Rmt5800KbpsMethod>(32),
+    //     //new DMXOutput(),
+    //     Pipe::transfer<RGB,RGB>,
+    //     RGBGamma),
+
+    Pipe(
+        new UDPInput(9617),
+        new NeoPixelBusOutput<NeoEsp32Rmt6800KbpsMethod>(0),
+        Pipe::transfer<RGB,RGB>,
+        RGBGamma),
+
+    Pipe(
+        new UDPInput(9618),
+        new NeoPixelBusOutput<NeoEsp32Rmt7800KbpsMethod>(33),
+        Pipe::transfer<RGB,RGB>,
+        RGBGamma),
+
+    Pipe(
+        new UDPInput(9619),
+        new PWMOutput(),
+        Pipe::transfer<RGB,Monochrome12>,
+        RGBGamma12),
+
 };
-
-// const int numOutputs = 9;
-// #define forEach(output) for(int index=0;index<numOutputs;index++)
-
-// Output* out[numOutputs] = {
-//   new NeoPixelBusOutput<NeoEsp32Rmt0800KbpsMethod>(5),
-//   new NeoPixelBusOutput<NeoEsp32Rmt1800KbpsMethod>(4),
-//   new NeoPixelBusOutput<NeoEsp32Rmt2800KbpsMethod>(14),
-//   new NeoPixelBusOutput<NeoEsp32Rmt3800KbpsMethod>(2),
-//   new NeoPixelBusOutput<NeoEsp32Rmt4800KbpsMethod>(15),
-//   //new NeoPixelBusOutput<NeoEsp32Rmt5800KbpsMethod>(32), //cant use together with dmx
-//   new DMXOutput(),
-//   new NeoPixelBusOutput<NeoEsp32Rmt6800KbpsMethod>(0),
-//   new NeoPixelBusOutput<NeoEsp32Rmt7800KbpsMethod>(33),
-//   //new APCMiniOutput(),
-//   new PWMOutput()
-
-// };
-
-// Input* in[numOutputs] = {
-//   new UDPInput(9611),
-//   new UDPInput(9612),
-//   new UDPInput(9613),
-//   new UDPInput(9614),
-//   new UDPInput(9615),
-//   //new UDPInput(9616),
-//   new ApcminiInput(90, 0, new Pattern[8] {sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
-//   new UDPInput(9617),
-//   new UDPInput(9618),
-//   //new UDPInput(9619)
-//   new ApcminiInput(3*12, 1, new Pattern[8] {sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
-// };
-
 
 void click() { Debug.println("click"); }
 void press() { Debug.println("press"); }
@@ -118,19 +141,25 @@ void setup()
     // }
     // out[8]->setGammaCurve(gamma12);
 
-    // Debug.println("Starting network");
-    // clearall();
-    // NetworkBegin();
-    // clearall();
+    for (int j = 0; j < sizeof(pipes) / sizeof(Pipe); j++)
+    {
+        //pipes[j].in->begin();
+        pipes[j].out->Begin();
+    }
 
-    Debug.println("Starting inputs");
+    Debug.println("Starting network");
+    clearall();
+    NetworkBegin();
+    clearall();
+
+    Debug.println("Starting pipes");
     // forEach(output)
     //     in[index]->begin();
 
     for (int j = 0; j < sizeof(pipes) / sizeof(Pipe); j++)
     {
         pipes[j].in->begin();
-        pipes[j].out->Begin();
+        //pipes[j].out->Begin();
     }
 
     Debug.println("Done");
