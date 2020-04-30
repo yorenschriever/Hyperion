@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Arduino.h>
-//#include <NeoPixelBus.h>
 #include "../../.pio/libdeps/esp32-poe/NeoPixelBus_ID547/src/NeoPixelBus.h"
 #include "output.h"
 
@@ -17,18 +16,6 @@ public:
         pinMode(pin, OUTPUT);
         this->pin = pin;
         this->length = 4;
-    }
-
-    //depricated
-    void SetPixelColor(int index, uint8_t r, uint8_t g, uint8_t b) override
-    {
-        if (this->pixels != NULL)
-            this->pixels->SetPixelColor(
-                index,
-                RgbColor(
-                    this->gammaCurve[r],
-                    this->gammaCurve[g],
-                    this->gammaCurve[b]));
     }
 
     void SetData(uint8_t* data, int size, int index)
@@ -88,4 +75,6 @@ public:
 
 private:
     NeoPixelBus<NeoGrbFeature, T> *pixels = NULL;
+    int length=0;
+    int pin=0;
 };

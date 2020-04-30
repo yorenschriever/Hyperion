@@ -1,40 +1,32 @@
 
 #include <Arduino.h>
 #include <WebServer.h>
-//#include "ESP32AsyncWebServer.h"
 #include <ESPmDNS.h>
 #include <Update.h>
 #include "ota.h"
 #include "debug.h"
 
 WebServer otaserver(81);
-//
-//volatile boolean otaActive = false;
-//
-//boolean getOtaActive()
-//{
-//  return otaActive;
-//}
 
 void setupOta()
 {
-   MDNS.begin("Hyperion");
+    MDNS.begin("Hyperion");
 
-   otaserver.on("/", HTTP_GET, []() {
-    otaserver.sendHeader("Connection", "close");
-    otaserver.send(200, "text/html", "Hi");
-  });
-//  otaserver.on("/serverIndex", HTTP_GET, []() {
-//    otaserver.sendHeader("Connection", "close");
-//    otaserver.send(200, "text/html", "Hello");
-//  });
-  /*handling uploading firmware file */
-  otaserver.on("/update", HTTP_POST, []() {
+    otaserver.on("/", HTTP_GET, []() {
+        otaserver.sendHeader("Connection", "close");
+        otaserver.send(200, "text/html", "Hi");
+    });
+    //  otaserver.on("/serverIndex", HTTP_GET, []() {
+    //    otaserver.sendHeader("Connection", "close");
+    //    otaserver.send(200, "text/html", "Hello");
+    //  });
+    /*handling uploading firmware file */
+    otaserver.on(
+        "/update", HTTP_POST, []() {
     otaserver.sendHeader("Connection", "close");
     otaserver.send(200, "text/plain", (Update.hasError()) ? "UPDATE FAILED\n" : "Update Successful\n");
     delay(1000);
-    ESP.restart();
-  }, []() {
+    ESP.restart(); }, []() {
 //    otaActive = true;
 //    
 //    static boolean stopped = false;
@@ -69,12 +61,11 @@ void setupOta()
         //Update.printError(Debug);
         //TODO
       }
-    }
-  });
-  otaserver.begin();
+    } });
+    otaserver.begin();
 }
 
 void handleOta()
 {
-  otaserver.handleClient();
+    otaserver.handleClient();
 }

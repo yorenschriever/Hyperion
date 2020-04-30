@@ -19,10 +19,6 @@
 #define MODE1_RESTART 0x80       /**< Restart enabled */
 #define PCA9685_PRESCALE 0xFE    /**< Prescaler for PWM output frequency */
 
-//                              1  2  3  4  5  6  7  8  9  10 11 12
-//const byte PWM_LED_ORDER[] = {8, 9 ,10,11,1, 0, 5, 4, 3, 7, 6, 2 }; //numbering on pcb
-//const byte PWM_LED_ORDER[] = {5, 4, 3, 10,9, 8, 7, 6, 2, 0, 1, 11}; //numbering on backside
-
 const byte PWM_LED_ORDER[] = {9, 10,8,2,1,0,7,6,5,4,3,11} ;//numbering on backside, pcb has a different numbering
 
 #define SDAPIN 13
@@ -35,26 +31,14 @@ public:
     {
     }
 
-    //depricated
-    void SetPixelColor(int index, uint8_t r, uint8_t g, uint8_t b) override
-    {
-        if (index < 12)
-            this->values[PWM_LED_ORDER[index]] = (r + g + b) / 3;
-    }
-
     //index and size are in bytes
     void SetData(uint8_t *data, int size, int index)
     {
         //this memcpy is not aware that is it actually copying uint16_ts byte by byte
         //(provided you actually converted to RGB12 format)
-        //if (index + size <= sizeof(this->values))
-        //    memcpy((uint8_t*)this->values + index, data, size);
-
-        Debug.printf("setting pixel size: %d, index: %d, sizeofvalues: %d\n",size,index,sizeof(this->values));
-
         int copylength = min(size, (int)sizeof(this->values) - index);
         if (copylength>0)
-          memcpy((uint8_t*)this->values + index, data, copylength);
+            memcpy((uint8_t*)this->values + index, data, copylength);
     }
 
     boolean Ready()
@@ -64,13 +48,8 @@ public:
 
     void Show()
     {
-        //while(this->busy); //wait for the device to be ready. (is there another way to do this?)
-
         this->busy = true;
-        //memcpy(this->valuesBuf,this->values,sizeof(this->values));
         xSemaphoreGive(dirtySemaphore);
-        //this->dirty=true;
-        Debug.printf("show\n");
     }
 
     void Begin() override
@@ -80,11 +59,11 @@ public:
         _i2c->setClock(1000000);
         this->reset();
 
+        //todo make setting
         //this->setPWMFreq(1500);
         this->setPWMFreq(100);
 
         dirtySemaphore = xSemaphoreCreateBinary();
-        //xTaskCreate(SendAsync,"SendPWMAsync",10000,this,6,NULL);
         xTaskCreatePinnedToCore(SendAsync, "SendPWMAsync", 10000, this, 6, NULL, 1);
     }
 
@@ -105,7 +84,6 @@ private:
     TwoWire *_i2c;
 
     volatile boolean busy = false;
-    //volatile boolean dirty=false;
     xSemaphoreHandle dirtySemaphore;
 
     void reset()
@@ -207,18 +185,11 @@ private:
                         on = 0;
                         off = value;
                     }
-                    // this2->_i2c->write(on);
-                    // this2->_i2c->write(on >> 8);
-                    // this2->_i2c->write(off);
-                    // this2->_i2c->write(off >> 8);
                     buffer[i * 4 + 1] = (on % 0xff);
                     buffer[i * 4 + 2] = (on >> 8);
                     buffer[i * 4 + 3] = (off % 0xff);
                     buffer[i * 4 + 4] = (off >> 8);
                 }
-
-                //this2->_i2c->write(buffer,sizeof(buffer));
-                //this2->_i2c->endTransmission();
 
                 if (xSemaphoreTake(i2cMutex, (TickType_t)10) != pdTRUE)
                 {
@@ -235,6 +206,5 @@ private:
             delay(5);
         }
 
-        //vTaskDelete( NULL );
     }
 };

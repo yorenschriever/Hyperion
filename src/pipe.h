@@ -4,7 +4,7 @@
 #include "inputs/input.h"
 #include "outputs/output.h"
 
-using HandlerFunc = void (*)(uint8_t *data, int length, Output *out, uint16_t **lut);
+using HandlerFunc = int (*)(uint8_t *data, int length, Output *out, uint16_t **lut);
 
 const int MTU = 1500;
 uint8_t data[MTU]; //i used to malloc this, but the MTU is 1500, so i just set it to the upped bound
@@ -35,22 +35,17 @@ public:
         if (datalength == 0)
             return;
 
-        this->converter(data, datalength, out, lut);
+        numPixels = this->converter(data, datalength, out, lut);
 
         out->Show();
     }
 
-    // void handleData(uint8_t *data, int length)
-    // {
-    //     this->converter(data, length, out, lut);
-    // }
-
     //Basic transfer function without bells and whistles
-    static void transfer(uint8_t *data, int length, Output *out, uint16_t **lut)
+    static int transfer(uint8_t *data, int length, Output *out, uint16_t **lut)
     {
-        //todo ask for max output capacity, only transfer that many
         out->SetLength(length);
         out->SetData(data,length,0);
+        return 0; //unkown number of pixels
     }
 
     //Transfer function that can convert between colour representations and apply LUTs
@@ -59,10 +54,10 @@ public:
     {
         //tell the output the new length so it can allocate enough space for the data
         //we are going to send
-        //todo ask for max output capacity, only transfer that many
         out->SetLength(length / sizeof(T) * sizeof(U));
 
-        for (int i = 0; i < length / sizeof(T); i++)
+        int numPixels = length / sizeof(T);
+        for (int i = 0; i < numPixels; i++)
         {
             //store the ith pixel in an object of type T (source datatype)
             T col = ((T *)data)[i];
@@ -81,5 +76,12 @@ public:
             //pixel. cant we dump the entire byte array in one go?
             out->SetData((uint8_t *)&outcol,sizeof(U),i*sizeof(U));
         }
+        return numPixels
     }
+
+    int getNumPixels() {
+        return numPixels;
+    }
+private:
+    int numPixels; //keep track of the number of pixels for stats. otherwise its not used.
 };

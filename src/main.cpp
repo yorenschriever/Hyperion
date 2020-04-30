@@ -34,7 +34,7 @@ const float indancescentBase = 0.2;
 uint16_t gamma8[256];
 uint16_t gamma12[256];
 uint16_t gamma12rotary[256];
-uint16_t *RGBGamma[] = {gamma8, gamma8, gamma8};
+uint16_t *RGBGamma8[] = {gamma8, gamma8, gamma8};
 uint16_t *RGBGamma12[] = {gamma12, gamma12, gamma12};
 
 Pipe pipes[] = {
@@ -51,31 +51,31 @@ Pipe pipes[] = {
         new UDPInput(9611),
         new NeoPixelBusOutput<NeoEsp32Rmt0800KbpsMethod>(5),
         Pipe::transfer<RGB,RGB>,
-        RGBGamma),
+        RGBGamma8),
 
     Pipe(
         new UDPInput(9612),
         new NeoPixelBusOutput<NeoEsp32Rmt1800KbpsMethod>(4),
         Pipe::transfer<RGB,RGB>,
-        RGBGamma),
+        RGBGamma8),
 
     Pipe(
         new UDPInput(9613),
         new NeoPixelBusOutput<NeoEsp32Rmt2800KbpsMethod>(14),
         Pipe::transfer<RGB,RGB>,
-        RGBGamma),
+        RGBGamma8),
 
     Pipe(
         new UDPInput(9614),
         new NeoPixelBusOutput<NeoEsp32Rmt3800KbpsMethod>(2),
         Pipe::transfer<RGB,RGB>,
-        RGBGamma),
+        RGBGamma8),
 
     Pipe(
         new UDPInput(9615),
         new NeoPixelBusOutput<NeoEsp32Rmt4800KbpsMethod>(15),
         Pipe::transfer<RGB,RGB>,
-        RGBGamma),
+        RGBGamma8),
 
     // //Shared with DMX!
     // Pipe(
@@ -89,13 +89,13 @@ Pipe pipes[] = {
         new UDPInput(9617),
         new NeoPixelBusOutput<NeoEsp32Rmt6800KbpsMethod>(0),
         Pipe::transfer<RGB,RGB>,
-        RGBGamma),
+        RGBGamma8),
 
     Pipe(
         new UDPInput(9618),
         new NeoPixelBusOutput<NeoEsp32Rmt7800KbpsMethod>(33),
         Pipe::transfer<RGB,RGB>,
-        RGBGamma),
+        RGBGamma8),
 
     Pipe(
         new UDPInput(9619),
@@ -132,84 +132,38 @@ void setup()
 
     Display::Initialize(); //initialize display before outputs
 
-    // Debug.println("Starting outputs");
-    // //TODO call setLUT, do this when creating, not here
-    // forEach(output)
-    // {
-    //   out[index]->Begin();
-    //   out[index]->setGammaCurve(gamma8);
-    // }
-    // out[8]->setGammaCurve(gamma12);
-
+    Debug.println("Starting outputs");
     for (int j = 0; j < sizeof(pipes) / sizeof(Pipe); j++)
-    {
-        //pipes[j].in->begin();
         pipes[j].out->Begin();
-    }
 
     Debug.println("Starting network");
     clearall();
     NetworkBegin();
     clearall();
 
-    Debug.println("Starting pipes");
-    // forEach(output)
-    //     in[index]->begin();
-
+    Debug.println("Starting inputs");
     for (int j = 0; j < sizeof(pipes) / sizeof(Pipe); j++)
-    {
         pipes[j].in->begin();
-        //pipes[j].out->Begin();
-    }
 
     Debug.println("Done");
 
     xTaskCreatePinnedToCore(DisplayFps, "DisplayFPS", 3000, NULL, 0, NULL, 0);
 
-    //setupOta();
+    setupOta();
 
     Debug.printf("max udp connections: %d\n", MEMP_NUM_NETCONN);
-
-    //APCMini::Initialize();
 }
 
 void loop()
 {
-
-    //forEach(output)
-    //{
     for (int j = 0; j < sizeof(pipes) / sizeof(Pipe); j++)
     {
         Pipe *pipe = &pipes[j];
         pipe->process();
-
-        // //check if the output is done sending the previous message
-        // //TODO i dont know where to put this check
-        // //if sending is the bottleneck, then i dont want to needlessly precalculate frames
-        // //if calculating is the bottleneck, then i want to precalculate the frame while we are waiting for the send to complete
-        // //is it possible to do the pre calculations with low prio?
-        // if (!pipe->out->Ready())
-        //     continue;
-
-        // //load the new frame from the input, or quit if none was available
-        // int datalength = pipe->in->loadData(data);
-        // if (datalength == 0)
-        //     continue;
-
-        // //int numPixels = std::max(cb/3+1,4);
-        // //out[index]->SetLength(numPixels);
-
-        // //copy the pixel values
-        // //for (int i=0;i<cb;i+=3)
-        // //  out[index]->SetPixelColor(i/3, data[i],data[i+1],data[i+2]);
-
-        // pipe->handleData(data, datalength);
-
-        // pipe->out->Show();
     }
 
     //check for over-the-air firmware updates
-    //handleOta();
+    handleOta();
 
     //demo code that will scroll through the rainbow when rotating the rotary encoder
     static byte color;
@@ -217,10 +171,12 @@ void loop()
     Rotary::setWheel(color);
 }
 
+//function that would display a loading animation on the ledstrips while eth connecting 
+//- 1. should we display that on the outs now that we have a display?
+//- 2. why wait for eth at all? there also also other input channels, so eth might never even connect
 // void animate(byte r, byte g, byte b)
 // {
 //   byte pos = (millis()/200)%4;
-
 //   for (int i=0;i<4;i++) {
 //     forEach(output)
 //       out[index]->SetPixelColor(i, r,g,i<pos?b:0);
@@ -263,7 +219,7 @@ void DisplayFps(void *parameter)
             totalTotalframes += pipe->in->getTotalFrameCount();
             pipe->in->resetFrameCount();
 
-            totalLength += pipe->out->getLength();
+            totalLength += pipe->getNumPixels();
         }
 
         float outfps = activeChannels == 0 ? 0 : (float)1000. * totalUsedframes / (elapsedTime) / activeChannels;
