@@ -49,11 +49,15 @@ public:
     }
 
     //Transfer function that can convert between colour representations and apply LUTs
+    //This function has been thoroughly optimized, because this is the workhorse of the 
+    //device. When making changes be absolutely sure that you keep performance in mind.
+    //See docs/speed and call stack for steps taken to optimize
     template <class T, class U>
     static int transfer(uint8_t *data, int length, Output *out, uint16_t **lut)
     {
         //tell the output the new length so it can allocate enough space for the data
         //we are going to send
+        //todo this function should return the actual length it has allocated, so we can use tht later
         out->SetLength(length / sizeof(T) * sizeof(U));
 
         int numPixels = length / sizeof(T);
@@ -74,6 +78,8 @@ public:
             //Pass the data to the output
             //TODO why provide the data pixel by pixel als have a function call overhead for each
             //pixel. cant we dump the entire byte array in one go?
+            //What about a function that passes us a datapointer, and we place the items directly into it
+            //this saves a function call for each pixel, and an additional memcpy. 
             out->SetData((uint8_t *)&outcol,sizeof(U),i*sizeof(U));
         }
         return numPixels;

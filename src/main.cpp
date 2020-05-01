@@ -26,7 +26,7 @@ void DisplayFps(void *parameter);
 void clearall();
 void animate(byte r, byte g, byte b);
 
-const float gammaCorrection8 = 2; //1.6 looks less quantized when dimming. 2.5 gives prettier colours. 2 is a compromise
+const float gammaCorrection8 = 2.0; //from quartz composer 1.6 looks less quantized when dimming. 2.5 gives prettier colours. 2 is a compromise. 
 const float gammaCorrection12 = 2.5;
 const float gammaCorrection12rotary = 2; //2 looks best with the roataryled.
 const float indancescentBase = 0.2;
@@ -38,14 +38,14 @@ uint16_t *RGBGamma8[] = {gamma8, gamma8, gamma8};
 uint16_t *RGBGamma12[] = {gamma12, gamma12, gamma12};
 
 Pipe pipes[] = {
-    Pipe(
-        //create an apcmini input that creates monochome patterns
-        new ApcminiInput<Monochrome>(
-            30, //width of the pattern
-            0,  //button column on the apc to listen to (0-7)
-            //the patterns to attach to the buttons
-            new Pattern<Monochrome>[8]{sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
-        new DMXOutput()),
+    // Pipe(
+    //     //create an apcmini input that creates monochome patterns
+    //     new ApcminiInput<Monochrome>(
+    //         30, //width of the pattern
+    //         0,  //button column on the apc to listen to (0-7)
+    //         //the patterns to attach to the buttons
+    //         new Pattern<Monochrome>[8]{sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
+    //     new DMXOutput()),
 
     Pipe(
         new UDPInput(9611),
@@ -53,11 +53,11 @@ Pipe pipes[] = {
         Pipe::transfer<RGB,RGB>,
         RGBGamma8),
 
-    // Pipe(
-    //     new UDPInput(9612),
-    //     new NeoPixelBusOutput<NeoEsp32Rmt1800KbpsMethod>(4),
-    //     Pipe::transfer<RGB,RGB>,
-    //     RGBGamma8),
+    Pipe(
+        new UDPInput(9612),
+        new NeoPixelBusOutput<NeoEsp32Rmt1800KbpsMethod>(4),
+        Pipe::transfer<RGB,RGB>,
+        RGBGamma8),
 
     Pipe(
         new UDPInput(9613),
@@ -77,13 +77,13 @@ Pipe pipes[] = {
         Pipe::transfer<RGB,RGB>,
         RGBGamma8),
 
-    // //Shared with DMX!
-    // Pipe(
-    //     new UDPInput(9616),
-    //     new NeoPixelBusOutput<NeoEsp32Rmt5800KbpsMethod>(32),
-    //     //new DMXOutput(),
-    //     Pipe::transfer<RGB,RGB>,
-    //     RGBGamma),
+    //Shared with DMX!
+    Pipe(
+        new UDPInput(9616),
+        new NeoPixelBusOutput<NeoEsp32Rmt5800KbpsMethod>(32),
+        //new DMXOutput(),
+        Pipe::transfer<RGB,RGB>,
+        RGBGamma8),
 
     Pipe(
         new UDPInput(9617),
@@ -113,15 +113,15 @@ Pipe pipes[] = {
         Pipe::transfer<Monochrome,Monochrome12>,
         RGBGamma12),
 
-    Pipe(
-        new ApcminiInput<RGB>(
-            16, //width of the pattern, in pixels
-            2,  //button column on the apc to listen to (0-7)
-            //the patterns to attach to the buttons
-            new Pattern<RGB>[8]{rainbowPattern, rainbowPattern, rainbowPattern, rainbowPattern, rainbowPattern, rainbowPattern, rainbowPattern, rainbowPattern}),
-        new NeoPixelBusOutput<NeoEsp32Rmt1800KbpsMethod>(4),
-        Pipe::transfer<RGB,RGB>,
-        RGBGamma8),
+    // Pipe(
+    //     new ApcminiInput<RGB>(
+    //         16, //width of the pattern, in pixels
+    //         2,  //button column on the apc to listen to (0-7)
+    //         //the patterns to attach to the buttons
+    //         new Pattern<RGB>[8]{rainbowPattern, rainbowPattern, rainbowPattern, rainbowPattern, rainbowPattern, rainbowPattern, rainbowPattern, rainbowPattern}),
+    //     new NeoPixelBusOutput<NeoEsp32Rmt1800KbpsMethod>(4),
+    //     Pipe::transfer<RGB,RGB>,
+    //     RGBGamma8),
 
 };
 
@@ -176,13 +176,14 @@ void setup()
 
 void loop()
 {
+    //The main process loop
     for (int j = 0; j < sizeof(pipes) / sizeof(Pipe); j++)
     {
         Pipe *pipe = &pipes[j];
         pipe->process();
     }
 
-    //check for over-the-air firmware updates
+    //check for over-the-air firmware updates (also works over ETH)
     handleOta();
 
     //demo code that will scroll through the rainbow when rotating the rotary encoder

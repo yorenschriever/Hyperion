@@ -51,8 +51,10 @@ bool config_eth(IPAddress local_ip, IPAddress gateway, IPAddress subnet)
     info.gw.addr = static_cast<uint32_t>(gateway);
     info.netmask.addr = static_cast<uint32_t>(subnet);
 
-    tcpip_adapter_dhcpc_stop(TCPIP_ADAPTER_IF_ETH);
-    return (tcpip_adapter_set_ip_info(TCPIP_ADAPTER_IF_ETH, &info) == ESP_OK);
+    ESP_ERROR_CHECK(tcpip_adapter_dhcpc_stop(TCPIP_ADAPTER_IF_ETH));
+    ESP_ERROR_CHECK(tcpip_adapter_set_ip_info(TCPIP_ADAPTER_IF_ETH, &info));
+    //return (tcpip_adapter_set_ip_info(TCPIP_ADAPTER_IF_ETH, &info) == ESP_OK);
+    return true;
 }
 
 void EthEvent(WiFiEvent_t event)

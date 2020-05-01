@@ -1,6 +1,7 @@
 #pragma once
 
 #include <inttypes.h>
+#include "debug.h"
 
 class Colour
 {
@@ -162,14 +163,14 @@ public:
     uint16_t L;
 };
 
-Monochrome::operator RGB() { return RGB(L, L, L); }
-Monochrome::operator RGB12() { return RGB12(L << 4, L << 4, L << 4); }
-Monochrome::operator Monochrome12() { return Monochrome12(L << 4); }
-
-RGB::operator Monochrome() { return Monochrome((R + G + B) / 3); }
-RGB::operator RGB12() { return RGB12(R << 4, G << 4, B << 4); }
-RGB::operator Monochrome12() { return Monochrome(((R + G + B) << 4) / 3); }
-
-RGB12::operator Monochrome() { return Monochrome((R + G + B) / 3); }
-RGB12::operator RGB() { return RGB12(R >> 4, G >> 4, B >> 4); }
-RGB12::operator Monochrome12() { return Monochrome((R + G + B) / 3); }
+inline Monochrome::operator RGB() { return RGB(L, L, L); }
+inline Monochrome::operator RGB12() { return RGB12(L << 4, L << 4, L << 4); }
+inline Monochrome::operator Monochrome12() { return Monochrome12(L << 4); }
+ 
+inline RGB::operator Monochrome() { return Monochrome((R + G + B) / 3); }
+inline RGB::operator RGB12() { return RGB12(R << 4, G << 4, B << 4); }
+inline RGB::operator Monochrome12() { return Monochrome12(((R + G + B) << 4) / 3); }
+ 
+inline RGB12::operator Monochrome() { return Monochrome((R + G + B) / 3); }
+inline RGB12::operator RGB() { return RGB12(R >> 4, G >> 4, B >> 4); }
+inline RGB12::operator Monochrome12() { return Monochrome12((R + G + B) / 3); }

@@ -1,0 +1,70 @@
+Onderzoek om te kijken hoe ik de transferfunctie kan versnellen.
+
+deel 1 is kijken of ik de conversie van kleuren en pixels kan versnellen. Er gebeurt een hoop met casts en datatypes, 
+verdeeld over allerlei classes. maar in essentie moet de transfer functies gewoon wat bytes uitlezen en in een andere 
+volgorde plaatsen, daarna nog even een lookup table. Dit zou de optimizer moeten kunnen platslaan, en er zou geen overhead 
+hoeven zijn van functie calls. 
+is dat ook zo?
+
+ik heb een beetje een primitieve manier van meten, maar ik weet niks beters. Ik plaats een Debug(1/0) op verschillende 
+plekken in mijn code. De error die dit oplevert bevat een stacktrace. Deze kan ik uitpluizen en zien of de optimizer
+een functie call heeft gedaan (entry in de stacktrace) of niet (zichtbaar als inlined by)
+
+== deel 1 ==
+
+Transfer (pipe.h:70)
+
+Yorens-Mac-mini:Hyperion yoren$ ./stack 0x400d4076:0x3ffc17f0 0x400d56e7:0x3ffc1830 0x400d8955:0x3ffc1850 0x4008ceed:0x3ffc1870
+0x400d4076: int Pipe::transfer<RGB, RGB>(unsigned char*, int, Output*, unsigned short**) at /Users/yoren/GoogleDrive/InterneProjecten/Hyperion/src/pipe.h:71
+0x400d56e7: loop() at /Users/yoren/GoogleDrive/InterneProjecten/Hyperion/src/pipe.h:38
+ (inlined by) loop() at /Users/yoren/GoogleDrive/InterneProjecten/Hyperion/src/main.cpp:183
+0x400d8955: loopTask(void*) at /Users/yoren/.platformio/packages/framework-arduinoespressif32/cores/esp32/main.cpp:19
+0x4008ceed: vPortTaskWrapper at /Users/yoren/.platformio/packages/framework-espidf/components/freertos/port.c:143
+
+Cast operator (colours.h RGB::operator Monochrome12() colours.h 173)
+
+Yorens-Mac-mini:Hyperion yoren$ ./stack 0x400d55e5:0x3ffc17d0 0x400d564d:0x3ffc17f0 0x400d56bf:0x3ffc1830 0x400d892d:0x3ffc1850 0x4008ceed:0x3ffc1870
+0x400d55e5: RGB::operator Monochrome12() at /Users/yoren/GoogleDrive/InterneProjecten/Hyperion/src/colours.h:173
+0x400d564d: int Pipe::transfer<RGB, Monochrome12>(unsigned char*, int, Output*, unsigned short**) at /Users/yoren/GoogleDrive/InterneProjecten/Hyperion/src/pipe.h:69
+0x400d56bf: loop() at /Users/yoren/GoogleDrive/InterneProjecten/Hyperion/src/pipe.h:38
+ (inlined by) loop() at /Users/yoren/GoogleDrive/InterneProjecten/Hyperion/src/main.cpp:183
+0x400d892d: loopTask(void*) at /Users/yoren/.platformio/packages/framework-arduinoespressif32/cores/esp32/main.cpp:19
+0x4008ceed: vPortTaskWrapper at /Users/yoren/.platformio/packages/framework-espidf/components/freertos/port.c:143
+
+daarna met inline operator
+Yorens-Mac-mini:Hyperion yoren$ ./stack 0x400d40fc:0x3ffc17f0 0x400d56b3:0x3ffc1830 0x400d891d:0x3ffc1850 0x4008ceed:0x3ffc1870
+0x400d40fc: int Pipe::transfer<RGB, Monochrome12>(unsigned char*, int, Output*, unsigned short**) at /Users/yoren/GoogleDrive/InterneProjecten/Hyperion/src/colours.h:173
+ (inlined by) int Pipe::transfer<RGB, Monochrome12>(unsigned char*, int, Output*, unsigned short**) at /Users/yoren/GoogleDrive/InterneProjecten/Hyperion/src/pipe.h:69
+0x400d56b3: loop() at /Users/yoren/GoogleDrive/InterneProjecten/Hyperion/src/pipe.h:38
+ (inlined by) loop() at /Users/yoren/GoogleDrive/InterneProjecten/Hyperion/src/main.cpp:183
+0x400d891d: loopTask(void*) at /Users/yoren/.platformio/packages/framework-arduinoespressif32/cores/esp32/main.cpp:19
+0x4008ceed: vPortTaskWrapper at /Users/yoren/.platformio/packages/framework-espidf/components/freertos/port.c:143
+
+-> dus inline op de operations heeft wel degelijk zin!
+
+Constructor monochrome12 Colours.h:139
+
+Yorens-Mac-mini:Hyperion yoren$ ./stack 0x400d3e28:0x3ffc17f0 0x400d56cb:0x3ffc1830 0x400d8935:0x3ffc1850 0x4008ceed:0x3ffc1870
+0x400d3e28: int Pipe::transfer<RGB, Monochrome12>(unsigned char*, int, Output*, unsigned short**) at /Users/yoren/GoogleDrive/InterneProjecten/Hyperion/src/colours.h:139
+ (inlined by) ?? at /Users/yoren/GoogleDrive/InterneProjecten/Hyperion/src/colours.h:173
+ (inlined by) int Pipe::transfer<RGB, Monochrome12>(unsigned char*, int, Output*, unsigned short**) at /Users/yoren/GoogleDrive/InterneProjecten/Hyperion/src/pipe.h:69
+0x400d56cb: loop() at /Users/yoren/GoogleDrive/InterneProjecten/Hyperion/src/pipe.h:38
+ (inlined by) loop() at /Users/yoren/GoogleDrive/InterneProjecten/Hyperion/src/main.cpp:183
+0x400d8935: loopTask(void*) at /Users/yoren/.platformio/packages/framework-arduinoespressif32/cores/esp32/main.cpp:19
+0x4008ceed: vPortTaskWrapper at /Users/yoren/.platformio/packages/framework-espidf/components/freertos/port.c:143
+
+-> de constructor van Monochrome 12 heeft geen function call overhead, en is inlined by pipe::transfer! lekker seg
+
+Apply LUT: monochrome12 applylut colours.h:151 (is al inline)
+
+Yorens-Mac-mini:Hyperion yoren$ ./stack 0x400d4111:0x3ffc17f0 0x400d56bf:0x3ffc1830 0x400d8929:0x3ffc1850 0x4008ceed:0x3ffc1870
+0x400d4111: int Pipe::transfer<RGB, Monochrome12>(unsigned char*, int, Output*, unsigned short**) at /Users/yoren/GoogleDrive/InterneProjecten/Hyperion/src/colours.h:151
+ (inlined by) int Pipe::transfer<RGB, Monochrome12>(unsigned char*, int, Output*, unsigned short**) at /Users/yoren/GoogleDrive/InterneProjecten/Hyperion/src/pipe.h:73
+0x400d56bf: loop() at /Users/yoren/GoogleDrive/InterneProjecten/Hyperion/src/pipe.h:38
+ (inlined by) loop() at /Users/yoren/GoogleDrive/InterneProjecten/Hyperion/src/main.cpp:183
+0x400d8929: loopTask(void*) at /Users/yoren/.platformio/packages/framework-arduinoespressif32/cores/esp32/main.cpp:19
+0x4008ceed: vPortTaskWrapper at /Users/yoren/.platformio/packages/framework-espidf/components/freertos/port.c:143
+
+-> ook netjes inline
+
+conclusie deel 1: als ik alle colour operators inline dan worden nergens functie calls gedaan in de transfer functie.
