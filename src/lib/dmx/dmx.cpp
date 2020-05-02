@@ -4,6 +4,8 @@
 #include "freertos/queue.h"
 #include "driver/uart.h"
 #include "strings.h"
+#include <cstring>
+#include <algorithm>
 
 #define DMX_SERIAL_INPUT_PIN    36          // pin for dmx rx
 #define DMX_SERIAL_OUTPUT_PIN   32          // pin for dmx tx
@@ -17,12 +19,22 @@
 #define DMX_BREAK                   1
 #define DMX_DATA                    2
 
+
+
 QueueHandle_t DMX::dmx_rx_queue;
 SemaphoreHandle_t DMX::sync_dmx;
 uint8_t DMX::dmx_state = DMX_IDLE;
 uint16_t DMX::current_rx_addr = 0;
 long DMX::last_dmx_packet = 0;
 uint8_t DMX::dmx_data[513];
+
+const int universeSize = 512;
+const bool always512 = true; //always send the entire universe, instead of only the channels that were provided from the input
+uint8_t DMX::dmx_tx_buffer[512];
+uint8_t DMX::dmx_tx_frontbuffer[512];
+xSemaphoreHandle DMX::tx_dirtySemaphore = xSemaphoreCreateBinary();
+volatile bool DMX::tx_busy = false;
+volatile int DMX::tx_size=0;
 
 DMX::DMX()
 {
@@ -38,7 +50,10 @@ void DMX::Initialize()
         .data_bits = UART_DATA_8_BITS,
         .parity = UART_PARITY_DISABLE,
         .stop_bits = UART_STOP_BITS_2,
-        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
+
+        .rx_flow_ctrl_thresh = 122, //not used
+        .use_ref_tick = false //not used
     };
 
     ESP_ERROR_CHECK(uart_param_config(DMX_UART_NUM, &uart_config));
@@ -54,6 +69,9 @@ void DMX::Initialize()
 
     // create mutex for syncronisation
     sync_dmx = xSemaphoreCreateMutex();
+
+    //related to sending
+    xTaskCreatePinnedToCore(SendDMXAsync, "SendDMXAsync", 10000, NULL, 1, NULL, 1);
 }
 
 uint8_t DMX::Read(uint16_t channel)
@@ -157,9 +175,41 @@ void DMX::uart_event_task(void *pvParameters)
 
 //portMUX_TYPE myMutex = portMUX_INITIALIZER_UNLOCKED;
 
-void DMX::Write(uint8_t* data, int length, bool wait)
+
+//================ send
+
+void DMX::Write(uint8_t* data, int size, int index)
 {
-    if (wait)
+    int copylength = std::min(size, universeSize - index);
+    if (copylength>0)
+        memcpy(dmx_tx_buffer + index, data, copylength);
+
+    tx_size = std::max((int)tx_size, index + copylength);
+}
+
+void DMX::SendDMXAsync(void *param)
+{
+    while (true)
+    {
+        if (!xSemaphoreTake(tx_dirtySemaphore, portMAX_DELAY))
+            continue;
+
+        //vTaskDelay(5 / portTICK_PERIOD_MS);
+
+        tx_busy = true;
+
+        int frontBufferLen = always512 ? universeSize : tx_size;
+        memcpy(dmx_tx_frontbuffer, dmx_tx_buffer, frontBufferLen);
+        SendBuffer(dmx_tx_frontbuffer,frontBufferLen);
+
+        tx_busy = false;
+
+    }
+}
+
+void DMX::SendBuffer(uint8_t* buf, int size)
+{
+    //if (wait)
       uart_wait_tx_done(DMX_UART_NUM, 500); 
 
     const char nullBuf = 0;
@@ -177,11 +227,25 @@ void DMX::Write(uint8_t* data, int length, bool wait)
     // taskEXIT_CRITICAL(&myMutex);
     
     uart_write_bytes(DMX_UART_NUM,  &nullBuf, 1); //send the start byte (0)
-    uart_write_bytes(DMX_UART_NUM, (const char*) data, length);
-    if (wait)
-    {
+    uart_write_bytes(DMX_UART_NUM, (const char*) buf, size);
+    //if (wait)
+    //{
         vTaskDelay(5 / portTICK_PERIOD_MS); //wait a little the the tx has time to start https://www.esp32.com/viewtopic.php?t=10469 
         uart_wait_tx_done(DMX_UART_NUM, 500); //wait till completed. at most 100 RTOS ticks (=100ms?)
         //vTaskDelay(1 / portTICK_PERIOD_MS); //wait an additional inter frame period
-    }
+    //}
+}
+
+void DMX::Show()
+{
+    xSemaphoreGive(tx_dirtySemaphore);
+}
+
+bool DMX::TxBusy(){
+    return tx_busy;
+}
+
+void DMX::ClearTxBuffer()
+{
+    memset(dmx_tx_buffer,0,universeSize);
 }

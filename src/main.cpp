@@ -47,11 +47,20 @@ Pipe pipes[] = {
     Pipe(
         //create an apcmini input that creates monochome patterns
         new ApcminiInput<Monochrome>(
-            30, //width of the pattern
+            10, //width of the pattern
             0,  //button column on the apc to listen to (0-7)
             //the patterns to attach to the buttons
             new Pattern<Monochrome>[8]{sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
-        new DMXOutput()),
+        new DMXOutput(1)),
+
+    Pipe(
+        //create an apcmini input that creates monochome patterns
+        new ApcminiInput<Monochrome>(
+            10, //width of the pattern
+            1,  //button column on the apc to listen to (0-7)
+            //the patterns to attach to the buttons
+            new Pattern<Monochrome>[8]{sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
+        new DMXOutput(15)),
 
     Pipe(
         new UDPInput(9611),
@@ -185,8 +194,11 @@ void loop()
 
     //demo code that will scroll through the rainbow when rotating the rotary encoder
     static byte color;
-    color += Rotary::getRotation();
-    Rotary::setWheel(color);
+    int rot = Rotary::getRotation(); 
+    if (rot != 0){
+        color += rot;
+        Rotary::setWheel(color);
+    }
 }
 
 //function that would display a loading animation on the ledstrips while eth connecting 
