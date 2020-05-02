@@ -25,12 +25,8 @@ class UDPInput : public Input{
             //without having to recompile the lwip driver 
             while((cbr = udpFast.parsePacketFast(dataPtr))) { 
                 gotFrame=true; 
-                
-                //dropped++; packets++; 
-                
                 cb=cbr; 
                 missedframecount++;
-
             }
             if (!gotFrame)
                 return 0;

@@ -25,7 +25,8 @@
 #include "lib/display/display.h"
 #include "lib/rotary/rotary.h"
 #include "lib/apcmini/apcmini.h"
-#include "patterns/patterns.h"
+#include "patterns/monochromePatterns.h"
+#include "patterns/rgbPatterns.h"
 
 void DisplayFps(void *parameter);
 void clearall();

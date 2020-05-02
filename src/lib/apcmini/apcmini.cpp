@@ -95,8 +95,6 @@ void APCMini::setNote(uint8_t note, bool ison, bool force)
     //set led on APC
     Midi::sendNoteOn(midichannel, note,ison*100);
     Midi::waitTxDone(); 
-    //MIDI.sendNoteOn(note, ison*100, 1); 
-    //delay(2); //must be 2, 1 doesnt work
 }
 
 void APCMini::releaseGroup(uint8_t note, bool recursiveCall)

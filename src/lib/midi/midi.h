@@ -3,8 +3,6 @@
 #include <inttypes.h>
 #include <Arduino.h>
 
-//#define MIDI_SERIAL_INPUT_PIN    36          
-//#define MIDI_SERIAL_OUTPUT_PIN   32          
 #define MIDI_UART_NUM            UART_NUM_0  
 
 //do not increase otherwise you will get a bug that the last byte cannot be read

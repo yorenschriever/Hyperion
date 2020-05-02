@@ -27,8 +27,10 @@ const byte PWM_LED_ORDER[] = {9, 10,8,2,1,0,7,6,5,4,3,11} ;//numbering on backsi
 class PWMOutput : public Output
 {
 public:
-    PWMOutput() : _i2c(&Wire)
+    //PWPM frequency in Hz, choose 100 for incandescent and 1500 for led
+    PWMOutput(int frequency) : _i2c(&Wire)
     {
+        this->frequency = frequency;
     }
 
     //index and size are in bytes
@@ -61,7 +63,8 @@ public:
 
         //todo make setting
         //this->setPWMFreq(1500);
-        this->setPWMFreq(100);
+        //this->setPWMFreq(100);
+        setPWMFreq(frequency);
 
         dirtySemaphore = xSemaphoreCreateBinary();
         xTaskCreatePinnedToCore(SendAsync, "SendPWMAsync", 10000, this, 6, NULL, 1);
@@ -81,7 +84,8 @@ public:
 private:
     uint16_t values[12];
     uint16_t valuesBuf[12];
-    TwoWire *_i2c;
+    TwoWire *_i2c; 
+    int frequency;
 
     volatile boolean busy = false;
     xSemaphoreHandle dirtySemaphore;

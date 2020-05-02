@@ -18,15 +18,10 @@
 #define DMX_DATA                    2
 
 QueueHandle_t DMX::dmx_rx_queue;
-
 SemaphoreHandle_t DMX::sync_dmx;
-
 uint8_t DMX::dmx_state = DMX_IDLE;
-
 uint16_t DMX::current_rx_addr = 0;
-
 long DMX::last_dmx_packet = 0;
-
 uint8_t DMX::dmx_data[513];
 
 DMX::DMX()

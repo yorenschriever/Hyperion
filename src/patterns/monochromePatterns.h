@@ -1,10 +1,5 @@
 #pragma once
-#include <Arduino.h>
-#include <inttypes.h>
-#include "../colours.h"
-
-template<class T>
-using Pattern = T (*)(int index, int width, T* lastValue);
+#include "pattern.h"
 
 inline Monochrome sinPattern(int index, int width, Monochrome* lastValue){
     return (uint8_t) (127.f + 127.f * cos(float(index)/10.f - millis()/100.));
@@ -43,23 +38,4 @@ inline Monochrome slowStrobePattern(int index, int width, Monochrome* lastValue)
 
 inline Monochrome fastStrobePattern(int index, int width, Monochrome* lastValue){
     return millis()%50 < 25 ? 255:0;
-}
-
-inline RGB rainbowPattern(int index, int width, RGB* lastValue){
-    int WheelPos = (0xFF * index / width + (millis()/10)) %0xFF;
-    WheelPos = 255 - WheelPos;
-    if(WheelPos < 85)
-    {
-        return RGB(255 - WheelPos * 3, 0, WheelPos * 3);
-    }
-    else if(WheelPos < 170)
-    {
-        WheelPos -= 85;
-        return RGB(0, WheelPos * 3, 255 - WheelPos * 3);
-    }
-    else
-    {
-        WheelPos -= 170;
-        return RGB(WheelPos * 3, 255 - WheelPos * 3, 0);
-    }
 }
