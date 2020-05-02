@@ -35,7 +35,10 @@ void Midi::Initialize()
         .data_bits = UART_DATA_8_BITS,
         .parity = UART_PARITY_DISABLE,
         .stop_bits = UART_STOP_BITS_2,
-        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
+
+        .rx_flow_ctrl_thresh = 122, //not used
+        .use_ref_tick = false //not used
     };
 
     ESP_ERROR_CHECK(uart_param_config(MIDI_UART_NUM, &uart_config));

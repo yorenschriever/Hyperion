@@ -24,7 +24,7 @@
 //#include “FreeRTOS_sockets.h”
 #define FREERTOS_SO_UDP_MAX_RX_PACKETS (16)
 
-
+#define UDPFASTMTU 3100 //1460
 
 #undef write
 #undef read
@@ -243,7 +243,7 @@ int UDPFast::parsePacketFast(uint8_t* buf){
   struct sockaddr_in si_other;
   int slen = sizeof(si_other) , len;
   
-  if ((len = recvfrom(udp_server, buf, 1460, MSG_DONTWAIT, (struct sockaddr *) &si_other, (socklen_t *)&slen)) == -1){
+  if ((len = recvfrom(udp_server, buf, UDPFASTMTU, MSG_DONTWAIT, (struct sockaddr *) &si_other, (socklen_t *)&slen)) == -1){
     if(errno == EWOULDBLOCK){
       return 0;
     }

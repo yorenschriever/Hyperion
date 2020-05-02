@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 
-//#define DEBUGOVERSERIAL
+#define DEBUGOVERSERIAL
 
 #ifdef DEBUGOVERSERIAL
 
