@@ -44,14 +44,14 @@ uint16_t *RGBGamma8[] = {gamma8, gamma8, gamma8};
 uint16_t *RGBGamma12[] = {gamma12, gamma12, gamma12};
 
 Pipe pipes[] = {
-    // // Pipe(
-    // //     //create an apcmini input that creates monochome patterns
-    // //     new ApcminiInput<Monochrome>(
-    // //         30, //width of the pattern
-    // //         0,  //button column on the apc to listen to (0-7)
-    // //         //the patterns to attach to the buttons
-    // //         new Pattern<Monochrome>[8]{sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
-    // //     new DMXOutput()),
+    Pipe(
+        //create an apcmini input that creates monochome patterns
+        new ApcminiInput<Monochrome>(
+            30, //width of the pattern
+            0,  //button column on the apc to listen to (0-7)
+            //the patterns to attach to the buttons
+            new Pattern<Monochrome>[8]{sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
+        new DMXOutput()),
 
     Pipe(
         new UDPInput(9611),
@@ -83,13 +83,13 @@ Pipe pipes[] = {
         Pipe::transfer<RGB,GRB>,
         RGBGamma8),
 
-    //Shared with DMX!
-    Pipe(
-        new UDPInput(9616),
-        new NeopixelOutput<Kpbs800>(6),
-        //new DMXOutput(),
-        Pipe::transfer<RGB,GRB>,
-        RGBGamma8),
+    // //Shared with DMX!
+    // Pipe(
+    //     new UDPInput(9616),
+    //     new NeopixelOutput<Kpbs800>(6),
+    //     //new DMXOutput(),
+    //     Pipe::transfer<RGB,GRB>,
+    //     RGBGamma8),
 
     Pipe(
         new UDPInput(9617),
@@ -103,11 +103,11 @@ Pipe pipes[] = {
         Pipe::transfer<RGB,GRB>,
         RGBGamma8),
 
-    // Pipe(
-    //     new UDPInput(9619),
-    //     new PWMOutput(),
-    //     Pipe::transfer<RGB,Monochrome12>,
-    //     RGBGamma12),
+    Pipe(
+        new UDPInput(9619),
+        new PWMOutput(1500),
+        Pipe::transfer<RGB,Monochrome12>,
+        RGBGamma12),
 
 
     // Pipe(

@@ -29,12 +29,6 @@ void NetworkBegin()
     bool staticip = config_eth(ip, gateway, subnet);
     Debug.print(staticip ? "static ip configured" : "static ip failed");
 
-    while (!eth_connected)
-    {
-        Debug.print(".");
-        //animate(0,0,50);
-        delay(50);
-    }
     Debug.println("");
 
     Debug.println("Eth connected");
