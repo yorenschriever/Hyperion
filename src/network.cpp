@@ -16,7 +16,6 @@ bool config_eth(IPAddress local_ip, IPAddress gateway, IPAddress subnet);
 
 void NetworkBegin()
 {
-
     //this delay makes sure the network hardware is property started up, it is unstable without it
     delay(500);
 

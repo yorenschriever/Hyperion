@@ -1,3 +1,5 @@
+//todo find out why the build option -O2 in platform.ini doest work. 
+//this optimization increases fps from 35 to 41
 #pragma GCC optimize ("-O2")
 #pragma GCC push_options
 
@@ -14,7 +16,6 @@
 #include "pipe.h"
 #include "colours.h"
 
-//#include "outputs/neoPixelBusOutput.h"
 #include "outputs/pwmOutput.h"
 #include "outputs/dmxOutput.h"
 #include "outputs/apcminiOutput.h"
@@ -53,52 +54,52 @@ Pipe pipes[] = {
 
     Pipe(
         new UDPInput(9611),
-        new NeopixelOutput<NeoEsp32RmtSpeed800Kbps>(1),
-        Pipe::transfer<RGB,RGB>,
+        new NeopixelOutput<Kpbs800>(1),
+        Pipe::transfer<RGB,GRB>,
         RGBGamma8),
 
     Pipe(
         new UDPInput(9612),
-        new NeopixelOutput<NeoEsp32RmtSpeed800Kbps>(2),
-        Pipe::transfer<RGB,RGB>,
+        new NeopixelOutput<Kpbs800>(2),
+        Pipe::transfer<RGB,GRB>,
         RGBGamma8),
 
     Pipe(
         new UDPInput(9613),
-        new NeopixelOutput<NeoEsp32RmtSpeed800Kbps>(3),
-        Pipe::transfer<RGB,RGB>,
+        new NeopixelOutput<Kpbs800>(3),
+        Pipe::transfer<RGB,GRB>,
         RGBGamma8),
 
     Pipe(
         new UDPInput(9614),
-        new NeopixelOutput<NeoEsp32RmtSpeed800Kbps>(4),
-        Pipe::transfer<RGB,RGB>,
+        new NeopixelOutput<Kpbs800>(4),
+        Pipe::transfer<RGB,GRB>,
         RGBGamma8),
 
     Pipe(
         new UDPInput(9615),
-        new NeopixelOutput<NeoEsp32RmtSpeed800Kbps>(5),
-        Pipe::transfer<RGB,RGB>,
+        new NeopixelOutput<Kpbs800>(5),
+        Pipe::transfer<RGB,GRB>,
         RGBGamma8),
 
     //Shared with DMX!
     Pipe(
         new UDPInput(9616),
-        new NeopixelOutput<NeoEsp32RmtSpeed800Kbps>(6),
+        new NeopixelOutput<Kpbs800>(6),
         //new DMXOutput(),
-        Pipe::transfer<RGB,RGB>,
+        Pipe::transfer<RGB,GRB>,
         RGBGamma8),
 
     Pipe(
         new UDPInput(9617),
-        new NeopixelOutput<NeoEsp32RmtSpeed800Kbps>(8),
-        Pipe::transfer<RGB,RGB>,
+        new NeopixelOutput<Kpbs800>(7),
+        Pipe::transfer<RGB,GRB>,
         RGBGamma8),
 
     Pipe(
         new UDPInput(9618),
-        new NeopixelOutput<NeoEsp32RmtSpeed800Kbps>(7),
-        Pipe::transfer<RGB,RGB>,
+        new NeopixelOutput<Kpbs800>(8),
+        Pipe::transfer<RGB,GRB>,
         RGBGamma8),
 
     // Pipe(
@@ -237,7 +238,7 @@ void DisplayFps(void *parameter)
 
             totalLength += pipe->getNumPixels();
         }
-
+ 
         float outfps = activeChannels == 0 ? 0 : (float)1000. * totalUsedframes / (elapsedTime) / activeChannels;
         float infps = activeChannels == 0 ? 0 : (float)1000. * totalTotalframes / (elapsedTime) / activeChannels;
         float misses = totalTotalframes == 0 ? 0 : 100.0 * (totalMissedframes) / totalTotalframes;

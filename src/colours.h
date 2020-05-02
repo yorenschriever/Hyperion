@@ -9,6 +9,7 @@ class Colour
 
 class Monochrome;
 class RGB;
+class GRB;
 class Monochrome12;
 class RGB12;
 
@@ -37,6 +38,7 @@ public:
     }
 
     operator RGB();
+    operator GRB();
     operator RGB12();
     operator Monochrome12();
 
@@ -75,10 +77,50 @@ public:
     }
 
     operator RGB12();
+    operator GRB();
     operator Monochrome();
     operator Monochrome12();
 
     uint8_t R, G, B;
+};
+
+class GRB : Colour
+{
+public:
+    GRB()
+    {
+        this->G = 0;
+        this->R = 0;
+        this->B = 0;
+    }
+
+    GRB(uint8_t G, uint8_t R, uint8_t B)
+    {
+        this->G = G;
+        this->R = R;
+        this->B = B;
+    }
+
+    inline void ApplyLut(uint16_t *lut[])
+    {
+        G = lut[1][G];
+        R = lut[0][R];
+        B = lut[2][B];
+    }
+
+    inline void dim(uint8_t value)
+    {
+        G = (G * value) >> 8;
+        R = (R * value) >> 8;
+        B = (B * value) >> 8;
+    }
+
+    operator RGB12();
+    operator RGB();
+    operator Monochrome();
+    operator Monochrome12();
+
+    uint8_t G, R, B;
 };
 
 class RGB12 : Colour
@@ -120,6 +162,7 @@ public:
     }
 
     operator RGB();
+    operator GRB();
     operator Monochrome();
     operator Monochrome12();
 
@@ -157,6 +200,7 @@ public:
     }
 
     operator RGB();
+    operator GRB();
     operator RGB12();
     operator Monochrome();
 
@@ -166,11 +210,19 @@ public:
 inline Monochrome::operator RGB() { return RGB(L, L, L); }
 inline Monochrome::operator RGB12() { return RGB12(L << 4, L << 4, L << 4); }
 inline Monochrome::operator Monochrome12() { return Monochrome12(L << 4); }
- 
+inline Monochrome::operator GRB() { return GRB(L, L, L); }
+
 inline RGB::operator Monochrome() { return Monochrome((R + G + B) / 3); }
 inline RGB::operator RGB12() { return RGB12(R << 4, G << 4, B << 4); }
 inline RGB::operator Monochrome12() { return Monochrome12(((R + G + B) << 4) / 3); }
- 
+inline RGB::operator GRB() { return GRB(G,R,B); }
+
 inline RGB12::operator Monochrome() { return Monochrome((R + G + B) / 3); }
 inline RGB12::operator RGB() { return RGB12(R >> 4, G >> 4, B >> 4); }
 inline RGB12::operator Monochrome12() { return Monochrome12((R + G + B) / 3); }
+inline RGB12::operator GRB() { return GRB(G >> 4, R >> 4, B >> 4); }
+
+inline GRB::operator Monochrome() { return Monochrome((R + G + B) / 3); }
+inline GRB::operator RGB12() { return RGB12(R << 4, G << 4, B << 4); }
+inline GRB::operator Monochrome12() { return Monochrome12(((R + G + B) << 4) / 3); }
+inline GRB::operator RGB() { return RGB(R,G,B); }

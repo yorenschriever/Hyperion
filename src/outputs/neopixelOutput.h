@@ -6,13 +6,23 @@
 #include <driver/rmt.h>
 
 //mapping of esps gpio pins to channel 1-8 on the front panel
-//TODO also create aliases like 1blue 1brown etc
 const int pins[] = {5,4,14,2,15,32,0,33};
+
+//Based on NeoPixelBus
 
 template<typename T_SPEED>
 class NeopixelOutput : public Output
 {
 public:
+    const int Orange1 = 1;
+    const int Blue1 = 2;
+    const int Green1 = 3;
+    const int Brown1 = 4;
+    const int Orange2 = 5;
+    const int Blue2 = 6;
+    const int Green2 = 7;
+    const int Brown2 = 8;
+
     //channel goes from 1-8
     NeopixelOutput(int channel)
     {
@@ -57,6 +67,7 @@ public:
             return;
         }
 
+        //there are 8 outputs and 8 rmt channels, so this mapping is trivial
         rmtchannel = static_cast<rmt_channel_t>(channel-1);
 
         rmt_config_t config;
@@ -218,7 +229,7 @@ public:
     const static uint16_t RmtDurationReset = FromNs(300000); // 300us
 };
 
-class NeoEsp32RmtSpeedWs2812x : public NeoEsp32RmtSpeedBase
+class Ws2812x : public NeoEsp32RmtSpeedBase
 {
 public:
 	const static uint32_t RmtBit0 = Item32Val(400, 850);
@@ -226,7 +237,7 @@ public:
 	const static uint16_t RmtDurationReset = FromNs(300000); // 300us
 };
 
-class NeoEsp32RmtSpeedSk6812 : public NeoEsp32RmtSpeedBase
+class Sk6812 : public NeoEsp32RmtSpeedBase
 {
 public:
     const static uint32_t RmtBit0 = Item32Val(400, 850); 
@@ -243,7 +254,7 @@ public:
 //     const static uint16_t RmtDurationReset = FromNs(200000); // 200us
 // };
 
-class NeoEsp32RmtSpeed800Kbps : public NeoEsp32RmtSpeedBase
+class Kpbs800 : public NeoEsp32RmtSpeedBase
 {
 public:
     const static uint32_t RmtBit0 = Item32Val(400, 850); 
@@ -251,7 +262,7 @@ public:
     const static uint16_t RmtDurationReset = FromNs(50000); // 50us
 };
 
-class NeoEsp32RmtSpeed400Kbps : public NeoEsp32RmtSpeedBase
+class Kbps400 : public NeoEsp32RmtSpeedBase
 {
 public:
     const static uint32_t RmtBit0 = Item32Val(800, 1700); 
@@ -259,7 +270,7 @@ public:
     const static uint16_t RmtDurationReset = FromNs(50000); // 50us
 };
 
-class NeoEsp32RmtSpeedApa106 : public NeoEsp32RmtSpeedBase
+class Apa106 : public NeoEsp32RmtSpeedBase
 {
 public:
 	const static uint32_t RmtBit0 = Item32Val(400, 1250);

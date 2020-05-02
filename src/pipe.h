@@ -89,5 +89,5 @@ public:
         return numPixels;
     }
 private:
-    int numPixels; //keep track of the number of pixels for stats. otherwise its not used.
+    int numPixels; //keep track of the number of pixels is for stats only. 
 };
