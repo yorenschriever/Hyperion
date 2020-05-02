@@ -1,3 +1,6 @@
+#pragma GCC optimize ("-O2")
+#pragma GCC push_options
+
 #include <stdio.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
@@ -11,10 +14,11 @@
 #include "pipe.h"
 #include "colours.h"
 
-#include "outputs/neoPixelBusOutput.h"
+//#include "outputs/neoPixelBusOutput.h"
 #include "outputs/pwmOutput.h"
 #include "outputs/dmxOutput.h"
 #include "outputs/apcminiOutput.h"
+#include "outputs/neopixelOutput.h"
 #include "inputs/udpInput.h"
 #include "inputs/apcminiInput.h"
 #include "lib/display/display.h"
@@ -38,80 +42,71 @@ uint16_t *RGBGamma8[] = {gamma8, gamma8, gamma8};
 uint16_t *RGBGamma12[] = {gamma12, gamma12, gamma12};
 
 Pipe pipes[] = {
-    // Pipe(
-    //     //create an apcmini input that creates monochome patterns
-    //     new ApcminiInput<Monochrome>(
-    //         30, //width of the pattern
-    //         0,  //button column on the apc to listen to (0-7)
-    //         //the patterns to attach to the buttons
-    //         new Pattern<Monochrome>[8]{sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
-    //     new DMXOutput()),
+    // // Pipe(
+    // //     //create an apcmini input that creates monochome patterns
+    // //     new ApcminiInput<Monochrome>(
+    // //         30, //width of the pattern
+    // //         0,  //button column on the apc to listen to (0-7)
+    // //         //the patterns to attach to the buttons
+    // //         new Pattern<Monochrome>[8]{sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
+    // //     new DMXOutput()),
 
     Pipe(
         new UDPInput(9611),
-        new NeoPixelBusOutput<NeoEsp32Rmt0800KbpsMethod>(5),
+        new NeopixelOutput<NeoEsp32RmtSpeed800Kbps>(1),
         Pipe::transfer<RGB,RGB>,
         RGBGamma8),
 
     Pipe(
         new UDPInput(9612),
-        new NeoPixelBusOutput<NeoEsp32Rmt1800KbpsMethod>(4),
+        new NeopixelOutput<NeoEsp32RmtSpeed800Kbps>(2),
         Pipe::transfer<RGB,RGB>,
         RGBGamma8),
 
     Pipe(
         new UDPInput(9613),
-        new NeoPixelBusOutput<NeoEsp32Rmt2800KbpsMethod>(14),
+        new NeopixelOutput<NeoEsp32RmtSpeed800Kbps>(3),
         Pipe::transfer<RGB,RGB>,
         RGBGamma8),
 
     Pipe(
         new UDPInput(9614),
-        new NeoPixelBusOutput<NeoEsp32Rmt3800KbpsMethod>(2),
+        new NeopixelOutput<NeoEsp32RmtSpeed800Kbps>(4),
         Pipe::transfer<RGB,RGB>,
         RGBGamma8),
 
     Pipe(
         new UDPInput(9615),
-        new NeoPixelBusOutput<NeoEsp32Rmt4800KbpsMethod>(15),
+        new NeopixelOutput<NeoEsp32RmtSpeed800Kbps>(5),
         Pipe::transfer<RGB,RGB>,
         RGBGamma8),
 
     //Shared with DMX!
     Pipe(
         new UDPInput(9616),
-        new NeoPixelBusOutput<NeoEsp32Rmt5800KbpsMethod>(32),
+        new NeopixelOutput<NeoEsp32RmtSpeed800Kbps>(6),
         //new DMXOutput(),
         Pipe::transfer<RGB,RGB>,
         RGBGamma8),
 
     Pipe(
         new UDPInput(9617),
-        new NeoPixelBusOutput<NeoEsp32Rmt6800KbpsMethod>(0),
+        new NeopixelOutput<NeoEsp32RmtSpeed800Kbps>(8),
         Pipe::transfer<RGB,RGB>,
         RGBGamma8),
 
     Pipe(
         new UDPInput(9618),
-        new NeoPixelBusOutput<NeoEsp32Rmt7800KbpsMethod>(33),
+        new NeopixelOutput<NeoEsp32RmtSpeed800Kbps>(7),
         Pipe::transfer<RGB,RGB>,
         RGBGamma8),
 
-    Pipe(
-        new UDPInput(9619),
-        new PWMOutput(),
-        Pipe::transfer<RGB,Monochrome12>,
-        RGBGamma12),
+    // Pipe(
+    //     new UDPInput(9619),
+    //     new PWMOutput(),
+    //     Pipe::transfer<RGB,Monochrome12>,
+    //     RGBGamma12),
 
-    Pipe(
-        new ApcminiInput<Monochrome>(
-            12, //width of the pattern, in pixels
-            1,  //button column on the apc to listen to (0-7)
-            //the patterns to attach to the buttons
-            new Pattern<Monochrome>[8]{sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
-        new PWMOutput(),
-        Pipe::transfer<Monochrome,Monochrome12>,
-        RGBGamma12),
 
     // Pipe(
     //     new ApcminiInput<RGB>(
@@ -119,7 +114,7 @@ Pipe pipes[] = {
     //         2,  //button column on the apc to listen to (0-7)
     //         //the patterns to attach to the buttons
     //         new Pattern<RGB>[8]{rainbowPattern, rainbowPattern, rainbowPattern, rainbowPattern, rainbowPattern, rainbowPattern, rainbowPattern, rainbowPattern}),
-    //     new NeoPixelBusOutput<NeoEsp32Rmt1800KbpsMethod>(4),
+    //     new NeopixelOutput<NeoEsp32RmtSpeed800Kbps>(1),
     //     Pipe::transfer<RGB,RGB>,
     //     RGBGamma8),
 
@@ -258,3 +253,5 @@ void DisplayFps(void *parameter)
     }
     vTaskDelete(NULL);
 }
+
+#pragma GCC pop_options
