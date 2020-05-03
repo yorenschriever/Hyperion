@@ -131,7 +131,10 @@ Pipe pipes[] = {
 
 };
 
-void click() { Debug.println("click"); }
+void click() { 
+    Debug.println("click"); 
+    //APCMini::handleNoteOn(0,56,127);
+}
 void press() { Debug.println("press"); }
 void release() { Debug.println("release"); }
 void longpress() { Debug.println("longpress"); }
@@ -157,6 +160,9 @@ void setup()
     Rotary::onRotate(rotate);
 
     Display::Initialize(); //initialize display before outputs
+
+    DMX::SendFullFrame(false); //speed up dmx transmission by only sending the bytes that have a value
+    DMX::SetUniverseSize(37,7); //handle some quirks of the the midi device i use for testing
 
     Debug.println("Starting outputs");
     for (int j = 0; j < sizeof(pipes) / sizeof(Pipe); j++)
@@ -187,6 +193,12 @@ void loop()
     {
         Pipe *pipe = &pipes[j];
         pipe->process();
+    }
+
+    for (int j = 0; j < sizeof(pipes) / sizeof(Pipe); j++)
+    {
+        Pipe *pipe = &pipes[j];
+        pipe->out->ShowGroup();
     }
 
     //check for over-the-air firmware updates (also works over ETH)

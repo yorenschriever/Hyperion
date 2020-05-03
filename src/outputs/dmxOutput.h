@@ -31,7 +31,17 @@ public:
 
     void Show()
     {
+        //DMX::Show();
+        groupDirty=true;
+    }
+
+    void ShowGroup()
+    {
+        if (!groupDirty)
+            return;
+
         DMX::Show();
+        groupDirty=false;
     }
 
     void Begin() override
@@ -52,4 +62,8 @@ public:
 
 private:
     int startChannel;
+
+    static bool groupDirty;
 };
+
+bool DMXOutput::groupDirty = false;

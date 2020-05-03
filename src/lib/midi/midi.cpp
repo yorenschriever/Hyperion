@@ -21,6 +21,7 @@ void Midi::Initialize()
 
     #ifdef DEBUGSERIAL
         Debug.println("USB midi driver is not installed because the debugger is already using this serial port to print debug data. Incoming and outgoing midi data is ignored.");
+        started=false;
         return;
     #endif
 
@@ -127,6 +128,8 @@ void Midi::sendControllerChange(uint8_t channel, uint8_t controller, uint8_t val
 
 bool Midi::waitTxDone(int timeout)
 {
+    if (!started)
+        return false;
     return uart_wait_tx_done(MIDI_UART_NUM, timeout) == ESP_OK;
 }
 

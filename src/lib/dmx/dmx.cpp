@@ -6,6 +6,7 @@
 #include "strings.h"
 #include <cstring>
 #include <algorithm>
+#include "debug.h"
 
 #define DMX_SERIAL_INPUT_PIN    36          // pin for dmx rx
 #define DMX_SERIAL_OUTPUT_PIN   32          // pin for dmx tx
@@ -29,12 +30,14 @@ long DMX::last_dmx_packet = 0;
 uint8_t DMX::dmx_data[513];
 
 const int universeSize = 512;
-const bool always512 = true; //always send the entire universe, instead of only the channels that were provided from the input
+bool DMX::fullframe = true; //always send the entire universe, instead of only the channels that were provided from the input
 uint8_t DMX::dmx_tx_buffer[512];
 uint8_t DMX::dmx_tx_frontbuffer[512];
 xSemaphoreHandle DMX::tx_dirtySemaphore = xSemaphoreCreateBinary();
 volatile bool DMX::tx_busy = false;
 volatile int DMX::tx_size=0;
+int DMX::minchannels = 0;
+int DMX::trailingchannels = 0;
 
 DMX::DMX()
 {
@@ -198,9 +201,14 @@ void DMX::SendDMXAsync(void *param)
 
         tx_busy = true;
 
-        int frontBufferLen = always512 ? universeSize : tx_size;
+
+        int frontBufferLen = universeSize;
+        if (!fullframe) {
+            frontBufferLen = min(max(minchannels,tx_size+trailingchannels),universeSize);
+        }
         memcpy(dmx_tx_frontbuffer, dmx_tx_buffer, frontBufferLen);
         SendBuffer(dmx_tx_frontbuffer,frontBufferLen);
+        tx_size=0;
 
         tx_busy = false;
 
@@ -232,7 +240,7 @@ void DMX::SendBuffer(uint8_t* buf, int size)
     //{
         vTaskDelay(5 / portTICK_PERIOD_MS); //wait a little the the tx has time to start https://www.esp32.com/viewtopic.php?t=10469 
         uart_wait_tx_done(DMX_UART_NUM, 500); //wait till completed. at most 100 RTOS ticks (=100ms?)
-        //vTaskDelay(1 / portTICK_PERIOD_MS); //wait an additional inter frame period
+        vTaskDelay(1 / portTICK_PERIOD_MS); //wait an additional inter frame period
     //}
 }
 
@@ -248,4 +256,12 @@ bool DMX::TxBusy(){
 void DMX::ClearTxBuffer()
 {
     memset(dmx_tx_buffer,0,universeSize);
+}
+
+void DMX::SendFullFrame(bool ff){
+    fullframe = ff;
+}
+void DMX::SetUniverseSize(int minchannels,int trailingchannels){
+    DMX::minchannels = minchannels;
+    DMX::trailingchannels = trailingchannels;
 }

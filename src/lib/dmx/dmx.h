@@ -12,11 +12,12 @@ class DMX
         static void Initialize();                           // initialize library
         static uint8_t Read(uint16_t channel);              // returns the dmx value for the givven address (values from 1 to 512)
         static uint8_t IsHealthy();                            // returns true, when a valid DMX signal was received within the last 500ms
-        //static void Write(uint8_t* data, int length, bool wait); 
         static void Write(uint8_t* data, int len, int index);
         static void Show();
         static bool TxBusy();
         static void ClearTxBuffer();
+        static void SendFullFrame(bool);
+        static void SetUniverseSize(int minsize, int trailingchannels);
         
     private:
         DMX();                                              // hide constructor
@@ -35,6 +36,9 @@ class DMX
         static uint8_t dmx_tx_buffer[512],dmx_tx_frontbuffer[512];
         static volatile bool tx_busy;
         static volatile int tx_size;
+        static bool fullframe;
+        static int minchannels;
+        static int trailingchannels;
 };
 
 #endif
