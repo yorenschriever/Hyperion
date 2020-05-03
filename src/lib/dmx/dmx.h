@@ -18,6 +18,7 @@ class DMX
         static void ClearTxBuffer();
         static void SendFullFrame(bool);
         static void SetUniverseSize(int minsize, int trailingchannels);
+        static int GetFrameNumber();
         
     private:
         DMX();                                              // hide constructor
@@ -28,7 +29,7 @@ class DMX
         static long last_dmx_packet;                        // timestamp for the last received packet
         static uint8_t dmx_data[513];                       // stores the received dmx data
         static void uart_event_task(void *pvParameters);    // Event task
-
+        volatile static unsigned int frameCount;
 
         static void SendDMXAsync(void *param); //Task to send DMX
         static void SendBuffer(uint8_t* buf, int size); //artual send function
@@ -39,6 +40,8 @@ class DMX
         static bool fullframe;
         static int minchannels;
         static int trailingchannels;
+
+        static bool initialized;
 };
 
 #endif

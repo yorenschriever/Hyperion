@@ -254,8 +254,10 @@ void DisplayFps(void *parameter)
         for (int j = 0; j < sizeof(pipes) / sizeof(Pipe); j++)
         {
             Pipe *pipe = &pipes[j];
-            if (pipe->in->getTotalFrameCount() > 0)
-                activeChannels++;
+            if (pipe->in->getTotalFrameCount() == 0)
+                continue;
+            
+            activeChannels++;
             totalUsedframes += pipe->in->getUsedFramecount();
             totalMissedframes += pipe->in->getMissedFrameCount();
             totalTotalframes += pipe->in->getTotalFrameCount();
@@ -273,7 +275,9 @@ void DisplayFps(void *parameter)
 
         Debug.printf("FPS: %d of %d (%d%% miss)\t interval: %dms \t freeHeap: %d \t avg length: %d \t channel: %d \n", (int)outfps, (int)infps, (int)misses, (int)elapsedTime, ESP.getFreeHeap(), avglength, activeChannels);
 
-        Display::setFPS(outfps);
+        Display::setFPS(infps,outfps,misses);
+        Display::setLeds(totalLength);
+        Display::setDMX(DMX::IsHealthy());
 
         delay(500);
     }

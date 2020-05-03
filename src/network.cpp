@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "network.h"
 #include "debug.h"
+#include "lib/display/display.h"
 
 const unsigned int nodeid = 123;
 
@@ -94,6 +95,8 @@ void EthEvent(WiFiEvent_t event)
     default:
         break;
     }
+
+    Display::setEthernet(eth_connected);
 }
 
 byte flipByte(byte c)

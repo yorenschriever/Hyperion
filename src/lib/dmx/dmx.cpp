@@ -28,6 +28,7 @@ uint8_t DMX::dmx_state = DMX_IDLE;
 uint16_t DMX::current_rx_addr = 0;
 long DMX::last_dmx_packet = 0;
 uint8_t DMX::dmx_data[513];
+volatile unsigned int DMX::frameCount=0;
 
 const int universeSize = 512;
 bool DMX::fullframe = true; //always send the entire universe, instead of only the channels that were provided from the input
@@ -39,6 +40,8 @@ volatile int DMX::tx_size=0;
 int DMX::minchannels = 0;
 int DMX::trailingchannels = 0;
 
+bool DMX::initialized = false;
+
 DMX::DMX()
 {
 
@@ -46,6 +49,9 @@ DMX::DMX()
 
 void DMX::Initialize()
 {
+    if (initialized)
+        return;
+
     // configure UART for DMX
     uart_config_t uart_config =
     {
@@ -75,6 +81,8 @@ void DMX::Initialize()
 
     //related to sending
     xTaskCreatePinnedToCore(SendDMXAsync, "SendDMXAsync", 10000, NULL, 1, NULL, 1);
+
+    initialized=true;
 }
 
 uint8_t DMX::Read(uint16_t channel)
@@ -102,6 +110,7 @@ uint8_t DMX::IsHealthy()
     long dmx_timeout = last_dmx_packet;
     xSemaphoreGive(sync_dmx);
     // check if elapsed time < defined timeout
+    
     if(xTaskGetTickCount() - dmx_timeout < HEALTHY_TIME)
     {
         return 1;
@@ -136,6 +145,8 @@ void DMX::uart_event_task(void *pvParameters)
                         xSemaphoreTake(sync_dmx, portMAX_DELAY);
                         // store received timestamp
                         last_dmx_packet = xTaskGetTickCount();
+
+                        frameCount++;
                         xSemaphoreGive(sync_dmx);
                         }
                     }
@@ -174,6 +185,11 @@ void DMX::uart_event_task(void *pvParameters)
             }
         }
     }
+}
+
+int DMX::GetFrameNumber()
+{
+    return frameCount;
 }
 
 //portMUX_TYPE myMutex = portMUX_INITIALIZER_UNLOCKED;
@@ -240,7 +256,7 @@ void DMX::SendBuffer(uint8_t* buf, int size)
     //{
         vTaskDelay(5 / portTICK_PERIOD_MS); //wait a little the the tx has time to start https://www.esp32.com/viewtopic.php?t=10469 
         uart_wait_tx_done(DMX_UART_NUM, 500); //wait till completed. at most 100 RTOS ticks (=100ms?)
-        vTaskDelay(1 / portTICK_PERIOD_MS); //wait an additional inter frame period
+        //vTaskDelay(1 / portTICK_PERIOD_MS); //wait an additional inter frame period
     //}
 }
 

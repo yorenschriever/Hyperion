@@ -45,7 +45,7 @@ public:
     {
         out->SetLength(length);
         out->SetData(data,length,0);
-        return 0; //unkown number of pixels
+        return length; //unkown number of pixels, assume 1 pixel per byte
     }
 
     //Transfer function that can convert between colour representations and apply LUTs
