@@ -19,7 +19,8 @@ class DMX
         static void SendFullFrame(bool);
         static void SetUniverseSize(int minsize, int trailingchannels);
         static int GetFrameNumber();
-        
+        static uint8_t* GetDataPtr();
+
     private:
         DMX();                                              // hide constructor
         static QueueHandle_t dmx_rx_queue;                  // queue for uart rx events

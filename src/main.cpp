@@ -22,6 +22,7 @@
 #include "outputs/neopixelOutput.h"
 #include "inputs/udpInput.h"
 #include "inputs/apcminiInput.h"
+#include "inputs/dmxInput.h"
 #include "lib/display/display.h"
 #include "lib/rotary/rotary.h"
 #include "lib/apcmini/apcmini.h"
@@ -44,6 +45,11 @@ uint16_t *RGBGamma8[] = {gamma8, gamma8, gamma8};
 uint16_t *RGBGamma12[] = {gamma12, gamma12, gamma12};
 
 Pipe pipes[] = {
+    Pipe(
+        new DMXInput(1),
+        new DMXOutput(1)
+    ),
+
     Pipe(
         //create an apcmini input that creates monochome patterns
         new ApcminiInput<Monochrome>(

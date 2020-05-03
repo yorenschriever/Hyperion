@@ -192,6 +192,11 @@ int DMX::GetFrameNumber()
     return frameCount;
 }
 
+uint8_t* DMX::GetDataPtr()
+{
+    return dmx_data;
+}
+
 //portMUX_TYPE myMutex = portMUX_INITIALIZER_UNLOCKED;
 
 
