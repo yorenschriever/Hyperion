@@ -18,15 +18,14 @@ class APCMini {
         //(0,0) = top left, (7,7) is bottom right.
         static bool getStatus(uint8_t col, uint8_t row);
         static uint8_t getFader(uint8_t col);
-
-static void handleNoteOn(uint8_t channel, uint8_t note, uint8_t velocity);
+        static void sendStatus(void *pvParameters);
         
-
     private:
         APCMini();
-        //static void handleNoteOn(uint8_t channel, uint8_t note, uint8_t velocity);
+        static void handleNoteOn(uint8_t channel, uint8_t note, uint8_t velocity);
         static void handleNoteOff(uint8_t channel, uint8_t note, uint8_t velocity);
         static void handleControllerChange(uint8_t channel, uint8_t controller, uint8_t value);
+        static void handleConnect();
 
         static bool allFlash;
         static bool allStatus[width*height];

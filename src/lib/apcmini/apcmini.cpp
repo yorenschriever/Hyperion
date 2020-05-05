@@ -7,13 +7,18 @@ uint8_t APCMini::faders[numfaders];
 
 void APCMini::Initialize()
 {
+    for (int i=0; i<width*height; i++)
+        allStatus[i]=false;
+    for (int i=0;i<numfaders; i++)
+        faders[i]=127;
+
     Midi::Initialize();
     Midi::onNoteOn(handleNoteOn);
     Midi::onNoteOff(handleNoteOff);
     Midi::onControllerChange(handleControllerChange);
+    Midi::onConnect(handleConnect);
 
-    for (int i=0;i<numfaders; i++)
-        faders[i]=127;
+
 }
 
 void APCMini::handleNoteOff(uint8_t channel, uint8_t note, uint8_t velocity)
@@ -28,6 +33,20 @@ void APCMini::handleNoteOn(uint8_t channel, uint8_t note, uint8_t velocity)
     if (channel != midichannel)
         return;
     handleKeyPress(note,velocity>0);
+}
+
+void APCMini::handleConnect(){
+    //send all note statusses on connect, so the lights correspond to the active patterns after disconnecting/reconnecting
+    xTaskCreate(sendStatus,"APCMini status",1500,NULL,1,NULL);
+}
+
+void APCMini::sendStatus(void *pvParameters){
+    for (byte i=0; i < height*width; i++){
+        setNote(i, allStatus[i], true);
+        if (i%8==0) 
+            vTaskDelay(10); //give things some tme to breathe
+    }
+    vTaskDelete(NULL);
 }
 
 void APCMini::handleControllerChange(uint8_t channel, uint8_t controller, uint8_t value){

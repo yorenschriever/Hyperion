@@ -34,19 +34,8 @@ void DisplayFps(void *parameter);
 void clearall();
 void animate(byte r, byte g, byte b);
 
-// // const float gammaCorrection8 = 2.0; //from quartz composer 1.6 looks less quantized when dimming. 2.5 gives prettier colours. 2 is a compromise. 
-//  const float gammaCorrection12 = 2.5;
-// // const float gammaCorrection12rotary = 2; //2 looks best with the roataryled.
-//  const float indancescentBase = 0.2;
-
-// // uint16_t gamma8[256];
-// uint16_t gamma12[256];
-// // uint16_t gamma12rotary[256];
-// // uint16_t *RGBGamma8[] = {gamma8, gamma8, gamma8};
-// uint16_t *RGBGamma12[] = {gamma12, gamma12, gamma12};
-
 LUT* NeopixelLut = new ColourCorrectionLUT(2.0,255, 255,255,255);
-LUT* IncandescentLut = new IncandescentLUT(2.5, 4096, 0.2);
+LUT* IncandescentLut = new IncandescentLUT(2.5, 4096, 400);
 LUT* RotaryLut = new ColourCorrectionLUT(2.0, 4096, 150,255,255);
 
 Pipe pipes[] = {
@@ -155,19 +144,7 @@ void setup()
 {
     Debug.begin(115200);
 
-    //  for (int i = 0; i < 256; i++)
-    //  {
-    // //     gamma8[i] = pow((float)i / 255., gammaCorrection8) * 255;
-    // //     gamma12rotary[i] = pow((float)i / 255., gammaCorrection12rotary) * 4096; //4096 here, because the pca can also have a full on value, so 2^12+1 combinations are possible
-    //      gamma12[i] = pow(((indancescentBase + (float)i / 255. * (1. - indancescentBase))), gammaCorrection12) * 4096;
-    //  }
-
-// NeopixelLut = new ColourCorrectionLUT(2.0,255, 255,255,255);
-// IncandescentLut = new IncandescentLUT(2.5, 4096, 0.2);
-// RotaryLut = new ColourCorrectionLUT(2.0, 4096, 200,255,255);
-
     Rotary::Initialize();
-    //Rotary::setLut(gamma12rotary, gamma12rotary, gamma12rotary);
     Rotary::setLut(RotaryLut);
     Rotary::setRGB(255,255,255);
     Rotary::onClick(click);
@@ -201,15 +178,6 @@ void setup()
     setupOta();
 
     Debug.printf("max udp connections: %d\n", MEMP_NUM_NETCONN);
-
-    delay(5000);
-    for (int i = 0; i < 256; i++)
-    {
-        Monochrome12 test = RGB(i,i,i );
-        test.ApplyLut(IncandescentLut);
-        Debug.printf("%d = %d (%d)\n",i,IncandescentLut->luts[0][i],test.L);
-
-    }
 }
 
 void loop()

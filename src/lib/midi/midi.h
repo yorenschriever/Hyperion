@@ -12,6 +12,7 @@
 class Midi {
 
     using MidiEvent3 = void (*)(uint8_t, uint8_t, uint8_t);
+    using MidiEvent = void (*)();
 
     public:
         static void Initialize();
@@ -23,6 +24,7 @@ class Midi {
         static void onNoteOn(MidiEvent3 handler);
         static void onNoteOff(MidiEvent3 handler);
         static void onControllerChange(MidiEvent3 handler);
+        static void onConnect(MidiEvent handler); 
 
         static bool isConnected();
 
@@ -34,6 +36,7 @@ class Midi {
         static MidiEvent3 noteOnHandler;
         static MidiEvent3 noteOffHandler;
         static MidiEvent3 controllerChangeHandler;
+        static MidiEvent connectHandler;
 
         static unsigned long lastMessageTime;
 };

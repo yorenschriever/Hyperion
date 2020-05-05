@@ -18,6 +18,7 @@ QueueHandle_t Midi::midi_rx_queue;
 Midi::MidiEvent3 Midi::noteOnHandler=NULL;
 Midi::MidiEvent3 Midi::noteOffHandler=NULL;
 Midi::MidiEvent3 Midi::controllerChangeHandler=NULL;
+Midi::MidiEvent Midi::connectHandler=NULL;
 bool Midi::started=false;
 unsigned long Midi::lastMessageTime=0;
 
@@ -78,7 +79,11 @@ void Midi::uart_event_task(void *pvParameters)
         length = uart_read_bytes(MIDI_UART_NUM, data, length, 100);
 
         if (length>0)
+        {
+            if (!isConnected() && connectHandler)
+                connectHandler();
             lastMessageTime = xTaskGetTickCount();
+        }
 
         for(int i=0; i<length; i++){
             if (data[i] >= B10000000){ //detect start of a message, start filling the buffer
@@ -150,6 +155,10 @@ void Midi::onNoteOff(MidiEvent3 handler){
 }
 void Midi::onControllerChange(MidiEvent3 handler){
     controllerChangeHandler = handler;
+}
+
+void Midi::onConnect(MidiEvent handler){
+    connectHandler = handler;
 }
 
 bool Midi::isConnected(){

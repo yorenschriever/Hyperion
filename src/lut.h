@@ -52,12 +52,12 @@ class ColourCorrectionLUT  : public LUT
 class IncandescentLUT  : public LUT
 {
     public:
-        IncandescentLUT(double gammaCorrection, int maxValue, double incandescentBase) 
+        IncandescentLUT(double gammaCorrection, int maxValue, int incandescentBase) 
         {
             Dimension = 1;
             luts = new uint16_t*[Dimension];
             for (int i = 0; i < 256; i++)
-                lut[i] = pow(((incandescentBase + (double)i / 255. * (1. - incandescentBase))), gammaCorrection) * maxValue;
+                lut[i] = incandescentBase + (maxValue-incandescentBase) * pow((double)i / 255., gammaCorrection);
 
             luts[0] = lut;
         }
