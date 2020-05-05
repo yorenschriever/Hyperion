@@ -1,6 +1,6 @@
 //todo find out why the build option -O2 in platform.ini doest work. 
 //this optimization increases fps from 35 to 41
-#pragma GCC optimize ("-O2")
+#pragma GCC optimize ("-O3")
 #pragma GCC push_options
 
 #include <stdio.h>
@@ -15,6 +15,7 @@
 #include "debug.h"
 #include "pipe.h"
 #include "colours.h"
+#include "lut.h"
 
 #include "outputs/pwmOutput.h"
 #include "outputs/dmxOutput.h"
@@ -33,22 +34,26 @@ void DisplayFps(void *parameter);
 void clearall();
 void animate(byte r, byte g, byte b);
 
-const float gammaCorrection8 = 2.0; //from quartz composer 1.6 looks less quantized when dimming. 2.5 gives prettier colours. 2 is a compromise. 
-const float gammaCorrection12 = 2.5;
-const float gammaCorrection12rotary = 2; //2 looks best with the roataryled.
-const float indancescentBase = 0.2;
+// // const float gammaCorrection8 = 2.0; //from quartz composer 1.6 looks less quantized when dimming. 2.5 gives prettier colours. 2 is a compromise. 
+//  const float gammaCorrection12 = 2.5;
+// // const float gammaCorrection12rotary = 2; //2 looks best with the roataryled.
+//  const float indancescentBase = 0.2;
 
-uint16_t gamma8[256];
-uint16_t gamma12[256];
-uint16_t gamma12rotary[256];
-uint16_t *RGBGamma8[] = {gamma8, gamma8, gamma8};
-uint16_t *RGBGamma12[] = {gamma12, gamma12, gamma12};
+// // uint16_t gamma8[256];
+// uint16_t gamma12[256];
+// // uint16_t gamma12rotary[256];
+// // uint16_t *RGBGamma8[] = {gamma8, gamma8, gamma8};
+// uint16_t *RGBGamma12[] = {gamma12, gamma12, gamma12};
+
+LUT* NeopixelLut = new ColourCorrectionLUT(2.0,255, 255,255,255);
+LUT* IncandescentLut = new IncandescentLUT(2.5, 4096, 0.2);
+LUT* RotaryLut = new ColourCorrectionLUT(2.0, 4096, 150,255,255);
 
 Pipe pipes[] = {
-    Pipe(
-        new DMXInput(1),
-        new DMXOutput(1)
-    ),
+    // Pipe(
+    //     new DMXInput(1),
+    //     new DMXOutput(1)
+    // ),
 
     Pipe(
         //create an apcmini input that creates monochome patterns
@@ -59,70 +64,70 @@ Pipe pipes[] = {
             new Pattern<Monochrome>[8]{sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
         new DMXOutput(1)),
 
-    Pipe(
-        //create an apcmini input that creates monochome patterns
-        new ApcminiInput<Monochrome>(
-            10, //width of the pattern
-            1,  //button column on the apc to listen to (0-7)
-            //the patterns to attach to the buttons
-            new Pattern<Monochrome>[8]{sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
-        new DMXOutput(15)),
-
-    Pipe(
-        new UDPInput(9611),
-        new NeopixelOutput<Kpbs800>(1),
-        Pipe::transfer<RGB,GRB>,
-        RGBGamma8),
-
-    Pipe(
-        new UDPInput(9612),
-        new NeopixelOutput<Kpbs800>(2),
-        Pipe::transfer<RGB,GRB>,
-        RGBGamma8),
-
-    Pipe(
-        new UDPInput(9613),
-        new NeopixelOutput<Kpbs800>(3),
-        Pipe::transfer<RGB,GRB>,
-        RGBGamma8),
-
-    Pipe(
-        new UDPInput(9614),
-        new NeopixelOutput<Kpbs800>(4),
-        Pipe::transfer<RGB,GRB>,
-        RGBGamma8),
-
-    Pipe(
-        new UDPInput(9615),
-        new NeopixelOutput<Kpbs800>(5),
-        Pipe::transfer<RGB,GRB>,
-        RGBGamma8),
-
-    // //Shared with DMX!
     // Pipe(
-    //     new UDPInput(9616),
-    //     new NeopixelOutput<Kpbs800>(6),
-    //     //new DMXOutput(),
+    //     //create an apcmini input that creates monochome patterns
+    //     new ApcminiInput<Monochrome>(
+    //         10, //width of the pattern
+    //         1,  //button column on the apc to listen to (0-7)
+    //         //the patterns to attach to the buttons
+    //         new Pattern<Monochrome>[8]{sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
+    //     new DMXOutput(15)),
+
+    // Pipe(
+    //     new UDPInput(9611),
+    //     new NeopixelOutput<Kpbs800>(1),
     //     Pipe::transfer<RGB,GRB>,
-    //     RGBGamma8),
+    //     NeopixelLut),
 
-    Pipe(
-        new UDPInput(9617),
-        new NeopixelOutput<Kpbs800>(7),
-        Pipe::transfer<RGB,GRB>,
-        RGBGamma8),
+    // Pipe(
+    //     new UDPInput(9612),
+    //     new NeopixelOutput<Kpbs800>(2),
+    //     Pipe::transfer<RGB,GRB>,
+    //     NeopixelLut),
 
-    Pipe(
-        new UDPInput(9618),
-        new NeopixelOutput<Kpbs800>(8),
-        Pipe::transfer<RGB,GRB>,
-        RGBGamma8),
+    // Pipe(
+    //     new UDPInput(9613),
+    //     new NeopixelOutput<Kpbs800>(3),
+    //     Pipe::transfer<RGB,GRB>,
+    //     NeopixelLut),
+
+    // Pipe(
+    //     new UDPInput(9614),
+    //     new NeopixelOutput<Kpbs800>(4),
+    //     Pipe::transfer<RGB,GRB>,
+    //     NeopixelLut),
+
+    // Pipe(
+    //     new UDPInput(9615),
+    //     new NeopixelOutput<Kpbs800>(5),
+    //     Pipe::transfer<RGB,GRB>,
+    //     NeopixelLut),
+
+    // // //Shared with DMX!
+    // // Pipe(
+    // //     new UDPInput(9616),
+    // //     new NeopixelOutput<Kpbs800>(6),
+    // //     //new DMXOutput(),
+    // //     Pipe::transfer<RGB,GRB>,
+    // //     NeopixelLut),
+
+    // Pipe(
+    //     new UDPInput(9617),
+    //     new NeopixelOutput<Kpbs800>(7),
+    //     Pipe::transfer<RGB,GRB>,
+    //     NeopixelLut),
+
+    // Pipe(
+    //     new UDPInput(9618),
+    //     new NeopixelOutput<Kpbs800>(8),
+    //     Pipe::transfer<RGB,GRB>,
+    //     NeopixelLut),
 
     Pipe(
         new UDPInput(9619),
         new PWMOutput(1500),
         Pipe::transfer<RGB,Monochrome12>,
-        RGBGamma12),
+        IncandescentLut),
 
 
     // Pipe(
@@ -150,15 +155,21 @@ void setup()
 {
     Debug.begin(115200);
 
-    for (int i = 0; i < 256; i++)
-    {
-        gamma8[i] = pow((float)i / 255., gammaCorrection8) * 255;
-        gamma12rotary[i] = pow((float)i / 255., gammaCorrection12rotary) * 4096; //4096 here, because the pca can also have a full on value, so 2^12+1 combinations are possible
-        gamma12[i] = pow(((indancescentBase + (float)i / 255. * (1. - indancescentBase))), gammaCorrection12) * 4096;
-    }
+    //  for (int i = 0; i < 256; i++)
+    //  {
+    // //     gamma8[i] = pow((float)i / 255., gammaCorrection8) * 255;
+    // //     gamma12rotary[i] = pow((float)i / 255., gammaCorrection12rotary) * 4096; //4096 here, because the pca can also have a full on value, so 2^12+1 combinations are possible
+    //      gamma12[i] = pow(((indancescentBase + (float)i / 255. * (1. - indancescentBase))), gammaCorrection12) * 4096;
+    //  }
+
+// NeopixelLut = new ColourCorrectionLUT(2.0,255, 255,255,255);
+// IncandescentLut = new IncandescentLUT(2.5, 4096, 0.2);
+// RotaryLut = new ColourCorrectionLUT(2.0, 4096, 200,255,255);
 
     Rotary::Initialize();
-    Rotary::setLut(gamma12rotary, gamma12rotary, gamma12rotary);
+    //Rotary::setLut(gamma12rotary, gamma12rotary, gamma12rotary);
+    Rotary::setLut(RotaryLut);
+    Rotary::setRGB(255,255,255);
     Rotary::onClick(click);
     Rotary::onPress(press);
     Rotary::onRelease(release);
@@ -190,6 +201,15 @@ void setup()
     setupOta();
 
     Debug.printf("max udp connections: %d\n", MEMP_NUM_NETCONN);
+
+    delay(5000);
+    for (int i = 0; i < 256; i++)
+    {
+        Monochrome12 test = RGB(i,i,i );
+        test.ApplyLut(IncandescentLut);
+        Debug.printf("%d = %d (%d)\n",i,IncandescentLut->luts[0][i],test.L);
+
+    }
 }
 
 void loop()
@@ -284,6 +304,7 @@ void DisplayFps(void *parameter)
         Display::setFPS(infps,outfps,misses);
         Display::setLeds(totalLength);
         Display::setDMX(DMX::IsHealthy());
+        Display::setMidi(Midi::isConnected());
 
         delay(500);
     }

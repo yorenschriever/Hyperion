@@ -3,8 +3,9 @@
 #include <inttypes.h>
 #include "inputs/input.h"
 #include "outputs/output.h"
+#include "lut.h"
 
-using HandlerFunc = int (*)(uint8_t *data, int length, Output *out, uint16_t **lut);
+using HandlerFunc = int (*)(uint8_t *data, int length, Output *out, LUT *lut);
 
 const int MTU = 3100;
 uint8_t data[MTU]; //i used to malloc this, but the MTU is 1500, so i just set it to the upped bound
@@ -12,7 +13,7 @@ uint8_t data[MTU]; //i used to malloc this, but the MTU is 1500, so i just set i
 class Pipe
 {
 public:
-    Pipe(Input *in, Output *out, HandlerFunc converter = Pipe::transfer, uint16_t **lut = NULL)
+    Pipe(Input *in, Output *out, HandlerFunc converter = Pipe::transfer, LUT *lut = NULL)
     {
         this->in = in;
         this->out = out;
@@ -22,7 +23,7 @@ public:
     Output *out;
     Input *in;
     HandlerFunc converter;
-    uint16_t **lut;
+    LUT *lut;
 
     inline void process()
     {
@@ -41,35 +42,35 @@ public:
     }
 
     //Basic transfer function without bells and whistles
-    static int transfer(uint8_t *data, int length, Output *out, uint16_t **lut)
+    static int transfer(uint8_t *data, int length, Output *out, LUT *lut)
     {
         out->SetLength(length);
-        out->SetData(data,length,0);
+        out->SetData(data, length, 0);
         return length; //unkown number of pixels, assume 1 pixel per byte
     }
 
     //Transfer function that can convert between colour representations and apply LUTs
-    //This function has been thoroughly optimized, because this is the workhorse of the 
+    //This function has been thoroughly optimized, because this is the workhorse of the
     //device. When making changes be absolutely sure that you keep performance in mind.
     //See docs/speed and call stack for steps taken to optimize
-    template <class T, class U>
-    static int transfer(uint8_t *data, int length, Output *out, uint16_t **lut)
+    template <class T_SOURCECOLOUR, class T_TARGETCOLOUR>
+    static int transfer(uint8_t *data, int length, Output *out, LUT *lut)
     {
         //tell the output the new length so it can allocate enough space for the data
         //we are going to send
         //todo this function should return the actual length it has allocated, so we can use tht later
-        out->SetLength(length / sizeof(T) * sizeof(U));
+        out->SetLength(length / sizeof(T_SOURCECOLOUR) * sizeof(T_TARGETCOLOUR));
 
-        int numPixels = length / sizeof(T);
+        int numPixels = length / sizeof(T_SOURCECOLOUR);
         for (int i = 0; i < numPixels; i++)
         {
             //store the ith pixel in an object of type T (source datatype)
-            T col = ((T *)data)[i];
+            T_SOURCECOLOUR col = ((T_SOURCECOLOUR *)data)[i];
 
             //this is where the actual conversion takes place. static cast will use
             //the cast operators in the Colour classes to convert between the
             //representations.
-            U outcol = static_cast<U>(col); 
+            T_TARGETCOLOUR outcol = static_cast<T_TARGETCOLOUR>(col);
 
             //Apply lookup table to do gamma correction and other non linearities
             if (lut)
@@ -79,15 +80,17 @@ public:
             //TODO why provide the data pixel by pixel als have a function call overhead for each
             //pixel. cant we dump the entire byte array in one go?
             //What about a function that passes us a datapointer, and we place the items directly into it
-            //this saves a function call for each pixel, and an additional memcpy. 
-            out->SetData((uint8_t *)&outcol,sizeof(U),i*sizeof(U));
+            //this saves a function call for each pixel, and an additional memcpy.
+            out->SetData((uint8_t *)&outcol, sizeof(T_TARGETCOLOUR), i * sizeof(T_TARGETCOLOUR));
         }
         return numPixels;
     }
 
-    int getNumPixels() {
+    int getNumPixels()
+    {
         return numPixels;
     }
+
 private:
-    int numPixels; //keep track of the number of pixels is for stats only. 
+    int numPixels; //keep track of the number of pixels is for stats only.
 };

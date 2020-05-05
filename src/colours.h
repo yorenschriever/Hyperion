@@ -2,6 +2,7 @@
 
 #include <inttypes.h>
 #include "debug.h"
+#include "lut.h"
 
 class Colour
 {
@@ -27,9 +28,9 @@ public:
         this->L = L;
     }
 
-    inline void ApplyLut(uint16_t *lut[])
+    inline void ApplyLut(LUT* lut)
     {
-        L = lut[0][L];
+        L = lut->luts[0][L];
     }
 
     inline void dim(uint8_t value)
@@ -62,11 +63,11 @@ public:
         this->B = B;
     }
 
-    inline void ApplyLut(uint16_t *lut[])
+    inline void ApplyLut(LUT* lut)
     {
-        R = lut[0][R];
-        G = lut[1][G];
-        B = lut[2][B];
+        R = lut->luts[0%lut->Dimension][R];
+        G = lut->luts[1%lut->Dimension][G];
+        B = lut->luts[2%lut->Dimension][B];
     }
 
     inline void dim(uint8_t value)
@@ -101,11 +102,11 @@ public:
         this->B = B;
     }
 
-    inline void ApplyLut(uint16_t *lut[])
+    inline void ApplyLut(LUT* lut)
     {
-        G = lut[1][G];
-        R = lut[0][R];
-        B = lut[2][B];
+        G = lut->luts[1%lut->Dimension][G];
+        R = lut->luts[0%lut->Dimension][R];
+        B = lut->luts[2%lut->Dimension][B];
     }
 
     inline void dim(uint8_t value)
@@ -140,7 +141,7 @@ public:
         this->B = B;
     }
 
-    inline void ApplyLut(uint16_t *lut[])
+    inline void ApplyLut(LUT* lut)
     {
         //i choose to scale down the values before i do a lookup in the lut.
         //This means that a 12bit lut also only has 256 entries
@@ -149,9 +150,9 @@ public:
         //wont happen any time soon, and the only 12 bit values are upscaled
         //8bit values. Scaling them back down allows smaller luts, and thus
         //saves almost 4k in ram that would otherwise be used for nothing.
-        R = lut[0][R >> 4];
-        G = lut[1][G >> 4];
-        B = lut[2][B >> 4];
+        R = lut->luts[0%lut->Dimension][R >> 4];
+        G = lut->luts[1%lut->Dimension][G >> 4];
+        B = lut->luts[2%lut->Dimension][B >> 4];
     }
 
     inline void dim(uint8_t value)
@@ -182,7 +183,7 @@ public:
         this->L = L;
     }
 
-    inline void ApplyLut(uint16_t *lut[])
+    inline void ApplyLut(LUT* lut)
     {
         //i choose to scale down the values before i do a lookup in the lut.
         //This means that a 12bit lut also only has 256 entries
@@ -191,7 +192,7 @@ public:
         //wont happen any time soon, and the only 12 bit values are upscaled
         //8bit values. Scaling them back down allows smaller luts, and thus
         //saves almost 4k in ram that would otherwise be used for nothing.
-        L = lut[0][L >> 4];
+        L = lut->luts[0][L >> 4];
     }
 
     inline void dim(uint8_t value)

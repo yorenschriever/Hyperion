@@ -19,9 +19,7 @@
 #define DEBOUNCETIME 50 //ms
 #define LONGPRESSTIME 350 //ms
 
-uint16_t* Rotary::lutR = NULL;
-uint16_t* Rotary::lutG = NULL;
-uint16_t* Rotary::lutB = NULL;
+LUT* Rotary::lut = new GammaLUT(2,4096);
 
 void Rotary::Initialize()
 {
@@ -40,9 +38,9 @@ bool Rotary::setRGB(uint8_t r,uint8_t g,uint8_t b)
 {
     uint8_t buffer[3*4+1];
     buffer[0] = PCA9685_LED0_ON_L + 13*4;
-    fillLedBuffer(buffer+1,lutR,r,INVERT);
-    fillLedBuffer(buffer+5,lutG,g,INVERT);
-    fillLedBuffer(buffer+9,lutB,b,INVERT);
+    fillLedBuffer(buffer+1,lut->luts[0],r,INVERT);
+    fillLedBuffer(buffer+5,lut->luts[1],g,INVERT);
+    fillLedBuffer(buffer+9,lut->luts[2],b,INVERT);
 
     if(xSemaphoreTake( i2cMutex, ( TickType_t ) 100 ) != pdTRUE ){
         return false;
@@ -103,10 +101,8 @@ bool Rotary::setWheel(uint8_t wheelpos)
   }
 }
 
-void Rotary::setLut(uint16_t* lutR, uint16_t* lutG, uint16_t* lutB){
-    Rotary::lutR = lutR;
-    Rotary::lutG = lutG;
-    Rotary::lutB = lutB;
+void Rotary::setLut(LUT* lut){
+    Rotary::lut = lut;
 }
 
 uint8_t Rotary::prevNextCode = 0;

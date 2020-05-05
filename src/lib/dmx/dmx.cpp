@@ -105,6 +105,9 @@ uint8_t DMX::Read(uint16_t channel)
 
 uint8_t DMX::IsHealthy()
 {
+    if (!initialized)
+        return 0;
+
     // get timestamp of last received packet
     xSemaphoreTake(sync_dmx, portMAX_DELAY);
     long dmx_timeout = last_dmx_packet;

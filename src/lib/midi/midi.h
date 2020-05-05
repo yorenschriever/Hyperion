@@ -24,6 +24,8 @@ class Midi {
         static void onNoteOff(MidiEvent3 handler);
         static void onControllerChange(MidiEvent3 handler);
 
+        static bool isConnected();
+
     private:
         static QueueHandle_t midi_rx_queue;
         static void uart_event_task(void *pvParameters);    // Event task
@@ -33,4 +35,5 @@ class Midi {
         static MidiEvent3 noteOffHandler;
         static MidiEvent3 controllerChangeHandler;
 
+        static unsigned long lastMessageTime;
 };
