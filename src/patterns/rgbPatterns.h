@@ -19,3 +19,19 @@ inline RGB rainbowPattern(int index, int width, RGB* lastValue){
         return RGB(WheelPos * 3, 255 - WheelPos * 3, 0);
     }
 }
+
+inline RGB stardustPattern(int index, int width, RGB* lastValue){
+    static unsigned int timer;
+    
+    bool beat = millis() % 500 < 5;
+    //if (beat)
+        return RGB(255,255,255);
+    
+    // int 
+
+    // RGB result = RGB(lastValue[index]);;
+    
+    
+    // result.dim(255-index);
+    // return result;
+}

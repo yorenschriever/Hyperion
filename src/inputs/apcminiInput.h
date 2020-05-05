@@ -12,6 +12,9 @@ class ApcminiInput : public Input{
 
     public:
 
+        //length = the length in pixels
+        //column = the colunm on the apc to listen to
+        //patterns = a list of 8 patterns to attach to each button
         ApcminiInput(int length, int column, Pattern<T_COLOUR> patterns[8]){
             this->length = length;
             this->leddata = (T_COLOUR*) malloc(length * sizeof(T_COLOUR));

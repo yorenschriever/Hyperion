@@ -37,7 +37,7 @@ void APCMini::handleNoteOn(uint8_t channel, uint8_t note, uint8_t velocity)
 
 void APCMini::handleConnect(){
     //send all note statusses on connect, so the lights correspond to the active patterns after disconnecting/reconnecting
-    xTaskCreate(sendStatus,"APCMini status",1500,NULL,1,NULL);
+    xTaskCreate(sendStatus,"APCMini status",2048,NULL,1,NULL);
 }
 
 void APCMini::sendStatus(void *pvParameters){

@@ -10,6 +10,8 @@ class Display
         static void setMidi(bool connected);
         static void setLeds(int numleds);
 
+        static void setDFU(bool dfu, int percentage);
+
     private:
         Display();                                              // hide constructor
         static void displayTask( void * pvParameters );
@@ -20,6 +22,9 @@ class Display
         static bool dmxconnected;
         static bool midiconnected;
         static int numleds;
+
+        static bool dfu;
+        static int dfupercentage;
 
         static int renderConnectionStatus(int start, bool connected, String name);
 

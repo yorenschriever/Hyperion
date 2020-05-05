@@ -86,9 +86,9 @@ public:
 
         config.clk_div = T_SPEED::RmtClockDivider;
 
-        ESP_ERROR_CHECK(rmt_config(&config));
-        ESP_ERROR_CHECK(rmt_driver_install(rmtchannel, 0, 0));
-        ESP_ERROR_CHECK(rmt_translator_init(rmtchannel, _translate));
+        ESP_ERROR_CHECK_WITHOUT_ABORT(rmt_config(&config));
+        ESP_ERROR_CHECK_WITHOUT_ABORT(rmt_driver_install(rmtchannel, 0, 0));
+        ESP_ERROR_CHECK_WITHOUT_ABORT(rmt_translator_init(rmtchannel, _translate));
     }
 
     void Clear()
@@ -122,6 +122,8 @@ private:
     uint8_t* buffer;  //data we are receiving / editing
     uint8_t* frontBuffer; //data we are sending
     
+    static bool driverInstalled[8];
+
     //the way the project is currently setup we dont need 2 buffers.
     //because we wait for (Ready) before sending new data
 
@@ -183,8 +185,6 @@ private:
         *item_num = num;
     }
 };
-
-
 
 
 class NeoEsp32RmtSpeed

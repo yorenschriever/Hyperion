@@ -117,6 +117,10 @@ int Rotary::getRotation()
     return result;
 }   
 
+bool Rotary::isButtonPressed(){
+    return buttonState;
+}
+
 void Rotary::rotateISR()
 {
     static int8_t rot_enc_table[] = {0,1,1,0,1,0,0,1,1,0,0,1,0,1,1,0};

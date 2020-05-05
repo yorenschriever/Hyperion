@@ -26,6 +26,8 @@ bool Display::ethconnected=false;
 bool Display::dmxconnected=false;
 bool Display::midiconnected=false;
 int Display::numleds=0;
+bool Display::dfu=false;
+int Display::dfupercentage=0;
 
 Display::Display()
 {
@@ -101,6 +103,14 @@ void Display::setLeds(int leds){
     dirty=true;
 }
 
+void Display::setDFU(bool dfu, int percentage){
+    if (Display::dfu==dfu && Display::dfupercentage==percentage)
+        return;
+    Display::dfu=dfu;
+    Display::dfupercentage=percentage;
+    dirty=true;
+}
+
 void Display::displayTask( void * pvParameters )
 {
  for( ;; )
@@ -118,22 +128,35 @@ void Display::updateFrame()
 {
     display.clearDisplay();
 
-    display.setTextSize(1);      // Normal 1:1 pixel scale
-    display.setTextColor(SSD1306_WHITE); // Draw white text
-    display.cp437(true);         // Use full 256 char 'Code Page 437' font
+        display.setTextSize(1);      // Normal 1:1 pixel scale
+        display.setTextColor(SSD1306_WHITE); // Draw white text
+        display.cp437(true);         // Use full 256 char 'Code Page 437' font
 
-    display.setCursor(0, 0);    
-    display.write((String(fpsout) + String("/") + String(fpsin) + String(" FPS (") + String(100-framemiss) + String("%)")).c_str());
+    if (dfu){
 
-    display.setCursor(0, 8);     
-    display.write((String("Lights: ") + String(numleds)).c_str());
+        display.setCursor(0, 0);  
+        display.write("Firmware update");
+        display.setCursor(0, 8);     
+        display.write((String(dfupercentage) + "%").c_str());
 
-    display.setCursor(0, 16);    
-    
-    int pos=0;
-    pos = renderConnectionStatus(pos,ethconnected,"ETH");
-    pos = renderConnectionStatus(pos,dmxconnected,"DMX"); 
-    pos = renderConnectionStatus(pos,midiconnected,"MIDI"); 
+    } else {
+
+
+
+        display.setCursor(0, 0);    
+        display.write((String(fpsout) + String("/") + String(fpsin) + String(" FPS (") + String(100-framemiss) + String("%)")).c_str());
+
+        display.setCursor(0, 8);     
+        display.write((String("Lights: ") + String(numleds)).c_str());
+
+        display.setCursor(0, 16);    
+        
+        int pos=0;
+        pos = renderConnectionStatus(pos,ethconnected,"ETH");
+        pos = renderConnectionStatus(pos,dmxconnected,"DMX"); 
+        pos = renderConnectionStatus(pos,midiconnected,"MIDI"); 
+
+    }
 
     if(xSemaphoreTake( i2cMutex, ( TickType_t ) 100 ) == pdTRUE )
     {

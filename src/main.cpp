@@ -34,7 +34,10 @@ void DisplayFps(void *parameter);
 void clearall();
 void animate(byte r, byte g, byte b);
 
-LUT* NeopixelLut = new ColourCorrectionLUT(2.0,255, 255,255,255);
+//I picked colour correction values that Fastled uses for neopixels "TypicalLEDStrip"
+//http://fastled.io/docs/3.1/group___color_enums.html
+//note the different order, fastled uses RGB, luts are in ouput order (GRB)
+LUT* NeopixelLut = new ColourCorrectionLUT(1.5,255, 176, 255, 240); 
 LUT* IncandescentLut = new IncandescentLUT(2.5, 4096, 400);
 LUT* RotaryLut = new ColourCorrectionLUT(2.0, 4096, 150,255,255);
 
@@ -44,73 +47,77 @@ Pipe pipes[] = {
     //     new DMXOutput(1)
     // ),
 
-    Pipe(
-        //create an apcmini input that creates monochome patterns
-        new ApcminiInput<Monochrome>(
-            10, //width of the pattern
-            0,  //button column on the apc to listen to (0-7)
-            //the patterns to attach to the buttons
-            new Pattern<Monochrome>[8]{sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
-        new DMXOutput(1)),
+    // Pipe(
+    //     //create an apcmini input that creates monochome patterns
+    //     new ApcminiInput<Monochrome>(10,0,
+    //         new Pattern<Monochrome>[8]{sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
+    //     new DMXOutput(1)),
 
     // Pipe(
     //     //create an apcmini input that creates monochome patterns
-    //     new ApcminiInput<Monochrome>(
-    //         10, //width of the pattern
-    //         1,  //button column on the apc to listen to (0-7)
-    //         //the patterns to attach to the buttons
+    //     new ApcminiInput<Monochrome>(10,1,  
     //         new Pattern<Monochrome>[8]{sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
     //     new DMXOutput(15)),
 
+    Pipe(
+        new ApcminiInput<RGB>(
+            16, //width of the pattern, in pixels
+            2,  //button column on the apc to listen to (0-7)
+            //the patterns to attach to the buttons
+            new Pattern<RGB>[8]{rainbowPattern, stardustPattern, rainbowPattern, rainbowPattern, rainbowPattern, rainbowPattern, rainbowPattern, rainbowPattern}),
+        new NeopixelOutput<Kpbs800>(1),
+        Pipe::transfer<RGB,RGB>,
+        NeopixelLut),
+
+    Pipe(
+        new UDPInput(9611),
+        new NeopixelOutput<Kpbs800>(1),
+        Pipe::transfer<RGB,GRB>,
+        NeopixelLut),
+
+    Pipe(
+        new UDPInput(9612),
+        new NeopixelOutput<Kpbs800>(2),
+        Pipe::transfer<RGB,GRB>,
+        NeopixelLut),
+
+    Pipe(
+        new UDPInput(9613),
+        new NeopixelOutput<Kpbs800>(3),
+        Pipe::transfer<RGB,GRB>,
+        NeopixelLut),
+
+    Pipe(
+        new UDPInput(9614),
+        new NeopixelOutput<Kpbs800>(4),
+        Pipe::transfer<RGB,GRB>,
+        NeopixelLut),
+
+    Pipe(
+        new UDPInput(9615),
+        new NeopixelOutput<Kpbs800>(5),
+        Pipe::transfer<RGB,GRB>,
+        NeopixelLut),
+
+    // //Shared with DMX!
     // Pipe(
-    //     new UDPInput(9611),
-    //     new NeopixelOutput<Kpbs800>(1),
+    //     new UDPInput(9616),
+    //     new NeopixelOutput<Kpbs800>(6),
+    //     //new DMXOutput(),
     //     Pipe::transfer<RGB,GRB>,
     //     NeopixelLut),
 
-    // Pipe(
-    //     new UDPInput(9612),
-    //     new NeopixelOutput<Kpbs800>(2),
-    //     Pipe::transfer<RGB,GRB>,
-    //     NeopixelLut),
+    Pipe(
+        new UDPInput(9617),
+        new NeopixelOutput<Kpbs800>(7),
+        Pipe::transfer<RGB,GRB>,
+        NeopixelLut),
 
-    // Pipe(
-    //     new UDPInput(9613),
-    //     new NeopixelOutput<Kpbs800>(3),
-    //     Pipe::transfer<RGB,GRB>,
-    //     NeopixelLut),
-
-    // Pipe(
-    //     new UDPInput(9614),
-    //     new NeopixelOutput<Kpbs800>(4),
-    //     Pipe::transfer<RGB,GRB>,
-    //     NeopixelLut),
-
-    // Pipe(
-    //     new UDPInput(9615),
-    //     new NeopixelOutput<Kpbs800>(5),
-    //     Pipe::transfer<RGB,GRB>,
-    //     NeopixelLut),
-
-    // // //Shared with DMX!
-    // // Pipe(
-    // //     new UDPInput(9616),
-    // //     new NeopixelOutput<Kpbs800>(6),
-    // //     //new DMXOutput(),
-    // //     Pipe::transfer<RGB,GRB>,
-    // //     NeopixelLut),
-
-    // Pipe(
-    //     new UDPInput(9617),
-    //     new NeopixelOutput<Kpbs800>(7),
-    //     Pipe::transfer<RGB,GRB>,
-    //     NeopixelLut),
-
-    // Pipe(
-    //     new UDPInput(9618),
-    //     new NeopixelOutput<Kpbs800>(8),
-    //     Pipe::transfer<RGB,GRB>,
-    //     NeopixelLut),
+    Pipe(
+        new UDPInput(9618),
+        new NeopixelOutput<Kpbs800>(8),
+        Pipe::transfer<RGB,GRB>,
+        NeopixelLut),
 
     Pipe(
         new UDPInput(9619),
@@ -118,21 +125,11 @@ Pipe pipes[] = {
         Pipe::transfer<RGB,Monochrome12>,
         IncandescentLut),
 
-
-    // Pipe(
-    //     new ApcminiInput<RGB>(
-    //         16, //width of the pattern, in pixels
-    //         2,  //button column on the apc to listen to (0-7)
-    //         //the patterns to attach to the buttons
-    //         new Pattern<RGB>[8]{rainbowPattern, rainbowPattern, rainbowPattern, rainbowPattern, rainbowPattern, rainbowPattern, rainbowPattern, rainbowPattern}),
-    //     new NeopixelOutput<NeoEsp32RmtSpeed800Kbps>(1),
-    //     Pipe::transfer<RGB,RGB>,
-    //     RGBGamma8),
-
 };
 
 void click() { 
     Debug.println("click"); 
+    //Rotary::setRGB(0,0,0);
     //APCMini::handleNoteOn(0,56,127);
 }
 void press() { Debug.println("press"); }
@@ -142,11 +139,27 @@ void rotate(int amount) { Debug.printf("rotate: %d\n", amount); }
 
 void setup()
 {
+    //Start 'safe mode' when rotary button is pressed during boot
+    //only starts firmware update
+    //Be aware that the constructors of all stack objects will
+    //still execute before this point. If they crash you have to
+    //update over usb
+    pinMode(39,INPUT);
+    if (digitalRead(39)){
+        Display::Initialize(); 
+        Display::setDFU(true,0);
+        NetworkBegin();
+        setupOta();
+        for(;;){
+            handleOta();
+            delay(1);
+        }
+    }
+
     Debug.begin(115200);
 
     Rotary::Initialize();
     Rotary::setLut(RotaryLut);
-    Rotary::setRGB(255,255,255);
     Rotary::onClick(click);
     Rotary::onPress(press);
     Rotary::onRelease(release);
@@ -176,6 +189,7 @@ void setup()
     xTaskCreatePinnedToCore(DisplayFps, "DisplayFPS", 3000, NULL, 0, NULL, 0);
 
     setupOta();
+    Rotary::setRGB(0,0,0);
 
     Debug.printf("max udp connections: %d\n", MEMP_NUM_NETCONN);
 }

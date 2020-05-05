@@ -5,6 +5,7 @@
 #include <Update.h>
 #include "ota.h"
 #include "debug.h"
+#include "lib/display/display.h"
 
 WebServer otaserver(81);
 
@@ -24,7 +25,7 @@ void setupOta()
     otaserver.on(
         "/update", HTTP_POST, []() {
     otaserver.sendHeader("Connection", "close");
-    otaserver.send(200, "text/plain", (Update.hasError()) ? "UPDATE FAILED\n" : "Update Successful\n");
+    otaserver.send(200, "text/plain", Update.hasError() ? (String("UPDATE FAILED: ") + Update.errorString() + "\n") : String("Update Successful\n"));
     delay(1000);
     ESP.restart(); }, []() {
 //    otaActive = true;
@@ -39,6 +40,8 @@ void setupOta()
     HTTPUpload& upload = otaserver.upload();
     if (upload.status == UPLOAD_FILE_START) {
       Debug.printf("Update: %s\n", upload.filename.c_str());
+      Debug.print(String("content-length: ") + otaserver.header("Content-Length") + "\n");
+      Display::setDFU(true,0);
       if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { //start with max available size
         //Update.printError(Debug);
         //TODO
@@ -49,6 +52,7 @@ void setupOta()
       if (decimate++%20==0) {
         Debug.printf("progress: %d\n",upload.totalSize);
         Debug.println(otaserver.header("Content-Length"));
+        Display::setDFU(true,50);
       }
       if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
         //Update.printError(Debug);
@@ -57,6 +61,7 @@ void setupOta()
     } else if (upload.status == UPLOAD_FILE_END) {
       if (Update.end(true)) { //true to set the size to the current progress
         Debug.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
+        Display::setDFU(true,100);
       } else {
         //Update.printError(Debug);
         //TODO

@@ -19,6 +19,7 @@ class Rotary
         //get the rotation since the last time this function was called
         //you can use this if you dont want to keep track of the rotation with onRotate()
         static int getRotation();
+        static bool isButtonPressed();
 
         //use these functions to attach events to the button.
         //note that the handlers are called from inside an interrupt, so they should be kept short.

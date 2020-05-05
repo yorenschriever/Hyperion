@@ -60,7 +60,7 @@ void Midi::Initialize()
         return;
 
     // create receive task
-    xTaskCreate(uart_event_task, "Midi", 2048, NULL, 1, NULL);
+    xTaskCreatePinnedToCore(uart_event_task, "Midi", 2048, NULL, 1, NULL, 1);
 }
 
 void Midi::uart_event_task(void *pvParameters)
