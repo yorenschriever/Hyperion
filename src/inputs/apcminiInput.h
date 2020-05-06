@@ -15,30 +15,33 @@ class ApcminiInput : public Input{
         //length = the length in pixels
         //column = the colunm on the apc to listen to
         //patterns = a list of 8 patterns to attach to each button
-        ApcminiInput(int length, int column, Pattern<T_COLOUR> patterns[8]){
+        ApcminiInput(int length, int column, Pattern<T_COLOUR>* patterns[8]){
             this->length = length;
-            this->leddata = (T_COLOUR*) malloc(length * sizeof(T_COLOUR));
-            this->lastLeddata = (T_COLOUR*) malloc(length * sizeof(T_COLOUR));
             this->patterns = patterns;
             this->column = column;
+            this->leddata = (T_COLOUR*) malloc(length * sizeof(T_COLOUR));
+            //this->dimmedleddata = (T_COLOUR*) malloc(length * sizeof(T_COLOUR));
         }
 
         virtual void begin(){
             APCMini::Initialize();
 
             for (int i=0;i<length;i++)
-                    lastLeddata[i] = T_COLOUR();
+                this->leddata[i] = T_COLOUR();
+
+            for (int i=0; i<8; i++)
+                patterns[i]->Initialize();
         }
 
         virtual int loadData(uint8_t* dataPtr)
         {
-            Pattern<T_COLOUR> patternfunc=NULL;
+            int selectedPattern=-1;
             for (int i=0;i<8; i++){ //TODO use const from APCMini class instead of hardcoded 8
                 if (APCMini::getStatus(column,i))
-                    patternfunc = patterns[i];
+                    selectedPattern=i;
             }
 
-            if (!patternfunc){                
+            if (selectedPattern==-1){                
                 //stop sending new empty frames if we already have sent an empty frame because no patterns were selected, 
                 //tell the pipe that we dont have anything to process.
                 if (alloff) 
@@ -52,22 +55,39 @@ class ApcminiInput : public Input{
                 alloff = true;
             } else {
                 alloff=false;
-                for (int i=0; i<length; i++){
-                    //todo leddata is already partly updated when we pass it here. use 2 buffers
-                    leddata[i] = patternfunc(i,length,leddata);
 
-                    //combine and scale back the 2 faders to a range of 0-255 and feed to the dimmer function
-                    leddata[i].dim(APCMini::getFader(column) * APCMini::getFader(8) >> 6); //TODO magic const
-                }
+                // for (int i=0; i<length; i++){
+                //     //todo leddata is already partly updated when we pass it here. use 2 buffers
+                //     leddata[i] = T_COLOUR(); //patternfunc(i,length,leddata);
 
-                //i only copy to lastLedData if a pattern was on, not if not patternfunc was selected
-                //this might be useful when writing patches, so they continue where they were
-                //not sure though, we will have to see
-                memcpy(lastLeddata,leddata, length * sizeof(T_COLOUR));
+                //     //combine and scale back the 2 faders to a range of 0-255 and feed to the dimmer function
+                //     leddata[i].dim(APCMini::getFader(column) * APCMini::getFader(8) >> 6); //TODO magic const
+                // }
+
+                patterns[selectedPattern]->Calculate(leddata, length, selectedPattern==lastSelectedPattern); 
+
+                //TODO: find a solution for dimming.
+                //if the calculate above doesnt leddata with new colours, then dim will be applied to an already dimmed value
+                //memcpy(dimmedleddata,leddata, length * sizeof(T_COLOUR));
+                // for (int i=0; i<length; i++){
+                //     dimmedleddata[i].dim(APCMini::getFader(column) * APCMini::getFader(8) >> 6); //TODO magic const
+                // }
+
+                // //i only copy to lastLedData if a pattern was on, not if not patternfunc was selected
+                // //this might be useful when writing patches, so they continue where they were
+                // //not sure though, we will have to see
+                // memcpy(lastLeddata,leddata, length * sizeof(T_COLOUR));
             }
+
+            lastSelectedPattern = selectedPattern;
             
             memcpy(dataPtr,leddata, length * sizeof(T_COLOUR));
             
+            //apply dimming.
+            for (int i=0; i<length; i++)
+                ((T_COLOUR*)dataPtr)[i].dim(APCMini::getFader(column) * APCMini::getFader(8) >> 6); //TODO magic const
+            
+
             usedframecount++;
 
             return length * sizeof(T_COLOUR);
@@ -76,9 +96,10 @@ class ApcminiInput : public Input{
     private:
         int length=0;
         T_COLOUR* leddata;
-        T_COLOUR* lastLeddata;
-        Pattern<T_COLOUR>* patterns;
+        //T_COLOUR* dimmedleddata;
+        Pattern<T_COLOUR>** patterns;
         int column;
         boolean alloff=true;
+        int lastSelectedPattern=1;
 
 };

@@ -27,7 +27,7 @@
 #include "lib/display/display.h"
 #include "lib/rotary/rotary.h"
 #include "lib/apcmini/apcmini.h"
-#include "patterns/monochromePatterns.h"
+//#include "patterns/monochromePatterns.h"
 #include "patterns/rgbPatterns.h"
 
 void DisplayFps(void *parameter);
@@ -64,66 +64,75 @@ Pipe pipes[] = {
             16, //width of the pattern, in pixels
             2,  //button column on the apc to listen to (0-7)
             //the patterns to attach to the buttons
-            new Pattern<RGB>[8]{rainbowPattern, stardustPattern, rainbowPattern, rainbowPattern, rainbowPattern, rainbowPattern, rainbowPattern, rainbowPattern}),
+            new Pattern<RGB>*[8]{
+                new RainbowPattern(), 
+                new RainbowPattern(), 
+                new RainbowPattern(), 
+                new RainbowPattern(), 
+                new RainbowPattern(), 
+                new RainbowPattern(), 
+                new RainbowPattern(), 
+                new RainbowPattern()
+            }),
         new NeopixelOutput<Kpbs800>(1),
         Pipe::transfer<RGB,RGB>,
         NeopixelLut),
 
-    Pipe(
-        new UDPInput(9611),
-        new NeopixelOutput<Kpbs800>(1),
-        Pipe::transfer<RGB,GRB>,
-        NeopixelLut),
-
-    Pipe(
-        new UDPInput(9612),
-        new NeopixelOutput<Kpbs800>(2),
-        Pipe::transfer<RGB,GRB>,
-        NeopixelLut),
-
-    Pipe(
-        new UDPInput(9613),
-        new NeopixelOutput<Kpbs800>(3),
-        Pipe::transfer<RGB,GRB>,
-        NeopixelLut),
-
-    Pipe(
-        new UDPInput(9614),
-        new NeopixelOutput<Kpbs800>(4),
-        Pipe::transfer<RGB,GRB>,
-        NeopixelLut),
-
-    Pipe(
-        new UDPInput(9615),
-        new NeopixelOutput<Kpbs800>(5),
-        Pipe::transfer<RGB,GRB>,
-        NeopixelLut),
-
-    // //Shared with DMX!
     // Pipe(
-    //     new UDPInput(9616),
-    //     new NeopixelOutput<Kpbs800>(6),
-    //     //new DMXOutput(),
+    //     new UDPInput(9611),
+    //     new NeopixelOutput<Kpbs800>(1),
     //     Pipe::transfer<RGB,GRB>,
     //     NeopixelLut),
 
-    Pipe(
-        new UDPInput(9617),
-        new NeopixelOutput<Kpbs800>(7),
-        Pipe::transfer<RGB,GRB>,
-        NeopixelLut),
+    // Pipe(
+    //     new UDPInput(9612),
+    //     new NeopixelOutput<Kpbs800>(2),
+    //     Pipe::transfer<RGB,GRB>,
+    //     NeopixelLut),
 
-    Pipe(
-        new UDPInput(9618),
-        new NeopixelOutput<Kpbs800>(8),
-        Pipe::transfer<RGB,GRB>,
-        NeopixelLut),
+    // Pipe(
+    //     new UDPInput(9613),
+    //     new NeopixelOutput<Kpbs800>(3),
+    //     Pipe::transfer<RGB,GRB>,
+    //     NeopixelLut),
 
-    Pipe(
-        new UDPInput(9619),
-        new PWMOutput(1500),
-        Pipe::transfer<RGB,Monochrome12>,
-        IncandescentLut),
+    // Pipe(
+    //     new UDPInput(9614),
+    //     new NeopixelOutput<Kpbs800>(4),
+    //     Pipe::transfer<RGB,GRB>,
+    //     NeopixelLut),
+
+    // Pipe(
+    //     new UDPInput(9615),
+    //     new NeopixelOutput<Kpbs800>(5),
+    //     Pipe::transfer<RGB,GRB>,
+    //     NeopixelLut),
+
+    // // //Shared with DMX!
+    // // Pipe(
+    // //     new UDPInput(9616),
+    // //     new NeopixelOutput<Kpbs800>(6),
+    // //     //new DMXOutput(),
+    // //     Pipe::transfer<RGB,GRB>,
+    // //     NeopixelLut),
+
+    // Pipe(
+    //     new UDPInput(9617),
+    //     new NeopixelOutput<Kpbs800>(7),
+    //     Pipe::transfer<RGB,GRB>,
+    //     NeopixelLut),
+
+    // Pipe(
+    //     new UDPInput(9618),
+    //     new NeopixelOutput<Kpbs800>(8),
+    //     Pipe::transfer<RGB,GRB>,
+    //     NeopixelLut),
+
+    // Pipe(
+    //     new UDPInput(9619),
+    //     new PWMOutput(1500),
+    //     Pipe::transfer<RGB,Monochrome12>,
+    //     IncandescentLut),
 
 };
 
