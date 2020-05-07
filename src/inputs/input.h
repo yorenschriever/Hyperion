@@ -23,15 +23,15 @@ public:
     //to keep track of the number of frames that that we used by the pipe,
     //and the ones that your input received, but were already 
     //replaced before loadData was called
-    uint8_t getUsedFramecount() { return usedframecount; }
-    uint8_t getMissedFrameCount() { return missedframecount; }
-    uint8_t getTotalFrameCount() { return missedframecount + usedframecount; }
+    int getUsedFramecount() { return usedframecount; }
+    int getMissedFrameCount() { return missedframecount; }
+    int getTotalFrameCount() { return missedframecount + usedframecount; }
     void resetFrameCount()
     {
         usedframecount = 0;
         missedframecount = 0;
     }
 protected:
-    int usedframecount = 0;
-    int missedframecount = 0;
+    int volatile usedframecount = 0;
+    int volatile missedframecount = 0;
 };

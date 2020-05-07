@@ -48,13 +48,13 @@ Pipe pipes[] = {
     // ),
 
     // Pipe(
-    //     //create an apcmini input that creates monochome patterns
+    //     //create an apcmini input that creates monochrome patterns
     //     new ApcminiInput<Monochrome>(10,0,
     //         new Pattern<Monochrome>[8]{sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
     //     new DMXOutput(1)),
 
     // Pipe(
-    //     //create an apcmini input that creates monochome patterns
+    //     //create an apcmini input that creates monochrome patterns
     //     new ApcminiInput<Monochrome>(10,1,  
     //         new Pattern<Monochrome>[8]{sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
     //     new DMXOutput(15)),
@@ -74,9 +74,12 @@ Pipe pipes[] = {
                 new RainbowPattern(), 
                 new RainbowPattern()
             }),
-        new NeopixelOutput<Kpbs800>(1),
+        new NeopixelOutput<Kpbs800>(1)
+        //new PWMOutput(1500)
+        ,
         Pipe::transfer<RGB,RGB>,
-        NeopixelLut),
+        NeopixelLut
+        ),
 
     // Pipe(
     //     new UDPInput(9611),
@@ -139,7 +142,7 @@ Pipe pipes[] = {
 void click() { 
     Debug.println("click"); 
     //Rotary::setRGB(0,0,0);
-    //APCMini::handleNoteOn(0,56,127);
+    //APCMini::handleNoteOn(0,58,127);
 }
 void press() { Debug.println("press"); }
 void release() { Debug.println("release"); }

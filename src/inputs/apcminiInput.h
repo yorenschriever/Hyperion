@@ -29,8 +29,8 @@ class ApcminiInput : public Input{
             for (int i=0;i<length;i++)
                 this->leddata[i] = T_COLOUR();
 
-            for (int i=0; i<8; i++)
-                patterns[i]->Initialize();
+            //for (int i=0; i<8; i++)
+            //    patterns[i]->Initialize();
         }
 
         virtual int loadData(uint8_t* dataPtr)

@@ -40,7 +40,7 @@ void setupOta()
     HTTPUpload& upload = otaserver.upload();
     if (upload.status == UPLOAD_FILE_START) {
       Debug.printf("Update: %s\n", upload.filename.c_str());
-      Debug.print(String("content-length: ") + otaserver.header("Content-Length") + "\n");
+      //Debug.print(String("content-length: ") + otaserver.header("Content-Length") + "\n");
       Display::setDFU(true,0);
       if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { //start with max available size
         //Update.printError(Debug);

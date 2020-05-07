@@ -32,6 +32,8 @@ public:
             return;
 
         //load the new frame from the input, or quit if none was available
+        //TODO: either pass the MTU size here so the input knows when to stop copying,
+        //or better: ask for the size and realloc more space if needed. 
         int datalength = in->loadData(data);
         if (datalength == 0)
             return;
