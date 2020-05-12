@@ -24,6 +24,7 @@
 #include "inputs/udpInput.h"
 #include "inputs/apcminiInput.h"
 #include "inputs/dmxInput.h"
+#include "inputs/patternInput.h"
 #include "lib/display/display.h"
 #include "lib/rotary/rotary.h"
 #include "lib/apcmini/apcmini.h"
@@ -60,26 +61,31 @@ Pipe pipes[] = {
     //     new DMXOutput(15)),
 
     Pipe(
-        new ApcminiInput<RGB>(
-            16, //width of the pattern, in pixels
-            2,  //button column on the apc to listen to (0-7)
-            //the patterns to attach to the buttons
-            new Pattern<RGB>*[8]{
-                new RainbowPattern(), 
-                new RainbowPattern(), 
-                new RainbowPattern(), 
-                new RainbowPattern(), 
-                new RainbowPattern(), 
-                new RainbowPattern(), 
-                new RainbowPattern(), 
-                new RainbowPattern()
-            }),
-        new NeopixelOutput<Kpbs800>(1)
-        //new PWMOutput(1500)
-        ,
-        Pipe::transfer<RGB,RGB>,
-        NeopixelLut
+        new PatternInput<RGB>(16, new AnimatedMixingPattern()),
+            new NeopixelOutput<Kpbs800>(1),
+            Pipe::transfer<RGB,GRB>,
+            NeopixelLut
         ),
+
+    // Pipe(
+    //     new ApcminiInput<RGB>(
+    //         16, //width of the pattern, in pixels
+    //         2,  //button column on the apc to listen to (0-7)
+    //         //the patterns to attach to the buttons
+    //         new Pattern<RGB>*[8]{
+    //             new RainbowPattern(), 
+    //             new ColourOrderPattern(), 
+    //             new MixingPattern(), 
+    //             new AnimatedMixingPattern(), 
+    //             new RainbowPattern(), 
+    //             new RainbowPattern(), 
+    //             new RainbowPattern(), 
+    //             new RainbowPattern()
+    //         }),
+    //     new NeopixelOutput<Kpbs800>(1),
+    //     Pipe::transfer<RGB,GRB>,
+    //     NeopixelLut
+    //     ),
 
     // Pipe(
     //     new UDPInput(9611),
@@ -131,11 +137,11 @@ Pipe pipes[] = {
     //     Pipe::transfer<RGB,GRB>,
     //     NeopixelLut),
 
-    // Pipe(
-    //     new UDPInput(9619),
-    //     new PWMOutput(1500),
-    //     Pipe::transfer<RGB,Monochrome12>,
-    //     IncandescentLut),
+    Pipe(
+        new UDPInput(9619),
+        new PWMOutput(1500),
+        Pipe::transfer<RGB,Monochrome12>,
+        IncandescentLut),
 
 };
 

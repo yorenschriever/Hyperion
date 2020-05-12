@@ -4,11 +4,8 @@
 #include <inttypes.h>
 #include "pattern.h"
 #include "../colours.h"
-
-//template<class T>
-//using Pattern = T (*)(int index, int width, T* lastValue);
-
-
+#include "lfo.h"
+#include "fade.h"
 
 template<class T_COLOUR>
 class Pattern {

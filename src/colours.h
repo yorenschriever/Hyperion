@@ -312,6 +312,81 @@ public:
     uint8_t H, S, V;
 };
 
+class RGBA : Colour
+{
+public:
+    RGBA()
+    {
+        this->R = 0;
+        this->G = 0;
+        this->B = 0;
+        this->A = 0;
+    }
+
+    RGBA(uint8_t R, uint8_t G, uint8_t B, uint8_t A)
+    {
+        this->R = R;
+        this->G = G;
+        this->B = B;
+        this->A = A;
+    }
+
+    inline void dim(uint8_t value)
+    {
+        R = (R * value) >> 8;
+        G = (G * value) >> 8;
+        B = (B * value) >> 8;
+    }
+
+    operator RGB() { return RGB(R*A>>8,G*A>>8,B*A>>8); }
+
+    //overload some operators to quickly apply some blend modes
+    //https://en.wikipedia.org/wiki/Blend_modes#Normal_blend_mode
+
+    //overload to + operator, so you can use color1 + colour2 to stack 2 colors on top of eachother
+    //normal blend mode
+    //https://en.wikipedia.org/wiki/Alpha_compositing
+    RGBA operator+ (RGBA other){
+        //TODO, this is not the method described by wikipedia
+        //that one is the one i tried below.
+        return RGBA(
+            (this->R * other.A + other.R * (0xFF - other.A)) >> 8,
+            (this->G * other.A + other.G * (0xFF - other.A)) >> 8,
+            (this->B * other.A + other.B * (0xFF - other.A)) >> 8,
+            this->A);
+
+        //term in wiki => term here
+        //src => other
+        //dst => this
+        int outA = other.A + (this->A * (0xFF - other.A) >> 8);
+        if (outA == 0)
+            return RGBA(0,0,0,0); 
+
+        return RGBA(
+            (((other.R << 16) + (this->R * this->A * (255-other.A))) / outA) >> 8,
+            (((other.G << 16) + (this->G * this->A * (255-other.A))) / outA) >> 8,
+            (((other.B << 16) + (this->B * this->A * (255-other.A))) / outA) >> 8,
+            outA);
+    }
+
+    //TODO multiply blend mode
+    // RGBA operator* (RGBA* other){
+    //     return RGBA(
+    //         ?,
+    //         ?,
+    //         ?,
+    //         this->A);
+    // }
+    RGBA operator* (float scale){
+        return RGBA(R,G,B,constrain(A*scale,0,0xFF));
+    }
+    RGBA operator/ (float scale){
+        return RGBA(R,G,B,constrain(A/scale,0,0xFF));
+    }
+
+    uint8_t R, G, B, A;
+};
+
 inline Monochrome::operator RGB() { return RGB(L, L, L); }
 inline Monochrome::operator RGB12() { return RGB12(L << 4, L << 4, L << 4); }
 inline Monochrome::operator Monochrome12() { return Monochrome12(L << 4); }
