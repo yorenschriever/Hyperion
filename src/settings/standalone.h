@@ -8,9 +8,6 @@
 #include "inputs/apcminiInput.h"
 #include "inputs/dmxInput.h"
 #include "inputs/patternInput.h"
-#include "lib/display/display.h"
-#include "lib/rotary/rotary.h"
-#include "lib/apcmini/apcmini.h"
 #include "patterns/rgbPatterns.h"
 #include "patterns/monochromePatterns.h"
 
@@ -87,7 +84,7 @@ Pipe pipes[] = {
                 new ColourOrderPattern(), 
                 new MixingPattern(), 
                 new AnimatedMixingPattern(), 
-                new RainbowPattern(), 
+                new PoissonPattern(), 
                 new RainbowPattern(), 
                 new RainbowPattern(), 
                 new RainbowPattern()
@@ -96,5 +93,12 @@ Pipe pipes[] = {
         Pipe::transfer<RGB,GRB>,
         NeopixelLut
         ),
+
+    Pipe(
+        new PatternInput<RGB>(16,new PoissonPattern()),
+        new NeopixelOutput<Kpbs800>(1),
+        Pipe::transfer<RGB,GRB>,
+        NeopixelLut
+    )
 
 };

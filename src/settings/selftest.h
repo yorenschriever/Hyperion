@@ -12,9 +12,6 @@
 #include "inputs/apcminiInput.h"
 #include "inputs/dmxInput.h"
 #include "inputs/patternInput.h"
-#include "lib/display/display.h"
-#include "lib/rotary/rotary.h"
-#include "lib/apcmini/apcmini.h"
 #include "patterns/rgbPatterns.h"
 #include "patterns/monochromePatterns.h"
 
