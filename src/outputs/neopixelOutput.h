@@ -87,7 +87,7 @@ public:
         config.clk_div = T_SPEED::RmtClockDivider;
 
         ESP_ERROR_CHECK_WITHOUT_ABORT(rmt_config(&config));
-        ESP_ERROR_CHECK_WITHOUT_ABORT(rmt_driver_install(rmtchannel, 0, 0));
+        ESP_ERROR_CHECK_WITHOUT_ABORT(rmt_driver_install(rmtchannel, 0, ESP_INTR_FLAG_IRAM));
         ESP_ERROR_CHECK_WITHOUT_ABORT(rmt_translator_init(rmtchannel, _translate));
     }
 

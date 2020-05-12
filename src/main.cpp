@@ -60,32 +60,32 @@ Pipe pipes[] = {
     //         new Pattern<Monochrome>[8]{sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
     //     new DMXOutput(15)),
 
-    Pipe(
-        new PatternInput<RGB>(16, new AnimatedMixingPattern()),
-            new NeopixelOutput<Kpbs800>(1),
-            Pipe::transfer<RGB,GRB>,
-            NeopixelLut
-        ),
-
     // Pipe(
-    //     new ApcminiInput<RGB>(
-    //         16, //width of the pattern, in pixels
-    //         2,  //button column on the apc to listen to (0-7)
-    //         //the patterns to attach to the buttons
-    //         new Pattern<RGB>*[8]{
-    //             new RainbowPattern(), 
-    //             new ColourOrderPattern(), 
-    //             new MixingPattern(), 
-    //             new AnimatedMixingPattern(), 
-    //             new RainbowPattern(), 
-    //             new RainbowPattern(), 
-    //             new RainbowPattern(), 
-    //             new RainbowPattern()
-    //         }),
-    //     new NeopixelOutput<Kpbs800>(1),
-    //     Pipe::transfer<RGB,GRB>,
-    //     NeopixelLut
+    //     new PatternInput<RGB>(16, new AnimatedMixingPattern()),
+    //         new NeopixelOutput<Kpbs800>(1),
+    //         Pipe::transfer<RGB,GRB>,
+    //         NeopixelLut
     //     ),
+
+    Pipe(
+        new ApcminiInput<RGB>(
+            16, //width of the pattern, in pixels
+            2,  //button column on the apc to listen to (0-7)
+            //the patterns to attach to the buttons
+            new Pattern<RGB>*[8]{
+                new RainbowPattern(), 
+                new ColourOrderPattern(), 
+                new MixingPattern(), 
+                new AnimatedMixingPattern(), 
+                new RainbowPattern(), 
+                new RainbowPattern(), 
+                new RainbowPattern(), 
+                new RainbowPattern()
+            }),
+        new NeopixelOutput<Kpbs800>(1),
+        Pipe::transfer<RGB,GRB>,
+        NeopixelLut
+        ),
 
     // Pipe(
     //     new UDPInput(9611),
