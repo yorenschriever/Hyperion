@@ -1,5 +1,8 @@
 Onderzoek om te kijken hoe ik de transferfunctie kan versnellen.
 
+Pas na dit proces kwam ik erachter dat mijn -O2 optimizatino settings niet werkte. Heb het nu op een andere manier in main.cpp toegevoegd.
+Ik verwacht dat die optimization levell 2 al deze dingen al automatisch voor me worden gedaan.
+
 deel 1 is kijken of ik de conversie van kleuren en pixels kan versnellen. Er gebeurt een hoop met casts en datatypes, 
 verdeeld over allerlei classes. maar in essentie moet de transfer functies gewoon wat bytes uitlezen en in een andere 
 volgorde plaatsen, daarna nog even een lookup table. Dit zou de optimizer moeten kunnen platslaan, en er zou geen overhead 
