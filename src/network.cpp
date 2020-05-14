@@ -27,8 +27,12 @@ void NetworkBegin()
     WiFi.onEvent(EthEvent);
     ETH.begin();
 
+    //#ifdef DHCP
+
     bool staticip = config_eth(ip, gateway, subnet);
     Debug.print(staticip ? "static ip configured" : "static ip failed");
+
+    //#endif
 
     Debug.println("");
 

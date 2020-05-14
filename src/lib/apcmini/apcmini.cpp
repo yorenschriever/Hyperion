@@ -1,55 +1,57 @@
 #include "apcmini.h"
 #include "../midi/midi.h"
 
-bool APCMini::allFlash=false;
-bool APCMini::allStatus[width*height];
+bool APCMini::allFlash = false;
+bool APCMini::allStatus[width * height];
 uint8_t APCMini::faders[numfaders];
 
 void APCMini::Initialize()
 {
-    for (int i=0; i<width*height; i++)
-        allStatus[i]=false;
-    for (int i=0;i<numfaders; i++)
-        faders[i]=127;
+    for (int i = 0; i < width * height; i++)
+        allStatus[i] = false;
+    for (int i = 0; i < numfaders; i++)
+        faders[i] = 127;
 
     Midi::Initialize();
     Midi::onNoteOn(handleNoteOn);
     Midi::onNoteOff(handleNoteOff);
     Midi::onControllerChange(handleControllerChange);
     Midi::onConnect(handleConnect);
-
-
 }
 
 void APCMini::handleNoteOff(uint8_t channel, uint8_t note, uint8_t velocity)
 {
     if (channel != midichannel)
         return;
-    handleKeyPress(note,false);
+    handleKeyPress(note, false);
 }
 
 void APCMini::handleNoteOn(uint8_t channel, uint8_t note, uint8_t velocity)
 {
     if (channel != midichannel)
         return;
-    handleKeyPress(note,velocity>0);
+    handleKeyPress(note, velocity > 0);
 }
 
-void APCMini::handleConnect(){
+void APCMini::handleConnect()
+{
     //send all note statusses on connect, so the lights correspond to the active patterns after disconnecting/reconnecting
-    xTaskCreate(sendStatus,"APCMini status",2048,NULL,1,NULL);
+    xTaskCreate(sendStatus, "APCMini status", 2048, NULL, 1, NULL);
 }
 
-void APCMini::sendStatus(void *pvParameters){
-    for (byte i=0; i < height*width; i++){
+void APCMini::sendStatus(void *pvParameters)
+{
+    for (byte i = 0; i < height * width; i++)
+    {
         setNote(i, allStatus[i], true);
-        if (i%8==0) 
+        if (i % 8 == 0)
             vTaskDelay(10); //give things some tme to breathe
     }
     vTaskDelete(NULL);
 }
 
-void APCMini::handleControllerChange(uint8_t channel, uint8_t controller, uint8_t value){
+void APCMini::handleControllerChange(uint8_t channel, uint8_t controller, uint8_t value)
+{
 
     if (channel != midichannel)
         return;
@@ -58,7 +60,6 @@ void APCMini::handleControllerChange(uint8_t channel, uint8_t controller, uint8_
         return;
     faders[fadernum] = value;
 }
-
 
 void APCMini::handleKeyPress(uint8_t note, bool ison)
 {
@@ -71,20 +72,23 @@ void APCMini::handleKeyPress(uint8_t note, bool ison)
     }
 
     int flashBorder = allFlash ? (height * width) : (flashrows * width);
-    if (note < flashBorder){
-        setNote(note,ison, false);
-    } else if (ison && note <= (height+1)*width) { 
-        //a button was pressed, not released 
-        if (note >= height*width) 
+    if (note < flashBorder)
+    {
+        setNote(note, ison, false);
+    }
+    else if (ison && note <= (height + 1) * width)
+    {
+        //a button was pressed, not released
+        if (note >= height * width)
         {
             //stop buttons
-            releaseGroup(note,false);        
-        } 
-        else 
+            releaseGroup(note, false);
+        }
+        else
         {
             //other patterns
             boolean newstat = !allStatus[note];
-            releaseGroup(note,false);
+            releaseGroup(note, false);
             setNote(note, newstat, false);
         }
     }
@@ -93,15 +97,15 @@ void APCMini::handleKeyPress(uint8_t note, bool ison)
 void APCMini::toggleFlashAll()
 {
     allFlash = !allFlash;
-    Midi::sendNoteOn(midichannel, 82,allFlash*100);
-    Midi::waitTxDone(); 
+    Midi::sendNoteOn(midichannel, 82, allFlash * 100);
+    Midi::waitTxDone();
     setAllOff();
 }
 
 void APCMini::setAllOff()
 {
-    for (byte note=0; note<height*width; note++)
-        setNote(note,false,true);
+    for (byte note = 0; note < height * width; note++)
+        setNote(note, false, true);
 }
 
 void APCMini::setNote(uint8_t note, bool ison, bool force)
@@ -112,22 +116,22 @@ void APCMini::setNote(uint8_t note, bool ison, bool force)
     allStatus[note] = ison;
 
     //set led on APC
-    Midi::sendNoteOn(midichannel, note,ison*100);
-    Midi::waitTxDone(); 
+    Midi::sendNoteOn(midichannel, note, ison * 100);
+    Midi::waitTxDone();
 }
 
 void APCMini::releaseGroup(uint8_t note, bool recursiveCall)
 {
-    byte bottom = note%width;
-    for (byte i=bottom; i < height*width; i+=width)
-        setNote(i,false, false);
+    byte bottom = note % width;
+    for (byte i = bottom; i < height * width; i += width)
+        setNote(i, false, false);
 }
 
 bool APCMini::getStatus(uint8_t col, uint8_t row)
 {
-    if (col >= width || row >= height) 
+    if (col >= width || row >= height)
         return false;
-    return allStatus[(height-row-1)*width+col];
+    return allStatus[(height - row - 1) * width + col];
 }
 
 uint8_t APCMini::getFader(uint8_t col)

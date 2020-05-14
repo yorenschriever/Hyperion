@@ -13,6 +13,7 @@ class RGB;
 class GRB;
 class Monochrome12;
 class RGB12;
+class RGBA;
 
 class Monochrome : Colour
 {
@@ -81,6 +82,7 @@ public:
     operator GRB();
     operator Monochrome();
     operator Monochrome12();
+    operator RGBA();
 
     uint8_t R, G, B;
 };
@@ -257,21 +259,7 @@ public:
         this->H = H;
     }
 
-    // inline void ApplyLut(LUT* lut)
-    // {
-    //     R = lut->luts[0%lut->Dimension][R];
-    //     G = lut->luts[1%lut->Dimension][G];
-    //     B = lut->luts[2%lut->Dimension][B];
-    // }
-
-    // inline void dim(uint8_t value)
-    // {
-    //     //is the the correct way to dim HSL?
-    //     //L = (L * value) >> 8;
-    // }
-
     operator RGB();
-    //operator Monochrome();
 
     uint8_t H;
 };
@@ -396,6 +384,7 @@ inline RGB::operator Monochrome() { return Monochrome((R + G + B) / 3); }
 inline RGB::operator RGB12() { return RGB12(R << 4, G << 4, B << 4); }
 inline RGB::operator Monochrome12() { return Monochrome12(((R + G + B) << 4) / 3); }
 inline RGB::operator GRB() { return GRB(G, R, B); }
+inline RGB::operator RGBA() { return RGBA(R, G, B, 255); }
 
 inline RGB12::operator Monochrome() { return Monochrome((R + G + B) / 3); }
 inline RGB12::operator RGB() { return RGB12(R >> 4, G >> 4, B >> 4); }

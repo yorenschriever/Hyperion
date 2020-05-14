@@ -8,8 +8,9 @@
 //mapping of esps gpio pins to channel 1-8 on the front panel
 const int pins[] = {5,4,14,2,15,32,0,33};
 
+//Writes the ledata to the octows2811 style connector on the front panel. 
+//It used esp32's RMT peripheral to do this.
 //Based on NeoPixelBus
-
 template<typename T_SPEED>
 class NeopixelOutput : public Output
 {
@@ -111,7 +112,6 @@ public:
 
             this->length = len;
         }
-        //return len;
     }
 
 private:

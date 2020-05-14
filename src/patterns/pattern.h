@@ -4,8 +4,11 @@
 #include <inttypes.h>
 #include "pattern.h"
 #include "../colours.h"
-#include "lfo.h"
-#include "fade.h"
+#include "helpers/lfo.h"
+#include "helpers/fade.h"
+#include "helpers/interval.h"
+#include "helpers/timeline.h"
+#include "helpers/watcher.h"
 
 template<class T_COLOUR>
 class Pattern {

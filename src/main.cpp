@@ -17,133 +17,17 @@
 #include "colours.h"
 #include "lut.h"
 
-#include "outputs/pwmOutput.h"
-#include "outputs/dmxOutput.h"
-#include "outputs/apcminiOutput.h"
-#include "outputs/neopixelOutput.h"
-#include "inputs/udpInput.h"
-#include "inputs/apcminiInput.h"
-#include "inputs/dmxInput.h"
-#include "inputs/patternInput.h"
 #include "lib/display/display.h"
 #include "lib/rotary/rotary.h"
 #include "lib/apcmini/apcmini.h"
-//#include "patterns/monochromePatterns.h"
-#include "patterns/rgbPatterns.h"
+
+#include "settings/settings.h"
 
 void DisplayFps(void *parameter);
 void clearall();
 void animate(byte r, byte g, byte b);
 
-//I picked colour correction values that Fastled uses for neopixels "TypicalLEDStrip"
-//http://fastled.io/docs/3.1/group___color_enums.html
-//note the different order, fastled uses RGB, luts are in ouput order (GRB)
-LUT* NeopixelLut = new ColourCorrectionLUT(1.5,255, 176, 255, 240); 
-LUT* IncandescentLut = new IncandescentLUT(2.5, 4096, 400);
 LUT* RotaryLut = new ColourCorrectionLUT(2.0, 4096, 150,255,255);
-
-Pipe pipes[] = {
-    // Pipe(
-    //     new DMXInput(1),
-    //     new DMXOutput(1)
-    // ),
-
-    // Pipe(
-    //     //create an apcmini input that creates monochrome patterns
-    //     new ApcminiInput<Monochrome>(10,0,
-    //         new Pattern<Monochrome>[8]{sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
-    //     new DMXOutput(1)),
-
-    // Pipe(
-    //     //create an apcmini input that creates monochrome patterns
-    //     new ApcminiInput<Monochrome>(10,1,  
-    //         new Pattern<Monochrome>[8]{sinPattern, sawPattern, randomPattern, randomPattern2, meteorPattern, randomFadePattern, slowStrobePattern, fastStrobePattern}),
-    //     new DMXOutput(15)),
-
-    // Pipe(
-    //     new PatternInput<RGB>(16, new AnimatedMixingPattern()),
-    //         new NeopixelOutput<Kpbs800>(1),
-    //         Pipe::transfer<RGB,GRB>,
-    //         NeopixelLut
-    //     ),
-
-    Pipe(
-        new ApcminiInput<RGB>(
-            16, //width of the pattern, in pixels
-            2,  //button column on the apc to listen to (0-7)
-            //the patterns to attach to the buttons
-            new Pattern<RGB>*[8]{
-                new RainbowPattern(), 
-                new ColourOrderPattern(), 
-                new MixingPattern(), 
-                new AnimatedMixingPattern(), 
-                new RainbowPattern(), 
-                new RainbowPattern(), 
-                new RainbowPattern(), 
-                new RainbowPattern()
-            }),
-        new NeopixelOutput<Kpbs800>(1),
-        Pipe::transfer<RGB,GRB>,
-        NeopixelLut
-        ),
-
-    // Pipe(
-    //     new UDPInput(9611),
-    //     new NeopixelOutput<Kpbs800>(1),
-    //     Pipe::transfer<RGB,GRB>,
-    //     NeopixelLut),
-
-    // Pipe(
-    //     new UDPInput(9612),
-    //     new NeopixelOutput<Kpbs800>(2),
-    //     Pipe::transfer<RGB,GRB>,
-    //     NeopixelLut),
-
-    // Pipe(
-    //     new UDPInput(9613),
-    //     new NeopixelOutput<Kpbs800>(3),
-    //     Pipe::transfer<RGB,GRB>,
-    //     NeopixelLut),
-
-    // Pipe(
-    //     new UDPInput(9614),
-    //     new NeopixelOutput<Kpbs800>(4),
-    //     Pipe::transfer<RGB,GRB>,
-    //     NeopixelLut),
-
-    // Pipe(
-    //     new UDPInput(9615),
-    //     new NeopixelOutput<Kpbs800>(5),
-    //     Pipe::transfer<RGB,GRB>,
-    //     NeopixelLut),
-
-    // // //Shared with DMX!
-    // // Pipe(
-    // //     new UDPInput(9616),
-    // //     new NeopixelOutput<Kpbs800>(6),
-    // //     //new DMXOutput(),
-    // //     Pipe::transfer<RGB,GRB>,
-    // //     NeopixelLut),
-
-    // Pipe(
-    //     new UDPInput(9617),
-    //     new NeopixelOutput<Kpbs800>(7),
-    //     Pipe::transfer<RGB,GRB>,
-    //     NeopixelLut),
-
-    // Pipe(
-    //     new UDPInput(9618),
-    //     new NeopixelOutput<Kpbs800>(8),
-    //     Pipe::transfer<RGB,GRB>,
-    //     NeopixelLut),
-
-    Pipe(
-        new UDPInput(9619),
-        new PWMOutput(1500),
-        Pipe::transfer<RGB,Monochrome12>,
-        IncandescentLut),
-
-};
 
 void click() { 
     Debug.println("click"); 
@@ -238,20 +122,6 @@ void loop()
         Rotary::setWheel(color);
     }
 }
-
-//function that would display a loading animation on the ledstrips while eth connecting 
-//- 1. should we display that on the outs now that we have a display?
-//- 2. why wait for eth at all? there also also other input channels, so eth might never even connect
-// void animate(byte r, byte g, byte b)
-// {
-//   byte pos = (millis()/200)%4;
-//   for (int i=0;i<4;i++) {
-//     forEach(output)
-//       out[index]->SetPixelColor(i, r,g,i<pos?b:0);
-//   }
-//   forEach(output)
-//     out[index]->Show();
-// }
 
 void clearall()
 {

@@ -5,41 +5,43 @@
 #include "input.h"
 #include "lib/DMX/dmx.h"
 
-class DMXInput : public Input{
+//dmxInput listens to input on the dmx port.
+class DMXInput : public Input
+{
 
-    public:
+public:
+    //startchannel = the first channel it will listen to (1-512)
+    //length = the number of channels is will read
+    DMXInput(int startChannel = 1, int length = 512)
+    {
+        this->startChannel = std::min(512, std::max(1, startChannel));
+        this->length = std::min(513 - this->startChannel, length);
+    }
 
-        DMXInput(int startChannel=1, int length=512){
-            this->startChannel = std::min(512,std::max(1,startChannel));
-            this->length = std::min(513-this->startChannel,length);
-        }
+    virtual void begin()
+    {
+        DMX::Initialize();
+    }
 
-        virtual void begin()
-        {
-            DMX::Initialize();
-        }
+    virtual int loadData(uint8_t *dataPtr)
+    {
+        int frameNumber = DMX::GetFrameNumber();
 
-        virtual int loadData(uint8_t* dataPtr)
-        {
-            int frameNumber = DMX::GetFrameNumber();
-            
-            //check if there is a new frame since last time
-            if (frameNumber==lastFrameNumber)
-                return 0;
+        //check if there is a new frame since last time
+        if (frameNumber == lastFrameNumber)
+            return 0;
 
-            usedframecount++;
-            missedframecount += frameNumber-lastFrameNumber-1;
-            lastFrameNumber = frameNumber;
+        usedframecount++;
+        missedframecount += frameNumber - lastFrameNumber - 1;
+        lastFrameNumber = frameNumber;
 
-            memcpy(dataPtr,DMX::GetDataPtr()+startChannel,length);
+        memcpy(dataPtr, DMX::GetDataPtr() + startChannel, length);
 
-            return length;
-        }
+        return length;
+    }
 
-    private:
-        int startChannel;
-        int length;
-        unsigned int lastFrameNumber=0;
-
-
+private:
+    int startChannel;
+    int length;
+    unsigned int lastFrameNumber = 0;
 };

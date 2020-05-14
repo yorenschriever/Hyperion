@@ -19,15 +19,22 @@
 #define MODE1_RESTART 0x80       /**< Restart enabled */
 #define PCA9685_PRESCALE 0xFE    /**< Prescaler for PWM output frequency */
 
-const byte PWM_LED_ORDER[] = {9, 10,8,2,1,0,7,6,5,4,3,11} ;//numbering on backside, pcb has a different numbering
+const byte PWM_LED_ORDER[] = {9, 10, 8, 2, 1, 0, 7, 6, 5, 4, 3, 11}; //numbering on backside, pcb has a different numbering
 
 #define SDAPIN 13
 #define SCLPIN 16
 
+//This class controls the 12 pwm outputs on the back of the device
 class PWMOutput : public Output
 {
 public:
-    //PWPM frequency in Hz, choose 100 for incandescent and 1500 for led
+    //PWM frequency in Hz, choose 100 for incandescent and 1500 for led
+    //A higher frequency looks better, because it produces less flicker.
+    //This works great for leds, but if currents are high (indandescent)
+    //The mosfets will heat up quickly. Also the produced noise will be
+    //more audible. Indandescent lamps have a slow response, so you wont
+    //see the flicker as mucht. Setting the pwm frequency lower is better
+    //in that case.
     PWMOutput(int frequency) : _i2c(&Wire)
     {
         this->frequency = frequency;
@@ -39,8 +46,8 @@ public:
         //this memcpy is not aware that is it actually copying uint16_ts byte by byte
         //(provided you actually converted to RGB12 format)
         int copylength = min(size, (int)sizeof(this->values) - index);
-        if (copylength>0)
-            memcpy((uint8_t*)this->values + index, data, copylength);
+        if (copylength > 0)
+            memcpy((uint8_t *)this->values + index, data, copylength);
     }
 
     boolean Ready()
@@ -84,7 +91,7 @@ public:
 private:
     uint16_t values[12];
     uint16_t valuesBuf[12];
-    TwoWire *_i2c; 
+    TwoWire *_i2c;
     int frequency;
 
     volatile boolean busy = false;
@@ -209,6 +216,5 @@ private:
             }
             delay(5);
         }
-
     }
 };

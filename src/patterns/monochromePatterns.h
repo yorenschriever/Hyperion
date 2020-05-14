@@ -1,41 +1,87 @@
 #pragma once
 #include "pattern.h"
 
-inline Monochrome sinPattern(int index, int width, Monochrome* lastValue){
-    return (uint8_t) (127.f + 127.f * cos(float(index)/10.f - millis()/100.));
-}
+class SinPattern : public Pattern<Monochrome>
+{
+    inline void Calculate(Monochrome *pixels, int width, bool firstFrame) override
+    {
+        for (int index = 0; index < width; index++)
+            pixels[index] = (uint8_t)(127.f + 127.f * cos(float(index) / 10.f - millis() / 100.));
+    }
+};
 
-inline Monochrome sawPattern(int index, int width, Monochrome* lastValue){
-    return millis()/50 + index*2;
-}
+class SawPattern : public Pattern<Monochrome>
+{
+    inline void Calculate(Monochrome *pixels, int width, bool firstFrame) override
+    {
+        for (int index = 0; index < width; index++)
+            pixels[index] = millis() / 50 + index * 2;
+    }
+};
 
-inline Monochrome randomPattern(int index, int width, Monochrome* lastValue){
-    return random(0,100) < 10 ? 255:0;
-}
+class RandomPattern : public Pattern<Monochrome>
+{
+    inline void Calculate(Monochrome *pixels, int width, bool firstFrame) override
+    {
+        for (int index = 0; index < width; index++)
+            pixels[index] = random(0, 100) < 10 ? 255 : 0;
+    }
+};
 
-inline Monochrome randomPattern2(int index, int width, Monochrome* lastValue){
-    return random(0,100) < 1 ? 255:0;
-}
+class RandomPattern2 : public Pattern<Monochrome>
+{
+    inline void Calculate(Monochrome *pixels, int width, bool firstFrame) override
+    {
+        for (int index = 0; index < width; index++)
+            pixels[index] = random(0, 100) < 1 ? 255 : 0;
+    }
+};
 
-inline Monochrome randomFadePattern(int index, int width, Monochrome* lastValue){
-    uint8_t lastPixelvalue = lastValue[index].L;
-    if (random(0,100) < 1)
-        return 255;
-    return max(lastPixelvalue - 10,0);
-}
+class RandomFadePattern : public Pattern<Monochrome>
+{
+    inline void Calculate(Monochrome *pixels, int width, bool firstFrame) override
+    {
+        for (int index = 0; index < width; index++)
+        {
+            uint8_t lastPixelvalue = pixels[index].L;
+            if (random(0, 100) < 1)
+                pixels[index] = 255;
+            else
+                pixels[index] = max(lastPixelvalue - 10, 0);
+        }
+    }
+};
 
-inline Monochrome meteorPattern(int index, int width, Monochrome* lastValue){
-    int lastSelfvalue = lastValue[index].L;
-    int lastNeighbourvalue = lastValue[(index+1) % width].L;
-    if (random(0,300) < 1)
-        return 255;
-    return max(max(lastSelfvalue-25,lastNeighbourvalue-10),0);
-}
+class MeteorPattern : public Pattern<Monochrome>
+{
+    inline void Calculate(Monochrome *pixels, int width, bool firstFrame) override
+    {
+        for (int index = 0; index < width; index++)
+        {
+            int lastSelfvalue = pixels[index].L;
+            int lastNeighbourvalue = pixels[(index + 1) % width].L;
+            if (random(0, 300) < 1)
+                pixels[index] = 255;
+            else
+                pixels[index] = max(max(lastSelfvalue - 25, lastNeighbourvalue - 10), 0);
+        }
+    }
+};
 
-inline Monochrome slowStrobePattern(int index, int width, Monochrome* lastValue){
-    return millis()%100 < 25 ? 255:0;
-}
+class SlowStrobePattern : public Pattern<Monochrome>
+{
+    inline void Calculate(Monochrome *pixels, int width, bool firstFrame) override
+    {
+        for (int index = 0; index < width; index++)
+            pixels[index] = millis() % 100 < 25 ? 255 : 0;
+    }
+};
 
-inline Monochrome fastStrobePattern(int index, int width, Monochrome* lastValue){
-    return millis()%50 < 25 ? 255:0;
-}
+class FastStrobePattern : public Pattern<Monochrome>
+{
+    inline void Calculate(Monochrome *pixels, int width, bool firstFrame) override
+    {
+        for (int index = 0; index < width; index++)
+            pixels[index] = millis() % 50 < 25 ? 255 : 0;
+    }
+};
