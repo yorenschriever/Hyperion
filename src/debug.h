@@ -2,6 +2,9 @@
 
 #include <Arduino.h>
 
+//uncomment this line to enable debuggen over the usb port. 
+//this means that midi inputs wil be disabled, because they share
+//the same uart.
 //#define DEBUGOVERSERIAL
 
 #ifdef DEBUGOVERSERIAL

@@ -3,6 +3,9 @@
 #include <inttypes.h>
 #include <math.h>
 
+//LUTs, or look up tables, can help you tweak the colours, and make them look better.
+//For example luts can help you with gamma correction, colour correction, and solve
+//other non linearities in the lamps response.
 class LUT 
 {
 public:
@@ -11,6 +14,7 @@ public:
     uint16_t** luts;
 };
 
+//simple LUT that applies gamma correction only
 class GammaLUT : public LUT
 {
     public:
@@ -26,6 +30,9 @@ class GammaLUT : public LUT
         uint16_t lut[256];
 };
 
+//ColourCorrectionLut applies the same gamma correction to all channels, and also
+//gives you the option to scale the output of the 3 channels. You can use this if
+//get a better white balance.
 //This colour correction luts follows the colour order of the output. I.e.: If You use GRB as output colour,
 //then colour1 will be G. 
 class ColourCorrectionLUT  : public LUT
@@ -51,6 +58,10 @@ class ColourCorrectionLUT  : public LUT
         uint16_t lut3[256];
 };
 
+//incandescentlut is a lookuptable that applies gamma correction, but also 
+//applies a base value. This means that even when driven with a value of 0,
+//a little power will still be sent to keep the filament just hot enough to 
+//quickly respond, but not enough to light up.
 class IncandescentLUT  : public LUT
 {
     public:

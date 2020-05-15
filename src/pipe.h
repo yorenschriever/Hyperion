@@ -10,6 +10,13 @@ using HandlerFunc = int (*)(uint8_t *data, int length, Output *out, LUT *lut);
 const int MTU = 3100;
 uint8_t data[MTU]; //i used to malloc this, but the MTU is 1500, so i just set it to the upped bound
 
+//Pipes are object that tie everything together: a pipe has an input and an output.
+//The input privodes the data and the output sends it out to the lamps.
+//Additionally you can provide a custom transfer function. This is the function that will copy the data
+//from input to output. One that is often used is the static function 
+//Pipe::transfer<SourceColour,TargetColour>. This function will convert the data from source format 
+//to target format. eg. from RGB to RGBW or from RGB to Monochrome. The pipe also stores a reference
+//to the lut that that the transfer function can apply. 
 class Pipe
 {
 public:

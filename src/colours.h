@@ -4,6 +4,22 @@
 #include "debug.h"
 #include "lut.h"
 
+
+//Colours currently fulfill 2 purposes:
+//1. act as a struct to store colur data. This can be used by the 
+//transfer function to convert different colour spaces.
+//2. as a method to create patterns: layer colours on top of eachother
+//I have chosen to combine both things into a single set of classes.
+//Colours should support operators to convert themselves to other other
+//colours. This will be used by then transfer function when casting one
+//colour to another
+//They need to have a default constructor that initializes to colour 
+//to black. And also a constructor to provide values for all their channels.
+//the method dim() is used to to decrease the bightness, for example
+//by the faders of the apcmini.
+//RGBA is the most advanced colour, it supports alpha, colour blending, 
+//colour addition etc. I use RGBA a lot to create contents for patterns
+//and then cast to RGB to send it out to the leds. 
 class Colour
 {
 };

@@ -6,3 +6,4 @@
 sdkconfig
 poc
 settings/settings.h
+.travis.yml
