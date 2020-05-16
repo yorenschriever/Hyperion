@@ -4,6 +4,8 @@ The device is based on an Olimex ESP32-POE. It supports DMX, led strips like ws2
 
 [https://www.olimex.com/Products/IoT/ESP32/ESP32-POE/open-source-hardware](https://www.olimex.com/Products/IoT/ESP32/ESP32-POE/open-source-hardware)
 
+![HyperHyper](https://github.com/yorenschriever/Hyperion/blob/master/doc/hyperhyper-small.png)
+
 # Getting started
 
 ## Building the project
