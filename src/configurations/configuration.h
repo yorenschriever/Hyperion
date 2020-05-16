@@ -1,1 +1,1 @@
-configurations/selftest.h
+selftest.h

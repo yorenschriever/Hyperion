@@ -58,7 +58,7 @@ You can program the device over ethernet or WiFi. For that to work you have to b
 
 You can upload by clicking the arrow icon in the status bar, or by typing
 
-    pio run -t network
+    pio run -e ota -t upload
 
 The device creates a mDNS record for 'Hyperion.local' on startup, and this command will upload to that address. If you have multiple devices on the network you have to modify the upload command to use the specific ip address. 
 
@@ -72,7 +72,7 @@ The micro-usb port on the esp32-poe and the usb-midi input on the front are shar
 
 To upload over usb type: 
 
-    pio run -t usb
+    pio run -e usb -t upload
 
 
 ## Connections
