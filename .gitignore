@@ -5,5 +5,5 @@
 .vscode/ipch
 sdkconfig
 poc
-settings/settings.h
+configurations/configuration.h
 .travis.yml
