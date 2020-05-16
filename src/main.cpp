@@ -21,7 +21,7 @@
 #include "lib/rotary/rotary.h"
 #include "lib/apcmini/apcmini.h"
 
-#include "settings/settings.h"
+#include "configurations/configuration.h"
 
 void DisplayFps(void *parameter);
 void clearall();
