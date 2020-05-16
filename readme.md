@@ -1,4 +1,4 @@
-# What is it
+# What is this thing?!
 This is a light driver that drives leds strips, dmx, and pwm signals. The signal be routed from the inputs or generated locally. 
 The device is based on an Olimex ESP32-POE. It supports DMX, led strips like ws2812, ws2801, apa106, but can also drive  "dumb" lights like non-addressable led strips or incandescent lights using PWM. It can get its input from DMX, ethernet (ArtNet), SD card or generate patterns locally. Patterns can be controlled with an usb midi device, WiFi or BLE. 
 
