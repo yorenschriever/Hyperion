@@ -95,7 +95,7 @@ Pipe pipes[] = {
         ),
 
     Pipe(
-        new PatternInput<RGB>(16,new WatcherPattern()),
+        new PatternInput<RGB>(16,new WatcherPattern2()),
         new NeopixelOutput<Kpbs800>(1),
         Pipe::transfer<RGB,GRB>,
         NeopixelLut

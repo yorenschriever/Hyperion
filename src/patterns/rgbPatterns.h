@@ -163,17 +163,14 @@ class WatcherPattern : public Pattern<RGB>
     }
 };
 
-//attach the wachter to the midi driver
+//attach the wachter to the midi driver to check for button presses
 class WatcherPattern2 : public Pattern<RGB>
 {
-    Watcher<uint8_t> watcher = Watcher<uint8_t>(getMidiButtonStatus, Rising);
+    //use a lambda function to pass the note status of a specific note to the watcher
+    Watcher<uint8_t> watcher = Watcher<uint8_t>([] () { return Midi::noteStatus(1); }, Rising);
 
     Fade fader = Fade(Linear, 300, Down);
     RGBA red = RGBA(255, 0, 0, 255);
-
-    static uint8_t getMidiButtonStatus(){
-        return Midi::noteStatus(1);
-    }
 
     void Initialize(){
         Midi::Initialize();
