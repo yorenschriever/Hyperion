@@ -92,6 +92,12 @@ A midi controller can be connected to device to select patterns, or to change pa
 
 Pixel data can be sent or received through the rj-45 dmx connector. Some devices have an rj45 port, so you can hook them up with a network cable, but for classic dmx connectors you need an adapter like ADJ ACR­J453PM or ADJ ACRJ453PFM. An independent DMX input and output are wired to this port, and you can use them at the same time. The DMX output is connected to the orange/brown pairs, and the DMX input to green/blue. This means that if you use a normal network cable, you are connected to the DMX output, and if you use a cross cable you will be connected to the input. 
 
+![DMX connectors](https://github.com/yorenschriever/Hyperion/blob/master/doc/DMXconnectors.png)
+
+The 4 possible connections schemes for DMX are:
+
+![DMX connections](https://github.com/yorenschriever/Hyperion/blob/master/doc/DMXconnections.png)
+
 **PWM**
 
 The 12 PWM channels can handle 5A each, with a maximum of 30A combined. They use N-channel mosfets, so you can use use them with common-anode (CA) led strips. The mosfets are temperature and over-current protected. The indicator leds are wired through the mosfets, so if the protection kicks in, these leds reflect the actual output status.
