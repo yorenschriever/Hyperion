@@ -36,7 +36,7 @@ Now you can checkout the project
 
 The project contains multiple example configuration files. The project looks for a file called configurations/configuration.h. To get started you can create a symlink to selftest.h. On unix use:
 
-    ln -s configurations/selftest.h configurations/configuration.h
+    cd src/configurations && ln -s selftest.h configuration.h
 
 Or on windows use:
 
