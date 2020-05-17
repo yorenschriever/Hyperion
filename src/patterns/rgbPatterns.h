@@ -185,3 +185,15 @@ class WatcherPattern2 : public Pattern<RGB>
             pixels[index] = static_cast<RGBA>(static_cast<RGB>(Hue(Midi::controllerValue(49)*2))) * fader.getValue();
     }
 };
+
+
+class HSLLFOPattern : public Pattern<RGB>
+{
+    LFO<SinFast> lfo = LFO<SinFast>(2500);
+
+    inline void Calculate(RGB *pixels, int width, bool firstFrame) override
+    {
+        for (int index = 0; index < width; index++)
+            pixels[index] = HSL(255,255,255*lfo.getValue());
+    }
+};

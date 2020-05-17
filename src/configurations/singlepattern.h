@@ -18,9 +18,9 @@ LUT* NeopixelLut = new ColourCorrectionLUT(1.5,255, 176, 255, 240);
 Pipe pipes[] = {
 
     Pipe(
-        new PatternInput<RGB>(16,new WatcherPattern2()),
+        new PatternInput<RGB>(16,new HSLLFOPattern()),
         new NeopixelOutput<Kpbs800>(1),
-        Pipe::transfer<RGB,GRB>,
+        Pipe::transfer<RGB,GRBW>,
         NeopixelLut
     )
 

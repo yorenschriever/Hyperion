@@ -26,6 +26,7 @@ class Colour
 
 class Monochrome;
 class RGB;
+class GRBW;
 class GRB;
 class Monochrome12;
 class RGB12;
@@ -99,6 +100,7 @@ public:
     operator Monochrome();
     operator Monochrome12();
     operator RGBA();
+    operator GRBW();
 
     uint8_t R, G, B;
 };
@@ -188,6 +190,44 @@ public:
     uint16_t R, G, B;
 };
 
+class GRBW : Colour
+{
+public:
+    GRBW()
+    {
+        this->R = 0;
+        this->G = 0;
+        this->B = 0;
+        this->W = 0; 
+    }
+
+    GRBW(uint8_t G, uint8_t R, uint8_t B, uint8_t W)
+    {
+        this->R = R;
+        this->G = G;
+        this->B = B;
+        this->W = W;
+    }
+
+    inline void ApplyLut(LUT *lut)
+    {
+        R = lut->luts[0 % lut->Dimension][R];
+        G = lut->luts[1 % lut->Dimension][G];
+        B = lut->luts[2 % lut->Dimension][B];
+        W = lut->luts[3 % lut->Dimension][W];
+    }
+
+    inline void dim(uint8_t value)
+    {
+        R = (R * value) >> 8;
+        G = (G * value) >> 8;
+        B = (B * value) >> 8;
+        W = (W * value) >> 8;
+    }
+
+    uint8_t G, R, B, W;
+};
+
 class Monochrome12 : Colour
 {
 public:
@@ -252,7 +292,9 @@ public:
 
     inline void dim(uint8_t value)
     {
-        //is the the correct way to dim HSL?
+        //FIXME this is not the the correct way to dim HSL, 
+        //because for example whites will dim via a fully saturated colour now 
+        //the should become less white
         L = (L * value) >> 8;
     }
 
@@ -401,6 +443,10 @@ inline RGB::operator RGB12() { return RGB12(R << 4, G << 4, B << 4); }
 inline RGB::operator Monochrome12() { return Monochrome12(((R + G + B) << 4) / 3); }
 inline RGB::operator GRB() { return GRB(G, R, B); }
 inline RGB::operator RGBA() { return RGBA(R, G, B, 255); }
+inline RGB::operator GRBW() { 
+    uint8_t W = min(min(R,G),B);
+    return GRBW(G-W, R-W, B-W, W); 
+}
 
 inline RGB12::operator Monochrome() { return Monochrome((R + G + B) / 3); }
 inline RGB12::operator RGB() { return RGB12(R >> 4, G >> 4, B >> 4); }
@@ -418,9 +464,9 @@ inline HSV::operator Monochrome() { return Monochrome(V); }
 inline float hueToRGB(float p, float q, float t){
     if(t < 0) t += 1;
     if(t > 1) t -= 1;
-    if(t < 1/6) return p + (q - p) * 6 * t;
-    if(t < 1/2) return q;
-    if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+    if(t < 1.f/6) return p + (q - p) * 6 * t;
+    if(t < 1.f/2) return q;
+    if(t < 2.f/3) return p + (q - p) * (2.f/3 - t) * 6;
     return p;
 }
 
@@ -429,7 +475,7 @@ inline HSL::operator RGB()
     float r, g, b, h, s, l;
 
     //Scale each value to 0.0 - 1.0, from type int:
-    h = (float)H / 360.0;  //Hue is represented as a range of 360 degrees
+    h = (float)H / 255.0;  //Hue is represented as a range of 360 degrees, mapped on a value range from 0-255
     s = (float)S / 255.0;  //Saturation 
     l = (float)L / 255.0;  //Lightness
     
@@ -439,11 +485,11 @@ inline HSL::operator RGB()
     }
     else                //
     {
-        float q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-        float p = 2 * l - q;
-        r = hueToRGB(p, q, h + 1/3);
+        float q = l < 0.5 ? l * (1. + s) : l + s - l * s;
+        float p = 2. * l - q;
+        r = hueToRGB(p, q, h + 1./3);
         g = hueToRGB(p, q, h);
-        b = hueToRGB(p, q, h - 1/3);
+        b = hueToRGB(p, q, h - 1./3);
     }
 
     return RGB(r*255,g*255,b*255);
