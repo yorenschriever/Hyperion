@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "network.h"
 #include "debug.h"
-#include "lib/display/display.h"
+#include "hardware/display/display.h"
 
 const unsigned int nodeid = 123;
 

@@ -7,14 +7,14 @@ set(app_sources
 	"semaphores.cpp"
 
 	"main.cpp"
-	"lib/UDPFast/UDPFast.cpp"
-	"lib/dmx/dmx.cpp"
-	"lib/display/display.cpp"
-	"lib/display/Adafruit_GFX.cpp"
-	"lib/display/Adafruit_SSD1306.cpp"
-	"lib/rotary/rotary.cpp"
-	"lib/midi/midi.cpp"
-	"lib/apcmini/apcmini.cpp"
+	"hardware/UDPFast/UDPFast.cpp"
+	"hardware/dmx/dmx.cpp"
+	"hardware/display/display.cpp"
+	"hardware/display/Adafruit_GFX.cpp"
+	"hardware/display/Adafruit_SSD1306.cpp"
+	"hardware/rotary/rotary.cpp"
+	"hardware/midi/midi.cpp"
+	"hardware/apcmini/apcmini.cpp"
 )
 
 idf_component_register(SRCS ${app_sources} INCLUDE_DIRS ".")

@@ -2,7 +2,7 @@
 
 #include "Output.h"
 #include <Arduino.h>
-#include "../lib/midi/midi.h"
+#include "../hardware/midi/midi.h"
 
 #define NUMBUTTONS 64
 

@@ -17,9 +17,9 @@
 #include "colours.h"
 #include "lut.h"
 
-#include "lib/display/display.h"
-#include "lib/rotary/rotary.h"
-#include "lib/apcmini/apcmini.h"
+#include "hardware/display/display.h"
+#include "hardware/rotary/rotary.h"
+#include "hardware/apcmini/apcmini.h"
 
 #include "configurations/configuration.h"
 

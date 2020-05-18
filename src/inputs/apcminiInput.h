@@ -1,7 +1,7 @@
 #pragma once
 
 #include "input.h"
-#include "../lib/apcmini/apcmini.h"
+#include "../hardware/apcmini/apcmini.h"
 #include "../patterns/pattern.h"
 
 //this class attaches a provided set of 8 patterns to a column on the APCmini.

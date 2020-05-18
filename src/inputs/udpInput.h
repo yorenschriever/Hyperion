@@ -1,7 +1,7 @@
 #pragma once
 
 #include "input.h"
-#include "lib/UDPFast/UDPFast.h"
+#include "hardware/UDPFast/UDPFast.h"
 
 //UdpInput opens an UDP port, and listens for incoming packages. Each package
 //will correspond to 1 new frame. I enabled IP reassembly in sdkconfig.defaults,

@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cstring>
 #include "input.h"
-#include "lib/DMX/dmx.h"
+#include "hardware/DMX/dmx.h"
 
 //dmxInput listens to input on the dmx port.
 class DMXInput : public Input

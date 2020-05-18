@@ -2,7 +2,7 @@
 
 #include "Output.h"
 #include <Arduino.h>
-#include <lib/dmx/dmx.h>
+#include <hardware/dmx/dmx.h>
 #include "debug.h"
 
 //DMXoutput writes leddata to the dmx output. You can use multiple dmxoutputs

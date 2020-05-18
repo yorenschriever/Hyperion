@@ -5,7 +5,7 @@
 #include <Update.h>
 #include "ota.h"
 #include "debug.h"
-#include "lib/display/display.h"
+#include "hardware/display/display.h"
 
 WebServer otaserver(81);
 

@@ -1,6 +1,6 @@
 #pragma once
 #include "pattern.h"
-#include "lib/rotary/rotary.h"
+#include "hardware/rotary/rotary.h"
 
 class RainbowPattern : public Pattern<RGB>
 {
