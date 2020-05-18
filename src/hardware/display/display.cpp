@@ -1,6 +1,4 @@
 #include <Wire.h>
-//#include "../../.pio/libdeps/esp32-poe/Adafruit GFX Library_ID13/Adafruit_GFX.h"
-//#include "../../.pio/libdeps/esp32-poe/Adafruit SSD1306_ID571/Adafruit_SSD1306.h"
 
 #include "Adafruit_GFX.h"
 #include "Adafruit_SSD1306.h"
@@ -18,7 +16,6 @@
 //Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, NULL);
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire);
 
-volatile bool Display::dirty = false;
 int Display::fpsin = 1;
 int Display::fpsout = 1;
 int Display::framemiss = 0;
@@ -28,6 +25,7 @@ bool Display::midiconnected = false;
 int Display::numleds = 0;
 bool Display::dfu = false;
 int Display::dfupercentage = 0;
+xSemaphoreHandle Display::dirtySemaphore=xSemaphoreCreateBinary();
 
 Display::Display()
 {
@@ -69,7 +67,7 @@ void Display::setFPS(int newfpsin, int newfpsout, int misses)
     fpsin = newfpsin;
     fpsout = newfpsout;
     framemiss = misses;
-    dirty = true;
+    //xSemaphoreGive(dirtySemaphore);
 }
 
 void Display::setEthernet(bool connected)
@@ -77,7 +75,7 @@ void Display::setEthernet(bool connected)
     if (ethconnected == connected)
         return;
     ethconnected = connected;
-    dirty = true;
+    //xSemaphoreGive(dirtySemaphore);
 }
 
 void Display::setDMX(bool connected)
@@ -85,7 +83,7 @@ void Display::setDMX(bool connected)
     if (dmxconnected == connected)
         return;
     dmxconnected = connected;
-    dirty = true;
+    //xSemaphoreGive(dirtySemaphore);
 }
 
 void Display::setMidi(bool connected)
@@ -93,7 +91,7 @@ void Display::setMidi(bool connected)
     if (midiconnected == connected)
         return;
     midiconnected = connected;
-    dirty = true;
+    //xSemaphoreGive(dirtySemaphore);
 }
 
 void Display::setLeds(int leds)
@@ -101,7 +99,7 @@ void Display::setLeds(int leds)
     if (numleds == leds)
         return;
     numleds = leds;
-    dirty = true;
+    //xSemaphoreGive(dirtySemaphore);
 }
 
 void Display::setDFU(bool dfu, int percentage)
@@ -110,17 +108,20 @@ void Display::setDFU(bool dfu, int percentage)
         return;
     Display::dfu = dfu;
     Display::dfupercentage = percentage;
-    dirty = true;
+    //xSemaphoreGive(dirtySemaphore);
+}
+
+void Display::show(){
+    xSemaphoreGive(dirtySemaphore);
 }
 
 void Display::displayTask(void *pvParameters)
 {
     for (;;)
     {
-        if (dirty)
+        if (xSemaphoreTake(dirtySemaphore, 0)) //wait for show() to be called
         {
             updateFrame();
-            dirty = false; //todo only set to false if it actually updated
         }
         delay(10);
     }

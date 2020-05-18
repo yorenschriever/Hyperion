@@ -178,6 +178,7 @@ void UpdateDisplay(void *parameter)
         Display::setDMX(DMX::IsHealthy());
         Display::setMidi(Midi::isConnected());
         Display::setEthernet(Ethernet::isConnected());
+        Display::show();
 
         delay(500);
     }
