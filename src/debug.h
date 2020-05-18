@@ -2,6 +2,10 @@
 
 #include <Arduino.h>
 
+//I still have to write a proper debug class.
+//currently i either throw away all message, or write them to the serial console,
+//depending on the setting below
+
 //uncomment this line to enable debuggen over the usb port. 
 //this means that midi inputs wil be disabled, because they share
 //the same uart.

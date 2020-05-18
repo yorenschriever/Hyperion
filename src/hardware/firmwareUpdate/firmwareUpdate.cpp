@@ -3,13 +3,13 @@
 #include <WebServer.h>
 #include <ESPmDNS.h>
 #include <Update.h>
-#include "ota.h"
+#include "firmwareUpdate.h"
 #include "debug.h"
 #include "hardware/display/display.h"
 
 WebServer otaserver(81);
 
-void setupOta()
+void FirmwareUpdate::Initialize()
 {
     MDNS.begin("Hyperion");
 
@@ -70,7 +70,7 @@ void setupOta()
     otaserver.begin();
 }
 
-void handleOta()
+void FirmwareUpdate::Process()
 {
     otaserver.handleClient();
 }

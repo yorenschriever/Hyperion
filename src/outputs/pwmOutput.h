@@ -3,26 +3,11 @@
 #include "Output.h"
 #include <Arduino.h>
 #include <Wire.h>
+#include "hardware/pca9685/pca9685.h"
 
-#include "semaphores.h"
-
-#define PCA9685_I2C_ADDRESS 0x40 /**< Default PCA9685 I2C Slave Address */
-#define PCA9685_MODE1 0x00       /**< Mode Register 1 */
-#define PCA9685_MODE2 0x01       /**< Mode Register 2 */
-#define MODE1_RESTART 0x80       /**< Restart enabled */
-#define PCA9685_LED0_ON_L 0x06   /**< LED0 on tick, low byte*/
-#define PCA9685_PRESCALE_MIN 3   /**< minimum prescale value */
-#define PCA9685_PRESCALE_MAX 255 /**< maximum prescale value */
-#define MODE1_SLEEP 0x10         /**< Low power mode. Oscillator off */
-#define MODE1_AI 0x20            /**< Auto-Increment enabled */
-#define MODE1_EXTCLK 0x40        /**< Use EXTCLK pin clock */
-#define MODE1_RESTART 0x80       /**< Restart enabled */
-#define PCA9685_PRESCALE 0xFE    /**< Prescaler for PWM output frequency */
+#define PCA9685_LED0_ON_L 0x06 
 
 const byte PWM_LED_ORDER[] = {9, 10, 8, 2, 1, 0, 7, 6, 5, 4, 3, 11}; //numbering on backside, pcb has a different numbering
-
-#define SDAPIN 13
-#define SCLPIN 16
 
 //This class controls the 12 pwm outputs on the back of the device
 class PWMOutput : public Output
@@ -35,7 +20,7 @@ public:
     //more audible. Indandescent lamps have a slow response, so you wont
     //see the flicker as mucht. Setting the pwm frequency lower is better
     //in that case.
-    PWMOutput(int frequency) : _i2c(&Wire)
+    PWMOutput(int frequency) 
     {
         this->frequency = frequency;
     }
@@ -63,15 +48,8 @@ public:
 
     void Begin() override
     {
-
-        _i2c->begin(SDAPIN, SCLPIN);
-        _i2c->setClock(1000000);
-        this->reset();
-
-        //todo make setting
-        //this->setPWMFreq(1500);
-        //this->setPWMFreq(100);
-        setPWMFreq(frequency);
+        PCA9685::Initialize();
+        PCA9685::SetFrequency(frequency);
 
         dirtySemaphore = xSemaphoreCreateBinary();
         xTaskCreatePinnedToCore(SendAsync, "SendPWMAsync", 10000, this, 6, NULL, 1);
@@ -91,61 +69,10 @@ public:
 private:
     uint16_t values[12];
     uint16_t valuesBuf[12];
-    TwoWire *_i2c;
     int frequency;
 
     volatile boolean busy = false;
     xSemaphoreHandle dirtySemaphore;
-
-    void reset()
-    {
-        write8(PCA9685_MODE1, MODE1_RESTART);
-        delay(10);
-    }
-
-    void write8(uint8_t addr, uint8_t d)
-    {
-        _i2c->beginTransmission(PCA9685_I2C_ADDRESS);
-        _i2c->write(addr);
-        _i2c->write(d);
-        _i2c->endTransmission();
-    }
-
-    uint8_t read8(uint8_t addr)
-    {
-        _i2c->beginTransmission(PCA9685_I2C_ADDRESS);
-        _i2c->write(addr);
-        _i2c->endTransmission();
-
-        _i2c->requestFrom((uint8_t)PCA9685_I2C_ADDRESS, (uint8_t)1);
-        return _i2c->read();
-    }
-
-    void setPWMFreq(float freq)
-    {
-
-        // Range output modulation frequency is dependant on oscillator
-        if (freq < 1)
-            freq = 1;
-        if (freq > 3500)
-            freq = 3500; // Datasheet limit is 3052=50MHz/(4*4096)
-
-        float prescaleval = ((25000000 / (freq * 4096.0)) + 0.5) - 1;
-        if (prescaleval < PCA9685_PRESCALE_MIN)
-            prescaleval = PCA9685_PRESCALE_MIN;
-        if (prescaleval > PCA9685_PRESCALE_MAX)
-            prescaleval = PCA9685_PRESCALE_MAX;
-        uint8_t prescale = (uint8_t)prescaleval;
-
-        uint8_t oldmode = read8(PCA9685_MODE1);
-        uint8_t newmode = (oldmode & ~MODE1_RESTART) | MODE1_SLEEP; // sleep
-        write8(PCA9685_MODE1, newmode);                             // go to sleep
-        write8(PCA9685_PRESCALE, prescale);                         // set the prescaler
-        write8(PCA9685_MODE1, oldmode);
-        delay(5);
-        // This sets the MODE1 register to turn on auto increment.
-        write8(PCA9685_MODE1, oldmode | MODE1_RESTART | MODE1_AI);
-    }
 
     static void SendAsync(void *param) //todo 2 functions: the background task and the actual sending part
     {
@@ -202,16 +129,8 @@ private:
                     buffer[i * 4 + 4] = (off >> 8);
                 }
 
-                if (xSemaphoreTake(i2cMutex, (TickType_t)10) != pdTRUE)
-                {
-                    this2->busy = false;
-                    continue; //wait wait most 10 ticks (ms) to get the semaphore, otherwise give up
-                }
+                PCA9685::WritePWMData(buffer,sizeof(buffer),10);
 
-                this2->_i2c->setClock(1000000);
-                this2->_i2c->writeTransmission(PCA9685_I2C_ADDRESS, buffer, sizeof(buffer), true);
-
-                xSemaphoreGive(i2cMutex);
                 this2->busy = false;
             }
             delay(5);

@@ -2,11 +2,10 @@
 # without default 'CMakeLists.txt' file.
 
 set(app_sources
-	"ota.cpp"
-	"semaphores.cpp"
-
 	"main.cpp"
+
 	"hardware/ethernet/ethernet.cpp"
+	"hardware/firmwareUpdate/firmwareUpdate.cpp"
 	"hardware/UDPFast/UDPFast.cpp"
 	"hardware/dmx/dmx.cpp"
 	"hardware/display/display.cpp"
@@ -15,6 +14,8 @@ set(app_sources
 	"hardware/rotary/rotary.cpp"
 	"hardware/midi/midi.cpp"
 	"hardware/apcmini/apcmini.cpp"
+	"hardware/pca9685/pca9685.cpp"
+	"hardware/sharedResources.cpp"
 )
 
 idf_component_register(SRCS ${app_sources} INCLUDE_DIRS ".")

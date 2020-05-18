@@ -3,7 +3,7 @@
 #include <inttypes.h>
 #include "inputs/input.h"
 #include "outputs/output.h"
-#include "lut.h"
+#include "luts/lut.h"
 
 using HandlerFunc = int (*)(uint8_t *data, int length, Output *out, LUT *lut);
 

@@ -9,6 +9,7 @@
 #include "inputs/patternInput.h"
 #include "patterns/rgbPatterns.h"
 #include "patterns/monochromePatterns.h"
+#include "luts/colourCorrectionLut.h"
 
 //I picked colour correction values that Fastled uses for neopixels "TypicalLEDStrip"
 //http://fastled.io/docs/3.1/group___color_enums.html

@@ -1,29 +1,25 @@
 #include "rotary.h"
 #include <Arduino.h>
 #include <Wire.h>
-
-#include "semaphores.h"
-
-#define SDAPIN 13
-#define SCLPIN 16
+#include "luts/colourCorrectionLut.h"
+#include "../sharedResources.h"
 
 #define CLKPIN 35
 #define DATAPIN 34
 #define BTNPIN 39
 
-#define PCA9685_I2C_ADDRESS 0x40
 #define PCA9685_LED0_ON_L 0x06
 
-#define INVERT true
+#define INVERT true //the leds are inverted, so writing 4096 turns them off
 
 #define DEBOUNCETIME 50   //ms
 #define LONGPRESSTIME 350 //ms
 
-LUT *Rotary::lut = new GammaLUT(2, 4096);
+LUT *Rotary::lut = new ColourCorrectionLUT(2.0, 4096, 150,255,255);
 
 void Rotary::Initialize()
 {
-    Wire.begin(SDAPIN, SCLPIN);
+    PCA9685::Initialize();
 
     pinMode(CLKPIN, INPUT_PULLUP);
     pinMode(DATAPIN, INPUT_PULLUP);
@@ -34,24 +30,15 @@ void Rotary::Initialize()
     attachInterrupt(BTNPIN, buttonISR, CHANGE);
 }
 
-bool Rotary::setRGB(uint8_t r, uint8_t g, uint8_t b)
+bool Rotary::setColour(RGB colour)
 {
     uint8_t buffer[3 * 4 + 1];
     buffer[0] = PCA9685_LED0_ON_L + 13 * 4;
-    fillLedBuffer(buffer + 1, lut->luts[0], r, INVERT);
-    fillLedBuffer(buffer + 5, lut->luts[1], g, INVERT);
-    fillLedBuffer(buffer + 9, lut->luts[2], b, INVERT);
+    fillLedBuffer(buffer + 1, lut->luts[0], colour.R, INVERT);
+    fillLedBuffer(buffer + 5, lut->luts[1], colour.G, INVERT);
+    fillLedBuffer(buffer + 9, lut->luts[2], colour.B, INVERT);
 
-    if (xSemaphoreTake(i2cMutex, (TickType_t)100) != pdTRUE)
-    {
-        return false;
-    }
-
-    Wire.setClock(1000000);
-    Wire.writeTransmission(PCA9685_I2C_ADDRESS, buffer, sizeof(buffer), true);
-
-    xSemaphoreGive(i2cMutex);
-    return true;
+    return PCA9685::WritePWMData(buffer,sizeof(buffer),100);    
 }
 
 void Rotary::fillLedBuffer(uint8_t *buffer, uint16_t *lut, uint8_t value, bool invert)
@@ -86,25 +73,6 @@ void Rotary::fillLedBuffer(uint8_t *buffer, uint16_t *lut, uint8_t value, bool i
     buffer[1] = 0;
     buffer[2] = lutVal & 0xFF;
     buffer[3] = lutVal >> 8;
-}
-
-bool Rotary::setWheel(uint8_t wheelpos)
-{
-    byte WheelPos = 255 - wheelpos;
-    if (WheelPos < 85)
-    {
-        return setRGB(255 - WheelPos * 3, 0, WheelPos * 3);
-    }
-    else if (WheelPos < 170)
-    {
-        WheelPos -= 85;
-        return setRGB(0, WheelPos * 3, 255 - WheelPos * 3);
-    }
-    else
-    {
-        WheelPos -= 170;
-        return setRGB(WheelPos * 3, 255 - WheelPos * 3, 0);
-    }
 }
 
 void Rotary::setLut(LUT *lut)
@@ -221,7 +189,7 @@ void Rotary::buttonISR()
 
         if (longPressTimer)
             timerEnd(longPressTimer);
-        longPressTimer = timerBegin(0, 80, true);                     // timer_id = 0; divider=80; countUp = true;
+        longPressTimer = timerBegin(rotaryButtonTimer, 80, true);                     // timer_id = 0; divider=80; countUp = true;
         timerAttachInterrupt(longPressTimer, &longpressISR, true);    // edge = true
         timerAlarmWrite(longPressTimer, 1000 * LONGPRESSTIME, false); //1000 ms
         timerAlarmEnable(longPressTimer);

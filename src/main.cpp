@@ -10,24 +10,24 @@
 #include "sdkconfig.h"
 #include <Arduino.h>
 
-#include "ota.h"
+
 #include "debug.h"
 #include "pipe.h"
 #include "colours.h"
-#include "lut.h"
+#include "luts/lut.h"
 
 #include "hardware/ethernet/ethernet.h"
+#include "hardware/firmwareUpdate/firmwareUpdate.h"
 #include "hardware/display/display.h"
 #include "hardware/rotary/rotary.h"
 #include "hardware/apcmini/apcmini.h"
 
 #include "configurations/configuration.h"
 
-void DisplayFps(void *parameter);
+
+void UpdateDisplay(void *parameter);
 void clearall();
 void animate(byte r, byte g, byte b);
-
-LUT* RotaryLut = new ColourCorrectionLUT(2.0, 4096, 150,255,255);
 
 void click() { 
     Debug.println("click"); 
@@ -51,24 +51,23 @@ void setup()
         Display::Initialize(); 
         Display::setDFU(true,0);
         Ethernet::Initialize();
-        setupOta();
+        FirmwareUpdate::Initialize();
         for(;;){
-            handleOta();
+            FirmwareUpdate::Process();
             delay(1);
         }
     }
 
     Debug.begin(115200);
 
+    Display::Initialize(); //initialize display before outputs
+
     Rotary::Initialize();
-    Rotary::setLut(RotaryLut);
     Rotary::onClick(click);
     Rotary::onPress(press);
     Rotary::onRelease(release);
     Rotary::onLongPress(longpress);
     Rotary::onRotate(rotate);
-
-    Display::Initialize(); //initialize display before outputs
 
     DMX::SendFullFrame(false); //speed up dmx transmission by only sending the bytes that have a value
     DMX::SetUniverseSize(37,7); //handle some quirks of the the midi device i use for testing
@@ -78,6 +77,8 @@ void setup()
         pipes[j].out->Begin();
 
     clearall();
+
+    PCA9685::Initialize();
 
     Debug.println("Starting network");
     Ethernet::Initialize();
@@ -89,10 +90,10 @@ void setup()
 
     Debug.println("Done");
 
-    xTaskCreatePinnedToCore(DisplayFps, "DisplayFPS", 3000, NULL, 0, NULL, 0);
+    xTaskCreatePinnedToCore(UpdateDisplay, "UpdateDisplay", 3000, NULL, 0, NULL, 0);
 
-    setupOta();
-    Rotary::setRGB(0,0,0);
+    FirmwareUpdate::Initialize();
+    Rotary::setColour(RGB(0,0,0));
 
     Debug.printf("max udp connections: %d\n", MEMP_NUM_NETCONN);
 }
@@ -113,14 +114,14 @@ void loop()
     }
 
     //check for over-the-air firmware updates (also works over ETH)
-    handleOta();
+    FirmwareUpdate::Process();
 
     //demo code that will scroll through the rainbow when rotating the rotary encoder
-    static byte color;
+    static byte colour;
     int rot = Rotary::getRotation(); 
     if (rot != 0){
-        color += rot;
-        Rotary::setWheel(color);
+        colour += rot;
+        Rotary::setColour(Hue(colour));
     }
 }
 
@@ -134,7 +135,7 @@ void clearall()
     }
 }
 
-void DisplayFps(void *parameter)
+void UpdateDisplay(void *parameter)
 {
     unsigned long lastFpsUpdate = 0;
     while (true)

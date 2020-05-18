@@ -5,3 +5,4 @@
 #include "freertos/semphr.h"
 
 extern xSemaphoreHandle i2cMutex;
+extern int rotaryButtonTimer;

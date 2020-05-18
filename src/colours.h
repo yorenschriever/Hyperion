@@ -2,7 +2,7 @@
 
 #include <inttypes.h>
 #include "debug.h"
-#include "lut.h"
+#include "luts/lut.h"
 
 
 //Colours currently fulfill 2 purposes:

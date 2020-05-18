@@ -2,7 +2,9 @@
 
 #include <inttypes.h>
 #include <Arduino.h>
-#include "lut.h"
+#include "luts/lut.h"
+#include "colours.h"
+#include "hardware/pca9685/pca9685.h"
 
 //Rotary interfaces the rotary encoder on the front panel.
 class Rotary
@@ -16,9 +18,8 @@ public:
     //You can apply a lookup table to RGB leds
     static void setLut(LUT *lut);
 
-    //set a colour. TODO: accept RGB and Hue colours here, instead of separate arguments
-    static bool setRGB(uint8_t r, uint8_t g, uint8_t b);
-    static bool setWheel(uint8_t angle);
+    //set a colour. 
+    static bool setColour(RGB colour);
 
     //get the rotation since the last time this function was called
     //you can use this if you dont want to keep track of the rotation with onRotate()

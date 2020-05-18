@@ -2,7 +2,6 @@
 
 #include "pipe.h"
 #include "colours.h"
-#include "lut.h"
 
 #include "outputs/pwmOutput.h"
 #include "outputs/dmxOutput.h"
@@ -14,6 +13,8 @@
 #include "inputs/patternInput.h"
 #include "patterns/rgbPatterns.h"
 #include "patterns/monochromePatterns.h"
+#include "luts/colourCorrectionLut.h"
+#include "luts/incandescentLut.h"
 
 //extern const bool DHCP = true;
 // extern const IPAddress ip(192, 168, 1, 123);

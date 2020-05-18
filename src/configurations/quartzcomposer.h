@@ -1,11 +1,12 @@
 #pragma once
 #include "colours.h"
-#include "lut.h"
 #include "pipe.h"
 #include "inputs/udpInput.h"
 #include "outputs/neopixelOutput.h"
 #include "outputs/pwmOutput.h"
 #include "outputs/dmxOutput.h"
+#include "luts/colourCorrectionLut.h"
+#include "luts/incandescentLut.h"
 
 //I picked colour correction values that Fastled uses for neopixels "TypicalLEDStrip"
 //http://fastled.io/docs/3.1/group___color_enums.html
