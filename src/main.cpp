@@ -11,12 +11,12 @@
 #include <Arduino.h>
 
 #include "ota.h"
-#include "network.h"
 #include "debug.h"
 #include "pipe.h"
 #include "colours.h"
 #include "lut.h"
 
+#include "hardware/ethernet/ethernet.h"
 #include "hardware/display/display.h"
 #include "hardware/rotary/rotary.h"
 #include "hardware/apcmini/apcmini.h"
@@ -50,7 +50,7 @@ void setup()
     if (digitalRead(39)){
         Display::Initialize(); 
         Display::setDFU(true,0);
-        NetworkBegin();
+        Ethernet::Initialize();
         setupOta();
         for(;;){
             handleOta();
@@ -77,10 +77,11 @@ void setup()
     for (int j = 0; j < sizeof(pipes) / sizeof(Pipe); j++)
         pipes[j].out->Begin();
 
+    clearall();
+
     Debug.println("Starting network");
-    clearall();
-    NetworkBegin();
-    clearall();
+    Ethernet::Initialize();
+    Ethernet::SetFixedIp(IPAddress(192,168,1,123), IPAddress(192,168,1,1), IPAddress(255,255,255,0));
 
     Debug.println("Starting inputs");
     for (int j = 0; j < sizeof(pipes) / sizeof(Pipe); j++)
@@ -175,6 +176,7 @@ void DisplayFps(void *parameter)
         Display::setLeds(totalLength);
         Display::setDMX(DMX::IsHealthy());
         Display::setMidi(Midi::isConnected());
+        Display::setEthernet(Ethernet::isConnected());
 
         delay(500);
     }

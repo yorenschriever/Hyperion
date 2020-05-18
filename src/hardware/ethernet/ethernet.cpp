@@ -1,65 +1,60 @@
 #include <Arduino.h>
-#include "network.h"
+#include "ethernet.h"
 #include "debug.h"
-#include "hardware/display/display.h"
+//#include "hardware/display/display.h"
 
-const unsigned int nodeid = 123;
+// const unsigned int nodeid = 123;
 
-IPAddress ip(192, 168, 1, nodeid);
-IPAddress gateway(192, 168, 1, 1);
-IPAddress subnet(255, 255, 255, 0);
+// IPAddress ip(192, 168, 1, nodeid);
+// IPAddress gateway(192, 168, 1, 1);
+// IPAddress subnet(255, 255, 255, 0);
 
-void EthEvent(WiFiEvent_t event);
-static bool eth_connected = false;
+//void EthEvent(WiFiEvent_t event);
+bool Ethernet::eth_connected = false;
 
-byte flipByte(byte c);
-bool config_eth(IPAddress local_ip, IPAddress gateway, IPAddress subnet);
+//byte flipByte(byte c);
+//bool config_eth(IPAddress local_ip, IPAddress gateway, IPAddress subnet);
 
-void NetworkBegin()
+void Ethernet::Initialize()
 {
     //this delay makes sure the network hardware is property started up, it is unstable without it
     delay(500);
 
     //This delay makes sure that not all nodes will startup at exactly the same time when you flip the master power switch
     //Routers were having trouble when a large amount of nodes started communicating at exactly the same time.
-    delay(100 + flipByte(nodeid) * 5);
+    delay(100 + (esp_random() & 0xFF) * 5);
 
     WiFi.onEvent(EthEvent);
     ETH.begin();
+}
 
-    //#ifdef DHCP
+bool Ethernet::SetFixedIp(IPAddress ip, IPAddress gateway, IPAddress subnet)
+{
+    tcpip_adapter_ip_info_t info;
+    info.ip.addr = static_cast<uint32_t>(ip);
+    info.gw.addr = static_cast<uint32_t>(gateway);
+    info.netmask.addr = static_cast<uint32_t>(subnet);
 
-    bool staticip = config_eth(ip, gateway, subnet);
-    Debug.print(staticip ? "static ip configured" : "static ip failed");
-
-    //#endif
+    ESP_ERROR_CHECK(tcpip_adapter_dhcpc_stop(TCPIP_ADAPTER_IF_ETH));
+    //ESP_ERROR_CHECK(tcpip_adapter_set_ip_info(TCPIP_ADAPTER_IF_ETH, &info));
+    bool result = (tcpip_adapter_set_ip_info(TCPIP_ADAPTER_IF_ETH, &info) == ESP_OK);
 
     Debug.println("");
 
     Debug.println("Eth connected");
     Debug.println("IP address: ");
     Debug.println(ETH.localIP());
+
+    return result;
 }
 
-boolean networkIsConnected()
+
+bool Ethernet::isConnected()
 {
     return eth_connected;
 }
 
-bool config_eth(IPAddress local_ip, IPAddress gateway, IPAddress subnet)
-{
-    tcpip_adapter_ip_info_t info;
-    info.ip.addr = static_cast<uint32_t>(local_ip);
-    info.gw.addr = static_cast<uint32_t>(gateway);
-    info.netmask.addr = static_cast<uint32_t>(subnet);
-
-    ESP_ERROR_CHECK(tcpip_adapter_dhcpc_stop(TCPIP_ADAPTER_IF_ETH));
-    ESP_ERROR_CHECK(tcpip_adapter_set_ip_info(TCPIP_ADAPTER_IF_ETH, &info));
-    //return (tcpip_adapter_set_ip_info(TCPIP_ADAPTER_IF_ETH, &info) == ESP_OK);
-    return true;
-}
-
-void EthEvent(WiFiEvent_t event)
+void Ethernet::EthEvent(WiFiEvent_t event)
 {
     switch (event)
     {
@@ -67,7 +62,7 @@ void EthEvent(WiFiEvent_t event)
         Debug.println("ETH Started");
         //set eth hostname here
         char buf[20];
-        sprintf(buf, "Hyperion ip= %d", nodeid);
+        //sprintf(buf, "Hyperion ip= %d", nodeid);
         ETH.setHostname(buf);
         break;
     case SYSTEM_EVENT_ETH_CONNECTED:
@@ -100,17 +95,5 @@ void EthEvent(WiFiEvent_t event)
         break;
     }
 
-    Display::setEthernet(eth_connected);
-}
-
-byte flipByte(byte c)
-{
-    char r = 0;
-    for (byte i = 0; i < 8; i++)
-    {
-        r <<= 1;
-        r |= c & 1;
-        c >>= 1;
-    }
-    return r;
+    //Display::setEthernet(eth_connected);
 }

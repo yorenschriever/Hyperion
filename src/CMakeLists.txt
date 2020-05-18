@@ -2,11 +2,11 @@
 # without default 'CMakeLists.txt' file.
 
 set(app_sources
-	"network.cpp"
 	"ota.cpp"
 	"semaphores.cpp"
 
 	"main.cpp"
+	"hardware/ethernet/ethernet.cpp"
 	"hardware/UDPFast/UDPFast.cpp"
 	"hardware/dmx/dmx.cpp"
 	"hardware/display/display.cpp"
