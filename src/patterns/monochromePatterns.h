@@ -85,3 +85,14 @@ class FastStrobePattern : public Pattern<Monochrome>
             pixels[index] = millis() % 50 < 25 ? 255 : 0;
     }
 };
+
+
+class TemperatureTestPattern : public Pattern<Monochrome>
+{
+    inline void Calculate(Monochrome *pixels, int width, bool firstFrame) override
+    {
+        for (int index = 0; index < width; index++)
+            pixels[index] = 255*Rotary::isButtonPressed();
+    }
+};
+

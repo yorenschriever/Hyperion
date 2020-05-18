@@ -433,14 +433,19 @@ public:
     uint8_t R, G, B, A;
 };
 
+#define CONV8TO12 4096/255
+#define CONV12TO8 255/4096
+
 inline Monochrome::operator RGB() { return RGB(L, L, L); }
-inline Monochrome::operator RGB12() { return RGB12(L << 4, L << 4, L << 4); }
-inline Monochrome::operator Monochrome12() { return Monochrome12(L << 4); }
+inline Monochrome::operator RGB12() { return RGB12(L * CONV8TO12, L * CONV8TO12, L * CONV8TO12); }
+inline Monochrome::operator Monochrome12() { return Monochrome12(L * CONV8TO12); }
 inline Monochrome::operator GRB() { return GRB(L, L, L); }
 
+inline Monochrome12::operator Monochrome() { return Monochrome(L * CONV12TO8); }
+
 inline RGB::operator Monochrome() { return Monochrome((R + G + B) / 3); }
-inline RGB::operator RGB12() { return RGB12(R << 4, G << 4, B << 4); }
-inline RGB::operator Monochrome12() { return Monochrome12(((R + G + B) << 4) / 3); }
+inline RGB::operator RGB12() { return RGB12(R * CONV8TO12, G * CONV8TO12, B * CONV8TO12); }
+inline RGB::operator Monochrome12() { return Monochrome12(((R + G + B) * CONV8TO12) / 3); }
 inline RGB::operator GRB() { return GRB(G, R, B); }
 inline RGB::operator RGBA() { return RGBA(R, G, B, 255); }
 inline RGB::operator GRBW() { 
@@ -448,18 +453,19 @@ inline RGB::operator GRBW() {
     return GRBW(G-W, R-W, B-W, W); 
 }
 
-inline RGB12::operator Monochrome() { return Monochrome((R + G + B) / 3); }
-inline RGB12::operator RGB() { return RGB12(R >> 4, G >> 4, B >> 4); }
+
+inline RGB12::operator Monochrome() { return Monochrome((R + G + B) * CONV12TO8 / 3); }
+inline RGB12::operator RGB() { return RGB12(R * CONV12TO8, G * CONV12TO8, B * CONV12TO8); }
 inline RGB12::operator Monochrome12() { return Monochrome12((R + G + B) / 3); }
-inline RGB12::operator GRB() { return GRB(G >> 4, R >> 4, B >> 4); }
+inline RGB12::operator GRB() { return GRB(G * CONV12TO8, R * CONV12TO8, B * CONV12TO8); }
 
 inline GRB::operator Monochrome() { return Monochrome((R + G + B) / 3); }
-inline GRB::operator RGB12() { return RGB12(R << 4, G << 4, B << 4); }
-inline GRB::operator Monochrome12() { return Monochrome12(((R + G + B) << 4) / 3); }
+inline GRB::operator RGB12() { return RGB12(R * CONV8TO12, G * CONV8TO12, B * CONV8TO12); }
+inline GRB::operator Monochrome12() { return Monochrome12(((R + G + B) * CONV8TO12) / 3); }
 inline GRB::operator RGB() { return RGB(R, G, B); }
 
 inline HSL::operator Monochrome() { return Monochrome(L); }
-inline HSV::operator Monochrome() { return Monochrome(V); }
+inline HSV::operator Monochrome() { return Monochrome(V); } //This is not really consitent with the conversion in the line above
 
 inline float hueToRGB(float p, float q, float t){
     if(t < 0) t += 1;

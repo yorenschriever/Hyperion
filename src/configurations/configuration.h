@@ -1,1 +1,1 @@
-selftest.h
+singlepattern.h
