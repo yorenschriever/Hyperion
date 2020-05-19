@@ -23,22 +23,22 @@ LUT* LedLut = new GammaLUT(2,4096);
 
 Pipe pipes[] = {
 
-    // Pipe(
-    //     new PatternInput<RGB>(16,new HSLLFOPattern()),
-    //     new NeopixelOutput<Kpbs800>(1),
-    //     Pipe::transfer<RGB,GRBW>,
-    //     NeopixelLut
-    // )
-    
     Pipe(
-        new PatternInput<Monochrome>(1,new TemperatureTestPattern()),
-        //new PWMOutput(150),
-        new TemperatureControlledOutput<Monochrome12>(
-            new PWMOutput(1500),
-            0.77, 
-            0.0058,  
-            60),
-        Pipe::transfer<Monochrome,Monochrome12>,
-        LedLut
+        new PatternInput<RGB>(16,new BPMPattern()),
+        new NeopixelOutput<Kpbs800>(1),
+        Pipe::transfer<RGB,GRB>,
+        NeopixelLut
     )
+    
+    // Pipe(
+    //     new PatternInput<Monochrome>(1,new TemperatureTestPattern()),
+    //     //new PWMOutput(150),
+    //     new TemperatureControlledOutput<Monochrome12>(
+    //         new PWMOutput(1500),
+    //         0.77, 
+    //         0.0058,  
+    //         60),
+    //     Pipe::transfer<Monochrome,Monochrome12>,
+    //     LedLut
+    // )
 };

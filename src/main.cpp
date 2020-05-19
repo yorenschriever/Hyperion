@@ -16,6 +16,8 @@
 #include "colours.h"
 #include "luts/lut.h"
 
+#include "patterns/helpers/bpm/tapBpm.h"
+
 #include "hardware/ethernet/ethernet.h"
 #include "hardware/firmwareUpdate/firmwareUpdate.h"
 #include "hardware/display/display.h"
@@ -68,6 +70,8 @@ void setup()
     Rotary::onRelease(release);
     Rotary::onLongPress(longpress);
     Rotary::onRotate(rotate);
+
+    BPM::SetInstance(new tapBPM());
 
     DMX::SendFullFrame(false); //speed up dmx transmission by only sending the bytes that have a value
     DMX::SetUniverseSize(37,7); //handle some quirks of the the midi device i use for testing

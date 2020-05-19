@@ -197,3 +197,21 @@ class HSLLFOPattern : public Pattern<RGB>
             pixels[index] = HSL(255,255,255*lfo.getValue());
     }
 };
+
+
+class BPMPattern : public Pattern<RGB>
+{
+    Watcher<int> watcher = Watcher<int>([] () { return BPM::GetInstance()->GetBeatNumber(); } , Rising);
+    
+    Fade fader = Fade(Linear, 250, Down);
+
+    inline void Calculate(RGB *pixels, int width, bool firstFrame) override
+    {
+        if (watcher.Triggered())
+            fader.reset();
+
+        for (int index = 0; index < width; index++)
+            pixels[index] = HSL(0,255,127+127 * fader.getValue());
+
+    }
+};

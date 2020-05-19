@@ -20,6 +20,7 @@ LUT *Rotary::lut = new ColourCorrectionLUT(2.0, 4096, 150,255,255);
 void Rotary::Initialize()
 {
     PCA9685::Initialize();
+    PCA9685::SetFrequency(1500);
 
     pinMode(CLKPIN, INPUT_PULLUP);
     pinMode(DATAPIN, INPUT_PULLUP);
@@ -176,8 +177,8 @@ void Rotary::onLongPress(InputEvent evt)
 void Rotary::buttonISR()
 {
     unsigned long now = millis();
-    //if (now - buttonDebounce < DEBOUNCETIME)
-    //    return;
+    if (now - buttonDebounce < DEBOUNCETIME)
+        return;
 
     buttonDebounce = now;
 
