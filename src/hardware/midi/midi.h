@@ -20,6 +20,7 @@ class Midi
 {
     //define the signature of the callback functions i expect
     using MidiEvent3 = void (*)(uint8_t, uint8_t, uint8_t);
+    using MidiEvent1 = void (*)(uint8_t);
     using MidiEvent = void (*)();
 
 public:
@@ -33,6 +34,7 @@ public:
     static void onNoteOff(MidiEvent3 handler);
     static void onControllerChange(MidiEvent3 handler);
     static void onConnect(MidiEvent handler);
+    static void onSystemRealtime(MidiEvent1 handler);
 
     static uint8_t noteStatus(uint8_t notenumber);
     static uint8_t controllerValue(uint8_t channelnumber);
@@ -48,6 +50,7 @@ private:
     static MidiEvent3 noteOffHandler;
     static MidiEvent3 controllerChangeHandler;
     static MidiEvent connectHandler;
+    static MidiEvent1 systemRealTimeHandler;
 
     static unsigned long lastMessageTime;
 

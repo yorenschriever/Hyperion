@@ -19,6 +19,7 @@ Midi::MidiEvent3 Midi::noteOnHandler = NULL;
 Midi::MidiEvent3 Midi::noteOffHandler = NULL;
 Midi::MidiEvent3 Midi::controllerChangeHandler = NULL;
 Midi::MidiEvent Midi::connectHandler = NULL;
+Midi::MidiEvent1 Midi::systemRealTimeHandler = NULL;
 bool Midi::started = false;
 unsigned long Midi::lastMessageTime = 0;
 uint8_t Midi::noteValues[NUMBER_OF_NOTES];
@@ -73,65 +74,60 @@ void Midi::uart_event_task(void *pvParameters)
     byte message[4];
     while (true)
     {
-        delay(5);
-        uint8_t data[MIDI_BUF_SIZE];
-        int length = 0;
-        ESP_ERROR_CHECK(uart_get_buffered_data_len(MIDI_UART_NUM, (size_t *)&length));
-        if (length == 0)
+        uint8_t data[1];
+        int length = uart_read_bytes(MIDI_UART_NUM, data, 1, 1000);
+
+        if (length <= 0)
             continue;
 
-        length = uart_read_bytes(MIDI_UART_NUM, data, length, 100);
+        if (!isConnected() && connectHandler)
+            connectHandler();
+        lastMessageTime = xTaskGetTickCount();
 
-        if (length > 0)
+        if (data[0] >= 0xF8)
         {
-            if (!isConnected() && connectHandler)
-                connectHandler();
-            lastMessageTime = xTaskGetTickCount();
+            //this is a system realtime message, it is always 1 byte long, and come in between
+            //other messages, so they should not reset the messageposition.
+            if (systemRealTimeHandler)
+                systemRealTimeHandler(data[0]);
+            continue;
         }
 
-        for (int i = 0; i < length; i++)
+        if (data[0] >= B10000000)
         {
-            //TODO i should detect system-realtie messages here, and discard them.
-            //(or handle them properly)
-            //These messages are allowed to come in between another messages.
-            //They have a value > B10000000, so currently they reset the messageposition
-            //start a new message. better would be to ignore/handle them without
-            //resetting the messageposition.
+            //detect start of a message, start filling the buffer
+            message[0] = data[0];
+            messageposition = 1;
+        }
+        else if (messageposition < sizeof(message))
+        {
+            //otherwise: store bytes untill buffer is full
+            message[messageposition] = data[0];
+            messageposition++;
+        }
 
-            if (data[i] >= B10000000)
-            { //detect start of a message, start filling the buffer
-                message[0] = data[i];
-                messageposition = 1;
-            }
-            else if (messageposition < sizeof(message))
-            { //otherwise: store bytes untill buffer is full
-                message[messageposition] = data[i];
-                messageposition++;
-            }
+        uint8_t channel = message[0] & 0x0F;
+        uint8_t messagetype = message[0] & 0xF0;
 
-            uint8_t channel = message[0] & 0x0F;
-            uint8_t messagetype = message[0] & 0xF0;
+        if (messagetype == NOTEON && messageposition == 3 && message[1] < NUMBER_OF_NOTES)
+        {
+            noteValues[message[1]] = message[2];
+            if (noteOnHandler)
+                noteOnHandler(channel, message[1], message[2]);
+        }
 
-            if (messagetype == NOTEON && messageposition == 3 && message[1] < NUMBER_OF_NOTES)
-            {
-                noteValues[message[1]] = message[2];
-                if (noteOnHandler)
-                    noteOnHandler(channel, message[1], message[2]);
-            }
+        if (messagetype == NOTEOFF && messageposition == 3 && message[1] < NUMBER_OF_NOTES)
+        {
+            noteValues[message[1]] = 0;
+            if (noteOffHandler)
+                noteOffHandler(channel, message[1], message[2]);
+        }
 
-            if (messagetype == NOTEOFF && messageposition == 3 && message[1] < NUMBER_OF_NOTES)
-            {
-                noteValues[message[1]] = 0;
-                if (noteOffHandler)
-                    noteOffHandler(channel, message[1], message[2]);
-            }
-
-            if (messagetype == CONTROLLERCHANGE && messageposition == 3 && message[1] < NUMBER_OF_CONTROLLERS)
-            {
-                controllerValues[message[1]] = message[2];
-                if (controllerChangeHandler)
-                    controllerChangeHandler(channel, message[1], message[2]);
-            }
+        if (messagetype == CONTROLLERCHANGE && messageposition == 3 && message[1] < NUMBER_OF_CONTROLLERS)
+        {
+            controllerValues[message[1]] = message[2];
+            if (controllerChangeHandler)
+                controllerChangeHandler(channel, message[1], message[2]);
         }
     }
 }
@@ -192,6 +188,11 @@ void Midi::onControllerChange(MidiEvent3 handler)
 void Midi::onConnect(MidiEvent handler)
 {
     connectHandler = handler;
+}
+
+void Midi::onSystemRealtime(MidiEvent1 handler)
+{
+    systemRealTimeHandler = handler;
 }
 
 bool Midi::isConnected()
