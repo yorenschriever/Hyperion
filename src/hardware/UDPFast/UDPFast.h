@@ -66,6 +66,7 @@ public:
   int endPacket();
   size_t write(uint8_t);
   size_t write(const uint8_t *buffer, size_t size);
+  int waitPacketFast(uint8_t* buf);
   int parsePacketFast(uint8_t* buffer);
   boolean setMaxRxPackets(int max);
   void flushAllPackets();

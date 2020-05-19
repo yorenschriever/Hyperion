@@ -253,6 +253,21 @@ int UDPFast::parsePacketFast(uint8_t* buf){
   return len;  
 }
 
+
+int UDPFast::waitPacketFast(uint8_t* buf){
+  struct sockaddr_in si_other;
+  int slen = sizeof(si_other) , len;
+  
+  if ((len = recvfrom(udp_server, buf, UDPFASTMTU, NULL, (struct sockaddr *) &si_other, (socklen_t *)&slen)) == -1){
+    if(errno == EWOULDBLOCK){
+      return -1;
+    }
+    log_e("could not receive data: %d", errno);
+    return 0;
+  }
+  return len;  
+}
+
 #define FREERTOS_ZERO_COPY    ( 1 )
 
 void UDPFast::flushAllPackets()
