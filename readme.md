@@ -49,6 +49,8 @@ Now you are ready to build.  Click the checkmark icon in the status bar, or type
     pio run
    This will download all dependencies and then builds the project.
 
+If you get an error about python requirements not being satisfied (cyptograhpy>2.1.4): Running the suggested command solved it for me.
+
 ## Uploading
 You can upload new firmware over the network (ethernet / wifi) or over USB. 
 
