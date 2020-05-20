@@ -31,6 +31,8 @@ This project uses a branch of the ESPIDF. If you already are working with ESPIDF
 Now you can checkout the project
 
     git clone git@github.com:yorenschriever/Hyperion.git
+    
+   After you have checked out the code, goto the PIO homescreen, click 'Open project', and select your project folder. Opening from the platformio screen will open the project as a workspace, and add extra icons to vscode's status bar.
 
 **Configuration**
 
@@ -48,6 +50,8 @@ Now you are ready to build.  Click the checkmark icon in the status bar, or type
 
     pio run
    This will download all dependencies and then builds the project.
+
+If you get an error about python requirements not being satisfied (cyptograhpy>2.1.4): Running the suggested command solved it for me.
 
 ## Uploading
 You can upload new firmware over the network (ethernet / wifi) or over USB. 
