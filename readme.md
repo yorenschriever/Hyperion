@@ -31,6 +31,8 @@ This project uses a branch of the ESPIDF. If you already are working with ESPIDF
 Now you can checkout the project
 
     git clone git@github.com:yorenschriever/Hyperion.git
+    
+   After you have checked out the code, goto the PIO homescreen, click 'Open project', and select your project folder. Opening from the platformio screen will open the project as a workspace, and add extra icons to vscode's status bar.
 
 **Configuration**
 
