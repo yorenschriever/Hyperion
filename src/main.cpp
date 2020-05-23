@@ -17,6 +17,7 @@
 #include "luts/lut.h"
 
 #include "patterns/helpers/bpm/tapBpm.h"
+#include "patterns/helpers/bpm/proDJLinkBpm.h"
 
 #include "hardware/ethernet/ethernet.h"
 #include "hardware/firmwareUpdate/firmwareUpdate.h"
@@ -71,8 +72,6 @@ void setup()
     Rotary::onLongPress(longpress);
     Rotary::onRotate(rotate);
 
-    BPM::SetInstance(new tapBPM());
-
     DMX::SendFullFrame(false); //speed up dmx transmission by only sending the bytes that have a value
     DMX::SetUniverseSize(37,7); //handle some quirks of the the midi device i use for testing
 
@@ -86,7 +85,10 @@ void setup()
 
     Debug.println("Starting network");
     Ethernet::Initialize();
-    Ethernet::SetFixedIp(IPAddress(192,168,1,123), IPAddress(192,168,1,1), IPAddress(255,255,255,0));
+    Ethernet::SetFixedIp(IPAddress(169,254,67,123), IPAddress(192,168,1,1), IPAddress(255,255,0,0));
+    //Ethernet::SetFixedIp(IPAddress(192,254,67,123), IPAddress(192,168,1,1), IPAddress(0,0,0,0));
+
+    BPM::SetInstance(new ProDJLinkBPM());
 
     Debug.println("Starting inputs");
     for (int j = 0; j < sizeof(pipes) / sizeof(Pipe); j++)
@@ -94,7 +96,7 @@ void setup()
 
     Debug.println("Done");
 
-    xTaskCreatePinnedToCore(UpdateDisplay, "UpdateDisplay", 3000, NULL, 0, NULL, 0);
+    //xTaskCreatePinnedToCore(UpdateDisplay, "UpdateDisplay", 3000, NULL, 0, NULL, 0);
 
     FirmwareUpdate::Initialize();
     Rotary::setColour(RGB(0,0,0));

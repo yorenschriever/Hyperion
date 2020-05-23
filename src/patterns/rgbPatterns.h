@@ -201,7 +201,7 @@ class HSLLFOPattern : public Pattern<RGB>
 
 class BPMPattern : public Pattern<RGB>
 {
-    Watcher<int> watcher = Watcher<int>([] () { return BPM::GetInstance()->GetBeatNumber(); } , Rising);
+    Watcher<int> watcher = Watcher<int>([] () { return BPM::GetInstance()->GetBeatNumber(); } , Changing);
     
     Fade fader = Fade(Linear, 250, Down);
 
