@@ -24,7 +24,7 @@ public:
 
     int GetBeatNumber() override
     {
-        //todo: beatnumber shoudl always increase, not only 1-4
+        //todo: beatnumber should always increase, not only 1-4
         return beatnumber;
     }
 
@@ -60,7 +60,7 @@ private:
 
             len = this2->udpFaststatus.waitPacketFast(buffer);
             if (len>0){
-                //Debug.printf("status %x, %x",len, buffer[0x0a]);
+                Debug.printf("status %x, %x\n",len, buffer[0x0a]);
                 // if (len == 0x60 && buffer[0x0a]==0x28){
                 //     this2->beatnumber = buffer[0x5c];
                 // }
@@ -117,7 +117,8 @@ private:
                 };
 
                 //IPAddress ip = ETH.localIP();
-                uint8_t ip[4] = {169,254,67,123}; //TODO
+                //uint8_t ip[4] = {169,254,67,123}; //TODO
+                uint32_t ip = ETH.localIP();
 
                 memcpy(buffer + 0x26,ETH.macAddress(mac),6);
                 memcpy(buffer + 0x2c,&ip,4);
