@@ -23,4 +23,4 @@ private:
     static BPM *instance;
 };
 
-BPM *BPM::instance = NULL;
+BPM *BPM::instance = new BPM();

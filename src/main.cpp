@@ -86,7 +86,7 @@ void setup()
     Debug.println("Starting network");
     Ethernet::Initialize();
     //Ethernet::SetFixedIp(IPAddress(169,254,67,123), IPAddress(192,168,1,1), IPAddress(255,255,0,0));
-    //Ethernet::SetFixedIp(IPAddress(192,254,67,123), IPAddress(192,168,1,1), IPAddress(0,0,0,0));
+    Ethernet::SetFixedIp(IPAddress(192,168,1,123), IPAddress(192,168,1,1), IPAddress(0,0,0,0));
 
     BPM::SetInstance(new ProDJLinkBPM());
 
@@ -96,7 +96,7 @@ void setup()
 
     Debug.println("Done");
 
-    //xTaskCreatePinnedToCore(UpdateDisplay, "UpdateDisplay", 3000, NULL, 0, NULL, 0);
+    xTaskCreatePinnedToCore(UpdateDisplay, "UpdateDisplay", 3000, NULL, 0, NULL, 0);
 
     FirmwareUpdate::Initialize();
     Rotary::setColour(RGB(0,0,0));
