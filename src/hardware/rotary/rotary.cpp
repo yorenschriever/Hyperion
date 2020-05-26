@@ -258,8 +258,12 @@ inline void Rotary::handleEvent(InputEvent function, bool asTask)
     //add event to the event queue so it will be handled in the asynchronous task
     if (queueStarted)
     {
+        BaseType_t xHigherPriorityTaskWoken = pdFALSE;
         EventQueueItem item = EventQueueItem{function, NULL, 0};
-        xQueueSend(eventQueue,(void *)&item,(TickType_t)0);
+        xQueueSendFromISR(eventQueue,(void *)&item,&xHigherPriorityTaskWoken);
+
+        if( xHigherPriorityTaskWoken )
+            portYIELD_FROM_ISR ();
     }
 }
 
@@ -277,8 +281,12 @@ inline void Rotary::handleEvent(RotationEvent function, bool asTask, int amount)
     //add event to the event queue so it will be handled in the asynchronous task
     if (queueStarted)
     {
+        BaseType_t xHigherPriorityTaskWoken = pdFALSE;
         EventQueueItem item = EventQueueItem{NULL, function, amount};
-        xQueueSend(eventQueue,(void *)&item,(TickType_t)0);
+        xQueueSendFromISR(eventQueue,(void *)&item,&xHigherPriorityTaskWoken);
+
+        if( xHigherPriorityTaskWoken )
+            portYIELD_FROM_ISR ();
     }
 }
 
