@@ -12,13 +12,18 @@ class Rotary
     using InputEvent = void (*)();
     using RotationEvent = void (*)(int);
 
-    using RotationEventParams = struct {
-        RotationEvent function;
+    using EventQueueItem = struct {
+        InputEvent inputfunction;
+        RotationEvent rotationfunction;
         int amount;
     };
 
 public:
-    static void Initialize();
+    //if you pass createQueueTask=true, a new thread will be started to handle 
+    //all async handlers. The safer method is to set createQueueTask=false
+    //and call Rotary::handleQueue() regularly at times it suits you. This avoids
+    //concurrency issues and glitches
+    static void Initialize(bool createQueueTask=false);
 
     //You can apply a lookup table to RGB leds
     static void setLut(LUT *lut);
@@ -34,12 +39,16 @@ public:
     //use these functions to attach events to the button.
     //be aware that the handlers are called from inside an interrupt, so they should be kept short.
     //only 1 handler can be attached. if you attach another handler, the first one is removed. 
-    //TODO handle them from a task
-    static void onRotate(RotationEvent evt, bool asTask=true);
-    static void onPress(InputEvent evt, bool asTask=true);
-    static void onRelease(InputEvent evt, bool asTask=true);
-    static void onClick(InputEvent evt, bool asTask=true);
-    static void onLongPress(InputEvent evt, bool asTask=true);
+    //it is strongly advised to attach very short eventhandlers (only set a flag in your code)
+    //and set asTask to true. Doing otherwise will result in glitches of the led outputs
+    //or crashes of the application.
+    static void onRotate(RotationEvent evt, bool async=true);
+    static void onPress(InputEvent evt, bool async=true);
+    static void onRelease(InputEvent evt, bool async=true);
+    static void onClick(InputEvent evt, bool async=true);
+    static void onLongPress(InputEvent evt, bool async=true);
+
+    static void handleQueue();
 
 private:
     Rotary();
@@ -51,11 +60,13 @@ private:
     static void buttonISR();
     static void longpressISR();
 
+    static QueueHandle_t eventQueue;
+    static bool hasQueueTask;
+    static bool queueStarted;
+    static void startQueHandler();
+    static void queueHandlerTask(void *param);
     static void handleEvent(InputEvent function, bool asTask);
     static void handleEvent(RotationEvent function, bool asTask, int amount);
-    static void inputEventTask(void * param);
-    static void rotationEventTask(void * param);
-
 
     static uint8_t prevNextCode;
     static uint16_t store;

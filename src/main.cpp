@@ -33,8 +33,8 @@ void clearall();
 void animate(byte r, byte g, byte b);
 
 void click() { 
-    Debug.println("click"); 
     Rotary::setColour(RGB(0,0,0));
+    Debug.println("click"); 
     //APCMini::handleNoteOn(0,58,127);
 }
 void press() { Debug.println("press"); }
@@ -121,6 +121,8 @@ void loop()
 
     //check for over-the-air firmware updates (also works over ETH)
     FirmwareUpdate::Process();
+
+    Rotary::handleQueue();
 
     //demo code that will scroll through the rainbow when rotating the rotary encoder
     static byte colour;
