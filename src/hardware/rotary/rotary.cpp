@@ -31,6 +31,8 @@ void Rotary::Initialize(bool createQueueTask)
     attachInterrupt(CLKPIN, rotateISR, CHANGE);
     attachInterrupt(DATAPIN, rotateISR, CHANGE);
     attachInterrupt(BTNPIN, buttonISR, CHANGE);
+
+    longPressTimer = xTimerCreate("LongpressTimer",LONGPRESSTIME,false,( void * ) 0,longpressISR);
 }
 
 bool Rotary::setColour(RGB colour)
@@ -138,9 +140,8 @@ void Rotary::rotateISR()
         handleEvent(rotHandler, rotHandlerAsTask, result);
 
         return;
-        //return result;
     }
-    return; // 0;
+    return; 
 }
 
 Rotary::RotationEvent Rotary::rotHandler = NULL;
@@ -162,7 +163,7 @@ bool Rotary::queueStarted = false;
 unsigned long Rotary::buttonDebounce = 0;
 bool Rotary::buttonState = false;
 unsigned long Rotary::buttonPressTime = 0;
-hw_timer_t *Rotary::longPressTimer = NULL;
+TimerHandle_t Rotary::longPressTimer = NULL;
 
 void Rotary::onRotate(RotationEvent evt, bool asTask)
 {
@@ -202,7 +203,8 @@ void Rotary::onLongPress(InputEvent evt, bool asTask)
 }
 
 void Rotary::buttonISR()
-{
+{   
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     unsigned long now = millis();
     if (now - buttonDebounce < DEBOUNCETIME)
         return;
@@ -214,20 +216,12 @@ void Rotary::buttonISR()
     if (state)
     {
         buttonPressTime = millis();
-
-        if (longPressTimer)
-            timerEnd(longPressTimer);
-        longPressTimer = timerBegin(rotaryButtonTimer, 64000, true);  
-        timerAttachInterrupt(longPressTimer, &longpressISR, true);   
-        timerAlarmWrite(longPressTimer, LONGPRESSTIME*10/8, false); 
-        timerAlarmEnable(longPressTimer);
+        xTimerResetFromISR(longPressTimer,&xHigherPriorityTaskWoken);
     }
 
     if (!state)
     {
-        if (longPressTimer)
-            timerEnd(longPressTimer);
-        longPressTimer = NULL;
+        xTimerStopFromISR(longPressTimer,&xHigherPriorityTaskWoken);
     }
 
     if (state)
@@ -240,9 +234,12 @@ void Rotary::buttonISR()
         handleEvent(clickHandler, clickHandlerAsTask);
 
     buttonState = state;
+
+    if (xHigherPriorityTaskWoken)
+        portYIELD_FROM_ISR();
 }
 
-void Rotary::longpressISR()
+void Rotary::longpressISR(TimerHandle_t xTimer)
 {
     handleEvent(longPressHandler, longPressHandlerAsTask);
 }

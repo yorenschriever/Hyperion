@@ -58,7 +58,7 @@ private:
     static void fillLedBuffer(uint8_t *buffer, uint16_t *lut, uint8_t value, bool invert);
     static void rotateISR();
     static void buttonISR();
-    static void longpressISR();
+    static void longpressISR(TimerHandle_t xTimer);
 
     static QueueHandle_t eventQueue;
     static bool hasQueueTask;
@@ -88,5 +88,5 @@ private:
     static unsigned long buttonDebounce;
     static bool buttonState;
     static unsigned long buttonPressTime;
-    static hw_timer_t *longPressTimer;
+    static TimerHandle_t longPressTimer;
 };
