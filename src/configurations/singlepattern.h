@@ -24,7 +24,7 @@ LUT* LedLut = new GammaLUT(2,4096);
 Pipe pipes[] = {
 
     Pipe(
-        new PatternInput<RGB>(16,new BPMPattern()),
+        new PatternInput<RGB>(16,new AnimatedMixingPattern()),
         new NeopixelOutput<Kpbs800>(1),
         Pipe::transfer<RGB,GRB>,
         NeopixelLut

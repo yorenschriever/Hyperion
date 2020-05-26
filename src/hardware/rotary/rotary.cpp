@@ -133,8 +133,7 @@ void Rotary::rotateISR()
         lastChange = now;
         rotation += result;
 
-        if (rotHandler)
-            rotHandler(result);
+        handleEvent(rotHandler, rotHandlerAsTask, result);
 
         return;
         //return result;
@@ -147,31 +146,43 @@ Rotary::InputEvent Rotary::pressHandler = NULL;
 Rotary::InputEvent Rotary::releaseHandler = NULL;
 Rotary::InputEvent Rotary::clickHandler = NULL;
 Rotary::InputEvent Rotary::longPressHandler = NULL;
+
+bool Rotary::rotHandlerAsTask = true;
+bool Rotary::pressHandlerAsTask = true;
+bool Rotary::releaseHandlerAsTask = true;
+bool Rotary::clickHandlerAsTask = true;
+bool Rotary::longPressHandlerAsTask = true;
+
 unsigned long Rotary::buttonDebounce = 0;
 bool Rotary::buttonState = false;
 unsigned long Rotary::buttonPressTime = 0;
 hw_timer_t *Rotary::longPressTimer = NULL;
 
-void Rotary::onRotate(RotationEvent evt)
+void Rotary::onRotate(RotationEvent evt, bool asTask)
 {
     rotHandler = evt;
+    rotHandlerAsTask = asTask;
 }
 
-void Rotary::onPress(InputEvent evt)
+void Rotary::onPress(InputEvent evt, bool asTask)
 {
     pressHandler = evt;
+    pressHandlerAsTask = asTask;
 }
-void Rotary::onRelease(InputEvent evt)
+void Rotary::onRelease(InputEvent evt, bool asTask)
 {
     releaseHandler = evt;
+    releaseHandlerAsTask = asTask;
 }
-void Rotary::onClick(InputEvent evt)
+void Rotary::onClick(InputEvent evt, bool asTask)
 {
     clickHandler = evt;
+    clickHandlerAsTask = asTask;
 }
-void Rotary::onLongPress(InputEvent evt)
+void Rotary::onLongPress(InputEvent evt, bool asTask)
 {
     longPressHandler = evt;
+    longPressHandlerAsTask = asTask;
 }
 
 void Rotary::buttonISR()
@@ -203,22 +214,76 @@ void Rotary::buttonISR()
         longPressTimer = NULL;
     }
 
-    if (state && pressHandler)
-    {
-        pressHandler();
-    }
+    if (state)
+        handleEvent(pressHandler,pressHandlerAsTask);
 
-    if (!state && releaseHandler)
-        releaseHandler();
+    if (!state)
+        handleEvent(releaseHandler,releaseHandlerAsTask);
 
-    if (!state && now - buttonPressTime < LONGPRESSTIME && clickHandler)
-        clickHandler();
+    if (!state && now - buttonPressTime < LONGPRESSTIME)
+        handleEvent(clickHandler, clickHandlerAsTask);
 
     buttonState = state;
 }
 
 void Rotary::longpressISR()
 {
-    if (longPressHandler)
-        longPressHandler();
+    handleEvent(longPressHandler,longPressHandlerAsTask);
 }
+
+void Rotary::handleEvent(InputEvent function, bool asTask)
+{
+    if (!function)
+        return;
+
+    if (!asTask)
+    {
+        function();
+        return;
+    }
+
+    //spin up a thread to handle the task. this has more overhead, 
+    //but allows you to do stuff that would not be possible from an interrupt.
+    //ideally you create your handler in such a way that it only sets a flag and
+    //the actual handling takes place in the main loop. If you did that you can 
+    //pass asTask=false when setting the handlers. 
+    xTaskCreate(inputEventTask,"RotaryEvent",3000,(void*) function,1,NULL);
+}
+
+
+void Rotary::handleEvent(RotationEvent function, bool asTask, int amount)
+{
+    if (!function)
+        return;
+
+    if (!asTask)
+    {
+        function(amount);
+        return;
+    }
+
+    //spin up a thread to handle the task. this has more overhead, 
+    //but allows you to do stuff that would not be possible from an interrupt.
+    //ideally you create your handler in such a way that it only sets a flag and
+    //the actual handling takes place in the main loop. If you did that you can 
+    //pass asTask=false when setting the handlers. 
+    RotationEventParams* params = new RotationEventParams {function, amount};
+    xTaskCreate(rotationEventTask,"RotaryEvent",3000,params,1,NULL);
+}
+
+
+void Rotary::inputEventTask(void * param)
+{
+    InputEvent func = (InputEvent) param;
+    func();
+    vTaskDelete(NULL);
+}
+
+void Rotary::rotationEventTask(void * param)
+{
+    RotationEventParams* params = (RotationEventParams*) param;
+    params->function(params->amount);
+    delete params;
+    vTaskDelete(NULL);
+}
+

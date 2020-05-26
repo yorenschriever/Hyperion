@@ -12,6 +12,11 @@ class Rotary
     using InputEvent = void (*)();
     using RotationEvent = void (*)(int);
 
+    using RotationEventParams = struct {
+        RotationEvent function;
+        int amount;
+    };
+
 public:
     static void Initialize();
 
@@ -30,11 +35,11 @@ public:
     //be aware that the handlers are called from inside an interrupt, so they should be kept short.
     //only 1 handler can be attached. if you attach another handler, the first one is removed. 
     //TODO handle them from a task
-    static void onRotate(RotationEvent evt);
-    static void onPress(InputEvent evt);
-    static void onRelease(InputEvent evt);
-    static void onClick(InputEvent evt);
-    static void onLongPress(InputEvent evt);
+    static void onRotate(RotationEvent evt, bool asTask=true);
+    static void onPress(InputEvent evt, bool asTask=true);
+    static void onRelease(InputEvent evt, bool asTask=true);
+    static void onClick(InputEvent evt, bool asTask=true);
+    static void onLongPress(InputEvent evt, bool asTask=true);
 
 private:
     Rotary();
@@ -46,6 +51,12 @@ private:
     static void buttonISR();
     static void longpressISR();
 
+    static void handleEvent(InputEvent function, bool asTask);
+    static void handleEvent(RotationEvent function, bool asTask, int amount);
+    static void inputEventTask(void * param);
+    static void rotationEventTask(void * param);
+
+
     static uint8_t prevNextCode;
     static uint16_t store;
     static unsigned long lastChange;
@@ -56,6 +67,13 @@ private:
     static InputEvent releaseHandler;
     static InputEvent clickHandler;
     static InputEvent longPressHandler;
+
+    static bool rotHandlerAsTask;
+    static bool pressHandlerAsTask;
+    static bool releaseHandlerAsTask;
+    static bool clickHandlerAsTask;
+    static bool longPressHandlerAsTask;
+
     static unsigned long buttonDebounce;
     static bool buttonState;
     static unsigned long buttonPressTime;

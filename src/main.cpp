@@ -34,7 +34,7 @@ void animate(byte r, byte g, byte b);
 
 void click() { 
     Debug.println("click"); 
-    //Rotary::setRGB(0,0,0);
+    Rotary::setColour(RGB(0,0,0));
     //APCMini::handleNoteOn(0,58,127);
 }
 void press() { Debug.println("press"); }
