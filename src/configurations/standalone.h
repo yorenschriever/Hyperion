@@ -13,6 +13,8 @@
 #include "luts/colourCorrectionLut.h"
 #include "luts/incandescentLut.h"
 
+const char* HostName = "HyperionMaster";
+
 //I picked colour correction values that Fastled uses for neopixels "TypicalLEDStrip"
 //http://fastled.io/docs/3.1/group___color_enums.html
 //note the different order, fastled uses RGB, luts are in ouput order (GRB)
@@ -66,8 +68,8 @@ Pipe pipes[] = {
                 new SawPattern(), 
                 new RandomPattern(), 
                 new RandomPattern2(), 
-                new MeteorPattern(), 
                 new RandomFadePattern(), 
+                new MeteorPattern(), 
                 new SlowStrobePattern(), 
                 new FastStrobePattern()
             }),

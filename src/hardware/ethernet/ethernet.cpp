@@ -1,21 +1,12 @@
 #include <Arduino.h>
 #include "ethernet.h"
 #include "debug.h"
-//#include "hardware/display/display.h"
+#include "mdns.h"
 
-// const unsigned int nodeid = 123;
-
-// IPAddress ip(192, 168, 1, nodeid);
-// IPAddress gateway(192, 168, 1, 1);
-// IPAddress subnet(255, 255, 255, 0);
-
-//void EthEvent(WiFiEvent_t event);
 bool Ethernet::eth_connected = false;
+const char* Ethernet::hostname;
 
-//byte flipByte(byte c);
-//bool config_eth(IPAddress local_ip, IPAddress gateway, IPAddress subnet);
-
-void Ethernet::Initialize()
+void Ethernet::Initialize(const char* hostname)
 {
     //this delay makes sure the network hardware is property started up, it is unstable without it
     delay(500);
@@ -26,8 +17,18 @@ void Ethernet::Initialize()
 
     WiFi.onEvent(EthEvent);
     ETH.begin();
+
+    Ethernet::hostname = hostname;
+    if (hostname)
+        StartMdnsService(hostname);
+    
 }
 
+//for maximum compatibility with other hardware (routers, pioneer gear, (hyper)linked operation), 
+//it is not advised to set a fixed ip address. The default approach is to let the device request an ip from
+//the dhcp server, and self assign an autoip otherwise.
+//if you want to target this device specifically, set HostName in the config
+//this sets the hostname and a mdns entry.
 bool Ethernet::SetFixedIp(IPAddress ip, IPAddress gateway, IPAddress subnet)
 {
     tcpip_adapter_ip_info_t info;
@@ -54,6 +55,11 @@ bool Ethernet::isConnected()
     return eth_connected;
 }
 
+IPAddress Ethernet::GetIp()
+{
+    return ETH.localIP();
+}
+
 void Ethernet::EthEvent(WiFiEvent_t event)
 {
     switch (event)
@@ -61,9 +67,8 @@ void Ethernet::EthEvent(WiFiEvent_t event)
     case SYSTEM_EVENT_ETH_START:
         Debug.println("ETH Started");
         //set eth hostname here
-        char buf[20];
-        //sprintf(buf, "Hyperion ip= %d", nodeid);
-        ETH.setHostname(buf);
+        if (Ethernet::hostname)
+                ETH.setHostname(Ethernet::hostname);
         break;
     case SYSTEM_EVENT_ETH_CONNECTED:
         Debug.println("ETH Connected");
@@ -95,5 +100,19 @@ void Ethernet::EthEvent(WiFiEvent_t event)
         break;
     }
 
-    //Display::setEthernet(eth_connected);
+}
+
+void Ethernet::StartMdnsService(const char* name)
+{
+    //initialize mDNS service
+    esp_err_t err = mdns_init();
+    if (err) {
+        Debug.printf("MDNS Init failed: %d\n", err);
+        return;
+    }
+
+    //set hostname
+    mdns_hostname_set(name);
+    //set default instance
+    mdns_instance_name_set(name);
 }

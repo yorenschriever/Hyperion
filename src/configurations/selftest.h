@@ -16,10 +16,7 @@
 #include "luts/colourCorrectionLut.h"
 #include "luts/incandescentLut.h"
 
-//extern const bool DHCP = true;
-// extern const IPAddress ip(192, 168, 1, 123);
-// extern const IPAddress gateway(192, 168, 1, 1);
-// extern const IPAddress subnet(255, 255, 255, 0);
+const char* HostName = "selftest";
 
 //I picked colour correction values that Fastled uses for neopixels "TypicalLEDStrip"
 //http://fastled.io/docs/3.1/group___color_enums.html

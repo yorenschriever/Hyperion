@@ -19,6 +19,7 @@
 #include "patterns/helpers/bpm/tapBpm.h"
 #include "patterns/helpers/bpm/proDJLinkBpm.h"
 
+#include "hardware/midi/midi.h"
 #include "hardware/ethernet/ethernet.h"
 #include "hardware/firmwareUpdate/firmwareUpdate.h"
 #include "hardware/display/display.h"
@@ -44,6 +45,9 @@ void rotate(int amount) { Debug.printf("rotate: %d\n", amount); }
 
 void setup()
 {
+    Debug.begin(115200);
+    Debug.println("Checking safemode");
+
     //Start 'safe mode' when rotary button is pressed during boot
     //only starts firmware update
     //Be aware that the constructors of all stack objects will
@@ -51,9 +55,10 @@ void setup()
     //update over usb
     pinMode(39,INPUT);
     if (digitalRead(39)){
+        Debug.println("Starting safemode");
         Display::Initialize(); 
         Display::setDFU(true,0);
-        Ethernet::Initialize();
+        Ethernet::Initialize("Hyperion");
         FirmwareUpdate::Initialize();
         for(;;){
             FirmwareUpdate::Process();
@@ -61,7 +66,7 @@ void setup()
         }
     }
 
-    Debug.begin(115200);
+    Debug.println("Skipped safemode, normal boot");
 
     Display::Initialize(); //initialize display before outputs
 
@@ -84,11 +89,9 @@ void setup()
     PCA9685::Initialize();
 
     Debug.println("Starting network");
-    Ethernet::Initialize();
-    //Ethernet::SetFixedIp(IPAddress(169,254,67,123), IPAddress(192,168,1,1), IPAddress(255,255,0,0));
-    Ethernet::SetFixedIp(IPAddress(192,168,1,123), IPAddress(192,168,1,1), IPAddress(0,0,0,0));
+    Ethernet::Initialize(HostName);
 
-    BPM::SetInstance(new ProDJLinkBPM());
+    BPM::SetInstance(new TapBPM());
 
     Debug.println("Starting inputs");
     for (int j = 0; j < sizeof(pipes) / sizeof(Pipe); j++)
@@ -180,6 +183,7 @@ void UpdateDisplay(void *parameter)
         lastFpsUpdate = now;
 
         Debug.printf("FPS: %d of %d (%d%% miss)\t interval: %dms \t freeHeap: %d \t avg length: %d \t channel: %d \n", (int)outfps, (int)infps, (int)misses, (int)elapsedTime, ESP.getFreeHeap(), avglength, activeChannels);
+        Debug.printf("IPAddress: %s\n", Ethernet::GetIp().toString().c_str());
 
         Display::setFPS(infps,outfps,misses);
         Display::setLeds(totalLength);

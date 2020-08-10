@@ -15,6 +15,8 @@
 #include "luts/gammaLut.h"
 #include "colours.h"
 
+const char* HostName = "SinglePattern";
+
 //I picked colour correction values that Fastled uses for neopixels "TypicalLEDStrip"
 //http://fastled.io/docs/3.1/group___color_enums.html
 //note the different order, fastled uses RGB, luts are in ouput order (GRB)

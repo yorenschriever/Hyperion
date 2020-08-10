@@ -6,13 +6,13 @@
 //#define DEFAULTPERIOD 480000 //default at 125BPM
 #define DEFAULTPERIOD 0 //default off
 
-class tapBPM : public BPM
+class TapBPM : public BPM
 {
 
 public:
     void Initialize() override
     {
-        Rotary::onPress([]() { ((tapBPM *)BPM::GetInstance())->Tap(); });
+        Rotary::onPress([]() { ((TapBPM *)BPM::GetInstance())->Tap(); });
     }
 
     int GetBeatNumber() override
