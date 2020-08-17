@@ -20,6 +20,8 @@
 #include <lwip/sockets.h>
 #include <lwip/netdb.h>
 #include <errno.h>
+#include "debug.h"
+#include "../ethernet/ethernet.h"
 
 //#include “FreeRTOS_sockets.h”
 #define FREERTOS_SO_UDP_MAX_RX_PACKETS (16)
@@ -45,7 +47,7 @@ uint8_t UDPFast::begin(IPAddress address, uint16_t port)
 
     server_port = port;
 
-    tx_buffer = new char[1460];
+    tx_buffer = new char[1];
     if (!tx_buffer)
     {
         log_e("could not create tx buffer: %d", errno);
@@ -153,91 +155,123 @@ int UDPFast::beginMulticastPacket()
     return beginPacket();
 }
 
-int UDPFast::beginPacket()
+// int UDPFast::beginPacket()
+// {
+//     if (!remote_port)
+//         return 0;
+
+//     // allocate tx_buffer if is necessary
+//     if (!tx_buffer)
+//     {
+//         tx_buffer = new char[1460];
+//         if (!tx_buffer)
+//         {
+//             log_e("could not create tx buffer: %d", errno);
+//             return 0;
+//         }
+//     }
+
+//     tx_buffer_len = 0;
+
+//     // check whereas socket is already open
+//     if (udp_server != -1)
+//         return 1;
+
+//     if ((udp_server = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+//     {
+//         log_e("could not create socket: %d", errno);
+//         return 0;
+//     }
+
+//     fcntl(udp_server, F_SETFL, O_NONBLOCK);
+
+//     return 1;
+// }
+
+// int UDPFast::beginPacket(IPAddress ip, uint16_t port)
+// {
+//     remote_ip = ip;
+//     remote_port = port;
+//     return beginPacket();
+// }
+
+// int UDPFast::beginPacket(const char *host, uint16_t port)
+// {
+//     struct hostent *server;
+//     server = gethostbyname(host);
+//     if (server == NULL)
+//     {
+//         log_e("could not get host from dns: %d", errno);
+//         return 0;
+//     }
+//     return beginPacket(IPAddress((const uint8_t *)(server->h_addr_list[0])), port);
+// }
+
+// int UDPFast::endPacket()
+// {
+//     struct sockaddr_in recipient;
+//     recipient.sin_addr.s_addr = (uint32_t)remote_ip;
+//     recipient.sin_family = AF_INET;
+//     recipient.sin_port = htons(remote_port);
+//     int sent = sendto(udp_server, tx_buffer, tx_buffer_len, 0, (struct sockaddr *)&recipient, sizeof(recipient));
+//     if (sent < 0)
+//     {
+//         log_e("could not send data: %d", errno);
+//         return 0;
+//     }
+//     return 1;
+// }
+
+int UDPFast::sendPacketFast(const char* hostname, uint16_t port, uint8_t* data, int len)
 {
-    if (!remote_port)
+    if (!Ethernet::isConnected())
         return 0;
 
-    // allocate tx_buffer if is necessary
-    if (!tx_buffer)
+    if (udp_server == -1)
     {
-        tx_buffer = new char[1460];
-        if (!tx_buffer)
+        if ((udp_server = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
         {
-            log_e("could not create tx buffer: %d", errno);
+            //log_e("could not create socket: %d", errno);
+            Debug.println("Cannot open socket");
             return 0;
         }
+
     }
 
-    tx_buffer_len = 0;
-
-    // check whereas socket is already open
-    if (udp_server != -1)
-        return 1;
-
-    if ((udp_server = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
-    {
-        log_e("could not create socket: %d", errno);
+    IPAddress ip = Ethernet::Resolve(hostname);
+    if (ip==IPAddress((uint32_t)0))
         return 0;
-    }
 
     fcntl(udp_server, F_SETFL, O_NONBLOCK);
 
-    return 1;
-}
-
-int UDPFast::beginPacket(IPAddress ip, uint16_t port)
-{
-    remote_ip = ip;
-    remote_port = port;
-    return beginPacket();
-}
-
-int UDPFast::beginPacket(const char *host, uint16_t port)
-{
-    struct hostent *server;
-    server = gethostbyname(host);
-    if (server == NULL)
-    {
-        log_e("could not get host from dns: %d", errno);
-        return 0;
-    }
-    return beginPacket(IPAddress((const uint8_t *)(server->h_addr_list[0])), port);
-}
-
-int UDPFast::endPacket()
-{
     struct sockaddr_in recipient;
-    recipient.sin_addr.s_addr = (uint32_t)remote_ip;
+    recipient.sin_addr.s_addr = ip;
     recipient.sin_family = AF_INET;
-    recipient.sin_port = htons(remote_port);
-    int sent = sendto(udp_server, tx_buffer, tx_buffer_len, 0, (struct sockaddr *)&recipient, sizeof(recipient));
+    recipient.sin_port = htons(port);
+    int sent = sendto(udp_server, data, len, 0, (struct sockaddr *)&recipient, sizeof(recipient));
     if (sent < 0)
-    {
-        log_e("could not send data: %d", errno);
         return 0;
-    }
     return 1;
 }
 
-size_t UDPFast::write(uint8_t data)
-{
-    if (tx_buffer_len == 1460)
-    {
-        endPacket();
-        tx_buffer_len = 0;
-    }
-    tx_buffer[tx_buffer_len++] = data;
-    return 1;
-}
+// size_t UDPFast::write(uint8_t data)
+// {
+//     if (tx_buffer_len == 1460)
+//     {
+//         endPacket();
+//         tx_buffer_len = 0;
+//     }
+//     tx_buffer[tx_buffer_len++] = data;
+//     return 1;
+// }
 
-size_t UDPFast::write(const uint8_t *buffer, size_t size)
-{
-    size_t i;
-    for (i = 0; i < size; i++)
-        write(buffer[i]);
-    return i;
-}
+// size_t UDPFast::write(const uint8_t *buffer, size_t size)
+// {
+//     size_t i;
+//     for (i = 0; i < size; i++)
+//         write(buffer[i]);
+//     return i;
+// }
 
 boolean UDPFast::setMaxRxPackets(int value)
 {

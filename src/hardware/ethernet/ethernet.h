@@ -6,6 +6,8 @@
 
 #include <Arduino.h>
 #include <ETH.h>
+#include <string>
+#include <map>
 
 class Ethernet
 {
@@ -22,13 +24,21 @@ public:
     static bool SetFixedIp(IPAddress ip, IPAddress gateway, IPAddress subnet);
 
     //tells if the network is connected
-    static bool isConnected();
+    static bool isConnected();  
+    static bool isConnecting();
 
     static IPAddress GetIp();
+
+    //in case of a .local address it resolves using mdns, and caches the result
+    //otherwise it will do a regular hostname lookup
+    static IPAddress Resolve(const char* hostname);
 
 protected:
     static void EthEvent(WiFiEvent_t event);
     static void StartMdnsService(const char *name);
     static bool eth_connected;
+    static bool eth_connecting;
     static const char* hostname;
+
+    static std::map<std::string, IPAddress> mdnsCache;
 };

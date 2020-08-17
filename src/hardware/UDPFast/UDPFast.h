@@ -60,12 +60,15 @@ public:
   uint8_t beginMulticast(IPAddress a, uint16_t p);
   void stop();
   int beginMulticastPacket();
-  int beginPacket();
-  int beginPacket(IPAddress ip, uint16_t port);
-  int beginPacket(const char *host, uint16_t port);
-  int endPacket();
-  size_t write(uint8_t);
-  size_t write(const uint8_t *buffer, size_t size);
+  int beginPacket(){return 0;};
+  int beginPacket(IPAddress ip, uint16_t port){return 0;};
+  int beginPacket(const char *host, uint16_t port){return 0;};
+  int endPacket(){return 0;};
+  size_t write(uint8_t){return 0;};
+  size_t write(const uint8_t *buffer, size_t size){return 0;};
+
+  int sendPacketFast(const char* hostname, uint16_t port, uint8_t* data, int len);
+
   bool setReceiveTimeout(int value);
   int waitPacketFast(uint8_t* buf);
   int parsePacketFast(uint8_t* buffer);

@@ -1,13 +1,29 @@
+#ifndef LWIP_OPEN_SRC
+#define LWIP_OPEN_SRC
+#endif
+#define CONFIG_ETH_ENABLED
+
+#include "WiFi.h"
+#include <functional>
+#include "esp_wifi.h"
+
 #include <Arduino.h>
 #include "ethernet.h"
 #include "debug.h"
 #include "mdns.h"
+#include "WiFi.h"
+#include <ESPmDNS.h>
+#include <lwip/netdb.h>
 
 bool Ethernet::eth_connected = false;
+bool Ethernet::eth_connecting = false;
 const char* Ethernet::hostname;
+std::map<std::string, IPAddress> Ethernet::mdnsCache;
 
 void Ethernet::Initialize(const char* hostname)
 {
+    Ethernet::hostname = hostname;
+
     //this delay makes sure the network hardware is property started up, it is unstable without it
     delay(500);
 
@@ -16,12 +32,8 @@ void Ethernet::Initialize(const char* hostname)
     delay(100 + (esp_random() & 0xFF) * 5);
 
     WiFi.onEvent(EthEvent);
-    ETH.begin();
 
-    Ethernet::hostname = hostname;
-    if (hostname)
-        StartMdnsService(hostname);
-    
+    ETH.begin();
 }
 
 //for maximum compatibility with other hardware (routers, pioneer gear, (hyper)linked operation), 
@@ -55,6 +67,11 @@ bool Ethernet::isConnected()
     return eth_connected;
 }
 
+bool Ethernet::isConnecting()
+{
+    return eth_connecting;
+}
+
 IPAddress Ethernet::GetIp()
 {
     return ETH.localIP();
@@ -69,10 +86,11 @@ void Ethernet::EthEvent(WiFiEvent_t event)
         //set eth hostname here
         if (Ethernet::hostname)
                 ETH.setHostname(Ethernet::hostname);
+        mdnsCache.clear();
         break;
     case SYSTEM_EVENT_ETH_CONNECTED:
         Debug.println("ETH Connected");
-        //eth_connected = true;
+        eth_connecting = true;
         break;
     case SYSTEM_EVENT_ETH_GOT_IP:
         Debug.print("ETH MAC: ");
@@ -87,14 +105,22 @@ void Ethernet::EthEvent(WiFiEvent_t event)
         Debug.print(ETH.linkSpeed());
         Debug.println("Mbps");
         eth_connected = true;
+        eth_connecting = false;
+
+        if (Ethernet::hostname){
+            StartMdnsService(Ethernet::hostname);
+        }
+
         break;
     case SYSTEM_EVENT_ETH_DISCONNECTED:
         Debug.println("ETH Disconnected");
         eth_connected = false;
+        eth_connecting = false;
         break;
     case SYSTEM_EVENT_ETH_STOP:
         Debug.println("ETH Stopped");
         eth_connected = false;
+        eth_connecting = false;
         break;
     default:
         break;
@@ -104,15 +130,54 @@ void Ethernet::EthEvent(WiFiEvent_t event)
 
 void Ethernet::StartMdnsService(const char* name)
 {
-    //initialize mDNS service
-    esp_err_t err = mdns_init();
-    if (err) {
-        Debug.printf("MDNS Init failed: %d\n", err);
-        return;
+    if (!MDNS.begin(name)) {
+        Debug.println("Error setting up MDNS responder!");
+    } else {
+        Debug.printf("Hostname set: %s\n", name);
+    }
+}
+
+IPAddress Ethernet::Resolve(const char* hostname)
+{
+    if (!String(hostname).endsWith(".local"))
+    {
+        struct hostent *host;
+        host = gethostbyname(hostname);
+        if (host == NULL)
+        {
+            Debug.println("Cannot get host");
+            return IPAddress((uint32_t)0);
+        }
+        return IPAddress((const uint8_t *)(host->h_addr_list[0]));
     }
 
-    //set hostname
-    mdns_hostname_set(name);
-    //set default instance
-    mdns_instance_name_set(name);
+    //strip ".local" from the hostname
+    std::string localHostname = std::string(hostname);
+    localHostname.resize(localHostname.size()  -6);
+
+    std::map<std::string,IPAddress>::iterator it = mdnsCache.find(localHostname);
+    if (it != mdnsCache.end())
+        return it->second;
+    
+    Debug.printf("querying: %s\n",localHostname.c_str());
+
+    struct ip4_addr addr;
+    addr.addr = 0;
+    esp_err_t err = mdns_query_a(localHostname.c_str(), 2000,  &addr);
+    if(err){
+        if(err == ESP_ERR_NOT_FOUND){
+            Debug.println("Host was not found!");
+            return IPAddress((uint32_t)0);
+        }
+        Debug.println("Query Failed");
+        return IPAddress((uint32_t)0);
+    }
+
+    Debug.printf(IPSTR, IP2STR(&addr));
+
+    IPAddress result = IPAddress(addr.addr);
+
+    mdnsCache[localHostname] = result;
+
+    return result;
 }

@@ -4,6 +4,7 @@
 #include "outputs/apcminiOutput.h"
 #include "outputs/neopixelOutput.h"
 #include "outputs/pwmOutput.h"
+#include "outputs/udpOutput.h"
 #include "metaoutputs/temperatureControlledOutput.h"
 #include "inputs/udpInput.h"
 #include "inputs/apcminiInput.h"
@@ -25,12 +26,12 @@ LUT* LedLut = new GammaLUT(2,4096);
 
 Pipe pipes[] = {
 
-    Pipe(
-        new PatternInput<RGB>(16,new AnimatedMixingPattern()),
-        new NeopixelOutput<Kpbs800>(1),
-        Pipe::transfer<RGB,GRB>,
-        NeopixelLut
-    )
+    // Pipe(
+    //     new PatternInput<RGB>(16,new AnimatedMixingPattern()),
+    //     new NeopixelOutput<Kpbs800>(1),
+    //     Pipe::transfer<RGB,GRB>,
+    //     NeopixelLut
+    // )
     
     // Pipe(
     //     new PatternInput<Monochrome>(1,new TemperatureTestPattern()),
@@ -43,4 +44,10 @@ Pipe pipes[] = {
     //     Pipe::transfer<Monochrome,Monochrome12>,
     //     LedLut
     // )
+
+        Pipe(
+        new PatternInput<Monochrome>(12,new SawPattern()),
+        new UDPOutput("lasers.local",9619,120),
+        Pipe::transfer<Monochrome,Monochrome12>
+    )
 };

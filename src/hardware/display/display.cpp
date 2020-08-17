@@ -20,6 +20,7 @@ int Display::fpsin = 1;
 int Display::fpsout = 1;
 int Display::framemiss = 0;
 bool Display::ethconnected = false;
+bool Display::ethconnecting = false;
 bool Display::dmxconnected = false;
 bool Display::midiconnected = false;
 int Display::numleds = 0;
@@ -70,11 +71,12 @@ void Display::setFPS(int newfpsin, int newfpsout, int misses)
     //xSemaphoreGive(dirtySemaphore);
 }
 
-void Display::setEthernet(bool connected)
+void Display::setEthernet(bool connected, bool connecting)
 {
-    if (ethconnected == connected)
-        return;
+    //if (ethconnected == connected)
+    //    return;
     ethconnected = connected;
+    ethconnecting = connecting;
     //xSemaphoreGive(dirtySemaphore);
 }
 
@@ -155,7 +157,7 @@ void Display::updateFrame()
         display.setCursor(0, 16);
 
         int pos = 0;
-        pos = renderConnectionStatus(pos, ethconnected, "ETH");
+        pos = renderConnectionStatus(pos, ethconnecting? millis()%1000<500 : ethconnected, "ETH");
         pos = renderConnectionStatus(pos, dmxconnected, "DMX");
         pos = renderConnectionStatus(pos, midiconnected, "MIDI");
     }
