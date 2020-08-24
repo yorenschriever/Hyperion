@@ -17,8 +17,8 @@ public:
     //A higher frequency looks better, because it produces less flicker.
     //This works great for leds, but if currents are high (indandescent)
     //The mosfets will heat up quickly. Also the produced noise will be
-    //more audible. Indandescent lamps have a slow response, so you wont
-    //see the flicker as mucht. Setting the pwm frequency lower is better
+    //more audible. Incandescent lamps have a slow response, so you wont
+    //see the flicker as much. Setting the pwm frequency lower is better
     //in that case.
     PWMOutput(int frequency) 
     {
@@ -28,8 +28,8 @@ public:
     //index and size are in bytes
     void SetData(uint8_t *data, int size, int index)
     {
-        //this memcpy is not aware that is it actually copying uint16_ts byte by byte
-        //(provided you actually converted to RGB12 format)
+        //this memcpy is not aware that it is actually copying uint16_ts byte by byte
+        //(provided you actually converted to Monochrome12 format)
         int copylength = min(size, (int)sizeof(this->values) - index);
         if (copylength > 0)
             memcpy((uint8_t *)this->values + index, data, copylength);

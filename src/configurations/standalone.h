@@ -110,7 +110,7 @@ Pipe pipes[] = {
                 new GlitchPattern(),
                 new SlowStrobePattern()
             }),
-        new UDPOutput("lasers.local",9619,500),
+        new UDPOutput("lasers.local",9619,100),
         Pipe::transfer<Monochrome,Monochrome12>),
 
     Pipe(
@@ -122,13 +122,13 @@ Pipe pipes[] = {
                 new BeatAllFadePattern(),
                 new BeatSingleFadePattern(),
                 new GlitchPattern(),
-                new BeatAllFadePattern(),
+                new BeatShakePattern(),
                 new SlowStrobePattern(),
                 new OnPattern(),
                 new GlitchPattern(),
                 new FastStrobePattern()
             }),
-        new UDPOutput("strobes.local",9619,500),
+        new UDPOutput("strobes.local",9619,100),
         Pipe::transfer<Monochrome,Monochrome12>),
 
     // Pipe(

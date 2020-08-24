@@ -28,6 +28,7 @@
 
 #include "configurations/configuration.h"
 
+#include "metaOutputs/temperatureControlledOutput.h"
 
 void UpdateDisplay(void *parameter);
 void clearall();

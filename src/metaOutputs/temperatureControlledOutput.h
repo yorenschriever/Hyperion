@@ -36,7 +36,7 @@ public:
     }
 
     //requestedIntensity is on the scale 0-1 (full of, full on)
-    //dt is in ms? seconds?
+    //dt is in ms
     float getCorrectionFactor(float requestedIntensity, float dtms)
     {
         float dt = dtms/1000;
@@ -91,6 +91,7 @@ private:
 //If the temperature reaches above a threshold, that output will be scaled down.
 //This is a feedforward model only, and there is not feedback, so the temperature can be a bit off.
 //You have to measure heating/cooling coefficients of the lamp to get a usable model.
+//This class is memory intensive (22 bytes/lamp), so be careful when adding a lot of lamps
 template <class T_COLOUR>
 class TemperatureControlledOutput : public Output
 {
@@ -110,7 +111,7 @@ public:
         parameters.equilibriumDutyCycleComplement = equilibriumdutycomplement;                                         //1-the equilibriumdutycycle. The equilibrium duty cycle is pwm duty cycle at which the heatup and cooldown are equal, and the lamp would exentuallt exactly reach the maximum temperature.
         parameters.correctionThresholdTemperature = ambientTemperature + (maxTemperature - ambientTemperature) * 0.75; //The temperature where the model start scaling down. If the temperature is below this value the requested duty cycle doesn't have to be corrected.
 
-        SetLength(1);
+        SetLength(1*sizeof(T_COLOUR));
     }
 
     //index and size are in bytes
@@ -118,7 +119,7 @@ public:
     {
         //store the requested colour, so we can use it to further dim the values
         //if no input comes in, but the lamp is so bright it will overheat.
-        memcpy(this->pixelData + index, data, size);
+        memcpy((uint8_t*)this->pixelData + index, data, size);
 
         if (size != sizeof(T_COLOUR))
             return; //currently only works if setdata is called pixel by pixels
@@ -193,11 +194,15 @@ public:
 
     void SetLength(int len) override
     {
+        while (!childOutput->Ready()) delay(1); 
+
         if (this->length != len / sizeof(T_COLOUR))
         {
+            Debug.printf("set len %d, %d, old=%d\n", len, len / sizeof(T_COLOUR), this->length);
             this->length = len / sizeof(T_COLOUR);
-
+            
             pixelData = (T_COLOUR*) realloc(pixelData, len);
+            memset((void*)pixelData,0,len);
             models = (TemperatureModel*) realloc(models, length * sizeof(TemperatureModel));
             
             //i initialize all models to the maximum temperature. this is safest
