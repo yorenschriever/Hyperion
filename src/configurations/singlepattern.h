@@ -44,10 +44,24 @@ Pipe pipes[] = {
     //     Pipe::transfer<Monochrome,Monochrome12>,
     //     LedLut
     // )
+/*
 
-        Pipe(
-        new PatternInput<Monochrome>(12,new SawPattern()),
-        new UDPOutput("lasers.local",9619,120),
+RandomFadePattern()
+SlowStrobePattern();
+FastStrobePattern
+BeatAllFadePattern
+BeatShakePattern
+BeatSingleFadePattern
+BeatSinglePattern
+GlitchPattern
+OnPattern
+SinPattern
+BeatSomeFadePattern
+*/
+
+    Pipe(
+        new PatternInput<Monochrome>(12,new GlitchPattern()),
+        new UDPOutput("strobes.local",9619,500),
         Pipe::transfer<Monochrome,Monochrome12>
     )
 };

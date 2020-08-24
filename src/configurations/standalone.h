@@ -12,14 +12,15 @@
 #include "patterns/monochromePatterns.h"
 #include "luts/colourCorrectionLut.h"
 #include "luts/incandescentLut.h"
+#include "outputs/udpOutput.h"
 
-const char* HostName = "HyperionMaster";
+const char *HostName = "HyperionMaster";
 
 //I picked colour correction values that Fastled uses for neopixels "TypicalLEDStrip"
 //http://fastled.io/docs/3.1/group___color_enums.html
 //note the different order, fastled uses RGB, luts are in ouput order (GRB)
-LUT* NeopixelLut = new ColourCorrectionLUT(1.5,255, 176, 255, 240); 
-LUT* IncandescentLut = new IncandescentLUT(2.5, 4096, 400);
+LUT *NeopixelLut = new ColourCorrectionLUT(1.5, 255, 176, 255, 240);
+LUT *IncandescentLut = new IncandescentLUT(2.5, 4096, 400);
 
 Pipe pipes[] = {
 
@@ -28,81 +29,112 @@ Pipe pipes[] = {
         new ApcminiInput<Monochrome>(
             30,
             0,
-            new Pattern<Monochrome>*[8]{
-                new SinPattern(), 
-                new SawPattern(), 
-                new RandomPattern(), 
-                new RandomPattern2(), 
-                new MeteorPattern(), 
-                new RandomFadePattern(), 
-                new SlowStrobePattern(), 
-                new FastStrobePattern()
+            new Pattern<Monochrome> *[8] {
+                new SinPattern(),
+                    new SawPattern(),
+                    new RandomPattern(),
+                    new RandomPattern2(),
+                    new MeteorPattern(),
+                    new RandomFadePattern(),
+                    new SlowStrobePattern(),
+                    new FastStrobePattern()
             }),
-        new DMXOutput(1)
-    ),
+        new DMXOutput(1)),
 
     Pipe(
         //create an apcmini input that creates monochrome patterns
         new ApcminiInput<Monochrome>(
             30,
             1,
-            new Pattern<Monochrome>*[8]{
-                new SinPattern(), 
-                new SawPattern(), 
-                new RandomPattern(), 
-                new RandomPattern2(), 
-                new MeteorPattern(), 
-                new RandomFadePattern(), 
-                new SlowStrobePattern(), 
-                new FastStrobePattern()
+            new Pattern<Monochrome> *[8] {
+                new SinPattern(),
+                    new SawPattern(),
+                    new RandomPattern(),
+                    new RandomPattern2(),
+                    new MeteorPattern(),
+                    new RandomFadePattern(),
+                    new SlowStrobePattern(),
+                    new FastStrobePattern()
             }),
-        new DMXOutput(31)
-    ),
+        new DMXOutput(31)),
 
     Pipe(
         new ApcminiInput<Monochrome>(
             12,
             2,
-            new Pattern<Monochrome>*[8]{
-                new SinPattern(), 
-                new SawPattern(), 
-                new RandomPattern(), 
-                new RandomPattern2(), 
-                new RandomFadePattern(), 
-                new MeteorPattern(), 
-                new SlowStrobePattern(), 
-                new FastStrobePattern()
+            new Pattern<Monochrome> *[8] {
+                new SinPattern(),
+                    new SawPattern(),
+                    new RandomPattern(),
+                    new RandomPattern2(),
+                    new RandomFadePattern(),
+                    new MeteorPattern(),
+                    new SlowStrobePattern(),
+                    new FastStrobePattern()
             }),
         new PWMOutput(1500),
         Pipe::transfer<Monochrome, Monochrome12>,
-        IncandescentLut
-    ),
+        IncandescentLut),
 
     Pipe(
         new ApcminiInput<RGB>(
             16, //width of the pattern, in pixels
             3,  //button column on the apc to listen to (0-7)
             //the patterns to attach to the buttons
-            new Pattern<RGB>*[8]{
-                new RainbowPattern(), 
-                new ColourOrderPattern(), 
-                new MixingPattern(), 
-                new AnimatedMixingPattern(), 
-                new PoissonPattern(), 
-                new RainbowPattern(), 
-                new RainbowPattern(), 
-                new RainbowPattern()
+            new Pattern<RGB> *[8] {
+                new RainbowPattern(),
+                    new ColourOrderPattern(),
+                    new MixingPattern(),
+                    new AnimatedMixingPattern(),
+                    new PoissonPattern(),
+                    new RainbowPattern(),
+                    new RainbowPattern(),
+                    new RainbowPattern()
             }),
         new NeopixelOutput<Kpbs800>(1),
-        Pipe::transfer<RGB,GRB>,
-        NeopixelLut
-        ),
+        Pipe::transfer<RGB, GRB>,
+        NeopixelLut),
 
     Pipe(
-        new PatternInput<RGB>(16,new WatcherPattern2()),
-        new NeopixelOutput<Kpbs800>(1),
-        Pipe::transfer<RGB,GRB>,
-        NeopixelLut
-    )
+        new ApcminiInput<Monochrome>(
+            12, //width of the pattern, in pixels
+            6,  //button column on the apc to listen to (0-7)
+            //the patterns to attach to the buttons
+            new Pattern<Monochrome> *[8] {
+                new OnPattern(),
+                new SinPattern(),
+                new BeatSingleFadePattern(),
+                new BeatMultiFadePattern(),
+                new BeatShakePattern(),
+                new OnPattern(),
+                new GlitchPattern(),
+                new SlowStrobePattern()
+            }),
+        new UDPOutput("lasers.local",9619,500),
+        Pipe::transfer<Monochrome,Monochrome12>),
+
+    Pipe(
+        new ApcminiInput<Monochrome>(
+            12, //width of the pattern, in pixels
+            7,  //button column on the apc to listen to (0-7)
+            //the patterns to attach to the buttons
+            new Pattern<Monochrome> *[8] {
+                new BeatAllFadePattern(),
+                new BeatSingleFadePattern(),
+                new GlitchPattern(),
+                new BeatAllFadePattern(),
+                new SlowStrobePattern(),
+                new OnPattern(),
+                new GlitchPattern(),
+                new FastStrobePattern()
+            }),
+        new UDPOutput("strobes.local",9619,500),
+        Pipe::transfer<Monochrome,Monochrome12>),
+
+    // Pipe(
+    //     new PatternInput<RGB>(16, new WatcherPattern2()),
+    //     new NeopixelOutput<Kpbs800>(1),
+    //     Pipe::transfer<RGB, GRB>,
+    //     NeopixelLut)
 
 };

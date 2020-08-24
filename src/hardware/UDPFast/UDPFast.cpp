@@ -238,14 +238,14 @@ int UDPFast::sendPacketFast(const char* hostname, uint16_t port, uint8_t* data, 
 
     }
 
-    IPAddress ip = Ethernet::Resolve(hostname);
-    if (ip==IPAddress((uint32_t)0))
+    IPAddress* ip = Ethernet::ResolveNoWait(hostname);
+    if (!ip)
         return 0;
 
     fcntl(udp_server, F_SETFL, O_NONBLOCK);
 
     struct sockaddr_in recipient;
-    recipient.sin_addr.s_addr = ip;
+    recipient.sin_addr.s_addr = *(ip);
     recipient.sin_family = AF_INET;
     recipient.sin_port = htons(port);
     int sent = sendto(udp_server, data, len, 0, (struct sockaddr *)&recipient, sizeof(recipient));

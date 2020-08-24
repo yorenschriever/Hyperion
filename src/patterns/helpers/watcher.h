@@ -37,3 +37,14 @@ private:
     WatcherFunc getValue;
     WatcherType type;
 };
+
+class BPMWatcher : public Watcher<int>
+{
+public: 
+    BPMWatcher() : 
+        Watcher(
+            [] () { return BPM::GetInstance()->GetBeatNumber(); } ,
+            Changing
+        )
+    {}
+};

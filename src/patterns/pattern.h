@@ -9,6 +9,7 @@
 #include "helpers/interval.h"
 #include "helpers/timeline.h"
 #include "helpers/watcher.h"
+#include "helpers/permute.h"
 
 template<class T_COLOUR>
 class Pattern {

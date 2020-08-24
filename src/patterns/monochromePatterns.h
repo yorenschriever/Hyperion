@@ -6,7 +6,7 @@ class SinPattern : public Pattern<Monochrome>
     inline void Calculate(Monochrome *pixels, int width, bool firstFrame) override
     {
         for (int index = 0; index < width; index++)
-            pixels[index] = (uint8_t)(127.f + 127.f * cos(float(index) / 10.f - millis() / 100.));
+            pixels[index] = (uint8_t)(127.f + 127.f * cos(float(index) / float(width) * (2*3.1415) - millis() / 250.));
     }
 };
 
@@ -96,3 +96,109 @@ class TemperatureTestPattern : public Pattern<Monochrome>
     }
 };
 
+class BeatAllFadePattern : public Pattern<Monochrome>
+{
+    BPMWatcher watcher = BPMWatcher();
+    Fade fader = Fade(Linear, 100, Down);
+
+    inline void Calculate(Monochrome *pixels, int width, bool firstFrame) override
+    {
+        fader.duration = Midi::controllerValue(49)*2+50;
+
+        if (watcher.Triggered())
+            fader.reset();
+
+        for (int index = 0; index < width; index++)
+            pixels[index] = 255 * fader.getValue();
+    }
+};
+
+class BeatShakePattern : public Pattern<Monochrome>
+{
+    BPMWatcher watcher = BPMWatcher();
+    Fade fader = Fade(Linear, 150, Down, WaitAtEnd);
+    Permute perm = Permute(0);
+    
+    inline void Calculate(Monochrome *pixels, int width, bool firstFrame) override
+    {
+        perm.setSize(width);
+
+        if (watcher.Triggered())
+        {
+            perm.permute();
+            fader.reset();
+        }
+
+        for (int index = 0; index < width; index++)
+            pixels[index] = 255 * fader.getValue(perm.at[index]*10);
+    }
+};
+
+class BeatSingleFadePattern : public Pattern<Monochrome>
+{
+    BPMWatcher watcher = BPMWatcher();
+    Fade fader = Fade(Linear, 200, Down, WaitAtEnd);
+    int current=0;
+
+    inline void Calculate(Monochrome *pixels, int width, bool firstFrame) override
+    {
+        if (watcher.Triggered())
+        {
+            current = random(width);
+            fader.reset();
+        }
+
+        for (int index = 0; index < width; index++)
+            pixels[index] = index==current ? 255 * fader.getValue() : 0;
+    }
+};
+
+class BeatMultiFadePattern : public Pattern<Monochrome>
+{
+    BPMWatcher watcher = BPMWatcher();
+    Fade fader = Fade(Linear, 200, Down, WaitAtEnd);
+    Permute perm = Permute(0);
+
+    inline void Calculate(Monochrome *pixels, int width, bool firstFrame) override
+    {
+        perm.setSize(width);
+
+        if (watcher.Triggered())
+        {
+            perm.permute();
+            fader.reset();
+        }
+
+        for (int index = 0; index < width; index++)
+            pixels[index] = perm.at[index]<width/2 ? 255 * fader.getValue() : 0;
+    }
+};
+
+class GlitchPattern : public Pattern<Monochrome>
+{
+    Timeline timeline = Timeline(50);
+
+    inline void Calculate(Monochrome *pixels, int width, bool firstFrame) override
+    {
+        timeline.FrameStart();
+        //if (!timeline.Happened(0))
+        //    return;
+
+        if (timeline.Happened(0))
+            for (int index = 0; index < width; index++)
+                pixels[index] = random(2) ? 255 : 0;
+
+        if (timeline.Happened(25))
+            for (int index = 0; index < width; index++)
+                pixels[index] = 0;
+    }
+};
+
+class OnPattern : public Pattern<Monochrome>
+{
+    inline void Calculate(Monochrome *pixels, int width, bool firstFrame) override
+    {
+        for (int index = 0; index < width; index++)
+            pixels[index] = 255;
+    }
+};

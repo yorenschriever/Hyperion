@@ -18,7 +18,7 @@
 bool Ethernet::eth_connected = false;
 bool Ethernet::eth_connecting = false;
 const char* Ethernet::hostname;
-std::map<std::string, IPAddress> Ethernet::mdnsCache;
+std::map<std::string, Ethernet::hostnameCacheItem> Ethernet::hostnameCache;
 
 void Ethernet::Initialize(const char* hostname)
 {
@@ -86,7 +86,7 @@ void Ethernet::EthEvent(WiFiEvent_t event)
         //set eth hostname here
         if (Ethernet::hostname)
                 ETH.setHostname(Ethernet::hostname);
-        mdnsCache.clear();
+        hostnameCache.clear();
         break;
     case SYSTEM_EVENT_ETH_CONNECTED:
         Debug.println("ETH Connected");
@@ -137,8 +137,57 @@ void Ethernet::StartMdnsService(const char* name)
     }
 }
 
-IPAddress Ethernet::Resolve(const char* hostname)
+IPAddress* Ethernet::ResolveNoWait(const char* hostname)
 {
+    std::map<std::string,hostnameCacheItem>::iterator it = hostnameCache.find(hostname);
+    if (it == hostnameCache.end())
+    {
+        //start lookup
+        hostnameCache[hostname] = hostnameCacheItem {IPAddress((uint32_t)0),millis(),false};
+        Debug.println("hostname item created");
+        xTaskCreate(ResolveTask,"ResolveTask",3000,(void*)hostname,0,NULL);
+        return NULL;
+    }
+
+    if (!it->second.found){
+        if ((millis() - it->second.updated) < 5000){
+            //last hostname query returned nothing, and was less than 5 seconds ago. Do not ask again yet
+            //Debug.println("less than 5 sec. waiting");
+            return NULL;
+        }
+        Debug.println("item was queried before, but not found, retry");
+        hostnameCache[hostname].updated=millis();
+        xTaskCreate(ResolveTask,"ResolveTask",3000,(void*)hostname,0,NULL);
+        return NULL;
+    }
+
+    if (millis() - it->second.updated  > 6000){
+        //entry is older than 1 minute, refresh
+        Debug.println("refreshing hostname item");
+        hostnameCache[hostname].updated=millis();
+        xTaskCreate(ResolveTask,"ResolveTask",3000,(void*)hostname,0,NULL);
+    }
+
+    //Debug.printf("return cached ip %s\n",it->second.ip.toString().c_str());
+    return &it->second.ip;
+}
+
+void Ethernet::ResolveTask( void * pvParameters )
+{
+    #ifdef DEBUGOVERSERIAL
+        //give the serial some time to send the other messages
+        vTaskDelay(10);
+    #endif
+    Resolve(static_cast<const char*>(pvParameters));
+    vTaskDelete(NULL);
+}
+
+IPAddress* Ethernet::Resolve(const char* hostname)
+{
+
+    //there is a built in mdns resovler, but i cant get it to work
+    //https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/kconfig.html#config-lwip-dns-support-mdns-queries
+
     if (!String(hostname).endsWith(".local"))
     {
         struct hostent *host;
@@ -146,38 +195,44 @@ IPAddress Ethernet::Resolve(const char* hostname)
         if (host == NULL)
         {
             Debug.println("Cannot get host");
-            return IPAddress((uint32_t)0);
+            //return IPAddress((uint32_t)0);
+            hostnameCache[hostname].updated=millis();
+            hostnameCache[hostname].found=false;
+            return NULL;
         }
-        return IPAddress((const uint8_t *)(host->h_addr_list[0]));
+
+        hostnameCache[hostname].ip=IPAddress((const uint8_t *)(host->h_addr_list[0]));
+        hostnameCache[hostname].updated=millis();
+        hostnameCache[hostname].found=true;
+        return &hostnameCache[hostname].ip;
+
     }
 
     //strip ".local" from the hostname
     std::string localHostname = std::string(hostname);
     localHostname.resize(localHostname.size()  -6);
 
-    std::map<std::string,IPAddress>::iterator it = mdnsCache.find(localHostname);
-    if (it != mdnsCache.end())
-        return it->second;
-    
     Debug.printf("querying: %s\n",localHostname.c_str());
 
     struct ip4_addr addr;
     addr.addr = 0;
     esp_err_t err = mdns_query_a(localHostname.c_str(), 2000,  &addr);
-    if(err){
-        if(err == ESP_ERR_NOT_FOUND){
-            Debug.println("Host was not found!");
-            return IPAddress((uint32_t)0);
-        }
-        Debug.println("Query Failed");
-        return IPAddress((uint32_t)0);
+    if(err)
+    {
+        Debug.println(err==ESP_ERR_NOT_FOUND?"Host was not found!":"Error in mdns query");
+
+        hostnameCache[hostname].updated=millis();
+        hostnameCache[hostname].found=false;
+        return NULL;
     }
 
     Debug.printf(IPSTR, IP2STR(&addr));
 
-    IPAddress result = IPAddress(addr.addr);
+    Debug.printf("ip found: %s\n",IPAddress(addr.addr).toString().c_str());
 
-    mdnsCache[localHostname] = result;
+    hostnameCache[hostname].ip=IPAddress(addr.addr);
+    hostnameCache[hostname].updated=millis();
+    hostnameCache[hostname].found=true;
+    return &hostnameCache[hostname].ip;
 
-    return result;
 }

@@ -31,7 +31,8 @@ public:
 
     //in case of a .local address it resolves using mdns, and caches the result
     //otherwise it will do a regular hostname lookup
-    static IPAddress Resolve(const char* hostname);
+    static IPAddress* ResolveNoWait(const char* hostname);
+    static IPAddress* Resolve(const char* hostname);
 
 protected:
     static void EthEvent(WiFiEvent_t event);
@@ -40,5 +41,7 @@ protected:
     static bool eth_connecting;
     static const char* hostname;
 
-    static std::map<std::string, IPAddress> mdnsCache;
+    static void ResolveTask(void * pvParameters);
+    struct hostnameCacheItem {IPAddress ip; unsigned long updated; bool found;};
+    static std::map<std::string, hostnameCacheItem> hostnameCache;
 };

@@ -15,6 +15,12 @@ enum FadeDirection
     Down
 };
 
+enum FadeWaitPosition
+{
+    WaitAtStart=0,
+    WaitAtEnd=1
+};
+
 class Fade
 {
 
@@ -23,13 +29,22 @@ private:
 
     FadeEase ease;
     FadeDirection direction;
+    FadeWaitPosition waitPosition;
 
 public:
-    Fade(FadeEase ease, unsigned int duration, FadeDirection direction)
+    /***
+     * Creates a fader
+     * ease = ease curve
+     * suration = duration of the fade in ms
+     * direction: up or down
+     * waitPosition: when using startDelay(), should the fade wait at start (phase=0) or at the end (phase=1)
+     */ 
+    Fade(FadeEase ease, unsigned int duration, FadeDirection direction = Down, FadeWaitPosition waitPosition = WaitAtStart)
     {
         this->ease = ease;
         this->duration = duration;
         this->direction = direction;
+        this->waitPosition = waitPosition;
         reset();
     }
 
@@ -40,7 +55,7 @@ public:
     {
         int phase = (millis() - startingpoint - startDelay);
         if (phase < 0)
-            return 0;
+            return waitPosition;
 
         float result = ((float)phase / (float)duration);
         if (result > 1)

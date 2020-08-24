@@ -159,7 +159,9 @@ void Display::updateFrame()
         int pos = 0;
         pos = renderConnectionStatus(pos, ethconnecting? millis()%1000<500 : ethconnected, "ETH");
         pos = renderConnectionStatus(pos, dmxconnected, "DMX");
+        #ifndef DEBUGOVERSERIAL
         pos = renderConnectionStatus(pos, midiconnected, "MIDI");
+        #endif
     }
 
     if (xSemaphoreTake(i2cMutex, (TickType_t)100) == pdTRUE)
