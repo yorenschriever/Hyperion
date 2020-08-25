@@ -1,37 +1,34 @@
-#pragma once
 
+#pragma once
 #include <Arduino.h>
 
-//I still have to write a proper debug class.
-//currently i either throw away all message, or write them to the serial console,
-//depending on the setting below
+//uncomment the first line to enable debugging over the usb port. This means that 
+//midi inputs wil be disabled, because they share the same uart.
+//#ifdef DEBUGOVERSERIAL is also used to block mini uart initalization and to remove the Midi 
+//connection stats from the dusplay, so be careful when changing this name
+//Uncomment the second line to enable debugging over udp. use ./debug command
+//to start listening for debug messages
 
-//uncomment this line to enable debuggen over the usb port. 
-//this means that midi inputs wil be disabled, because they share
-//the same uart.
 //#define DEBUGOVERSERIAL
+#define DEBUGOVERUDP
 
-#ifdef DEBUGOVERSERIAL
+class DebugClass
+{
+public:
+    void begin() ;
+    void print(const char *) ;
+    void print(const unsigned char *) ;
+    void print(unsigned char) ;
+    void print(String) ;
+    void println(const char *) ;
+    void println(String) ;
+    void println(const __FlashStringHelper *) ;
+    void println(IPAddress) ;
+    void printf(const char *, ...) ;
 
-    #define DEBUGSERIAL
-    #define Debug Serial
+private:
+    void transmit(const char *data) ;
+    void transmit(const char *data, int len);
+};
 
-#else
-
-    //dummy class that basically throws away all debug data
-    class DebugClass {
-        public:
-        void begin(int){}
-        void print(const char*){}
-        void print(const unsigned char*){}
-        void print(unsigned char){}
-        void print(String){}
-        void println(const char*){}
-        void println(String){}
-        void println(const __FlashStringHelper*){}
-        void println(IPAddress){}
-        void printf(const char* , ...){}
-    };
-
-    extern DebugClass Debug;
-#endif
+extern DebugClass Debug;

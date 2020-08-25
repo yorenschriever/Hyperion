@@ -22,6 +22,9 @@ const char *HostName = "HyperionMaster";
 LUT *NeopixelLut = new ColourCorrectionLUT(1.5, 255, 176, 255, 240);
 LUT *IncandescentLut = new IncandescentLUT(2.5, 4096, 400);
 
+//TODO proper config struct
+uint8_t TapMidiNote = 98;
+
 Pipe pipes[] = {
 
     Pipe(

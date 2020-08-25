@@ -2,6 +2,7 @@
 # without default 'CMakeLists.txt' file.
 
 set(app_sources
+	"debug.cpp"
 	"main.cpp"
 
 	"hardware/ethernet/ethernet.cpp"
@@ -16,6 +17,7 @@ set(app_sources
 	"hardware/apcmini/apcmini.cpp"
 	"hardware/pca9685/pca9685.cpp"
 	"hardware/sharedResources.cpp"
+
 )
 
 idf_component_register(SRCS ${app_sources} INCLUDE_DIRS ".")

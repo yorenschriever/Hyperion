@@ -15,11 +15,11 @@ QueueHandle_t Midi::midi_rx_queue;
 //if nothing else was sent. we use this to check if the connection is still alive
 #define HEALTHY_TIME 500
 
-Midi::MidiEvent3 Midi::noteOnHandler = NULL;
-Midi::MidiEvent3 Midi::noteOffHandler = NULL;
-Midi::MidiEvent3 Midi::controllerChangeHandler = NULL;
-Midi::MidiEvent Midi::connectHandler = NULL;
-Midi::MidiEvent1 Midi::systemRealTimeHandler = NULL;
+std::set<Midi::MidiEvent3> Midi::noteOnHandler ;
+std::set<Midi::MidiEvent3> Midi::noteOffHandler ;
+std::set<Midi::MidiEvent3> Midi::controllerChangeHandler ;
+std::set<Midi::MidiEvent> Midi::connectHandler ;
+std::set<Midi::MidiEvent1> Midi::systemRealTimeHandler;
 bool Midi::started = false;
 unsigned long Midi::lastMessageTime = 0;
 uint8_t Midi::noteValues[NUMBER_OF_NOTES];
@@ -28,7 +28,7 @@ uint8_t Midi::controllerValues[NUMBER_OF_CONTROLLERS];
 void Midi::Initialize()
 {
 
-#ifdef DEBUGSERIAL
+#ifdef DEBUGOVERSERIAL
     Debug.println("USB midi driver is not installed because the debugger is already using this serial port to print debug data. Incoming and outgoing midi data is ignored.");
     started = false;
     return;
@@ -80,16 +80,19 @@ void Midi::uart_event_task(void *pvParameters)
         if (length <= 0)
             continue;
 
-        if (!isConnected() && connectHandler)
-            connectHandler();
+        if (!isConnected()) 
+        {
+            for(MidiEvent handler : connectHandler)
+                handler();
+        } 
         lastMessageTime = xTaskGetTickCount();
 
         if (data[0] >= 0xF8)
         {
             //this is a system realtime message, it is always 1 byte long, and come in between
             //other messages, so they should not reset the messageposition.
-            if (systemRealTimeHandler)
-                systemRealTimeHandler(data[0]);
+            for(auto && handler : systemRealTimeHandler)
+                handler(data[0]);
             continue;
         }
 
@@ -112,22 +115,22 @@ void Midi::uart_event_task(void *pvParameters)
         if (messagetype == NOTEON && messageposition == 3 && message[1] < NUMBER_OF_NOTES)
         {
             noteValues[message[1]] = message[2];
-            if (noteOnHandler)
-                noteOnHandler(channel, message[1], message[2]);
+            for(auto && handler : noteOnHandler)
+                handler(channel, message[1], message[2]);
         }
 
         if (messagetype == NOTEOFF && messageposition == 3 && message[1] < NUMBER_OF_NOTES)
         {
-            noteValues[message[1]] = 0;
-            if (noteOffHandler)
-                noteOffHandler(channel, message[1], message[2]);
+            noteValues[message[1]] = 0; 
+            for(auto && handler : noteOffHandler)
+                handler(channel, message[1], message[2]);
         }
 
         if (messagetype == CONTROLLERCHANGE && messageposition == 3 && message[1] < NUMBER_OF_CONTROLLERS)
         {
             controllerValues[message[1]] = message[2];
-            if (controllerChangeHandler)
-                controllerChangeHandler(channel, message[1], message[2]);
+            for(auto && handler : controllerChangeHandler) 
+                handler(channel, message[1], message[2]);
         }
     }
 }
@@ -174,25 +177,25 @@ bool Midi::waitTxDone(int timeout)
 
 void Midi::onNoteOn(MidiEvent3 handler)
 {
-    noteOnHandler = handler;
+    noteOnHandler.insert(handler);
 }
 void Midi::onNoteOff(MidiEvent3 handler)
 {
-    noteOffHandler = handler;
+    noteOffHandler.insert(handler);
 }
 void Midi::onControllerChange(MidiEvent3 handler)
 {
-    controllerChangeHandler = handler;
+    controllerChangeHandler.insert(handler);
 }
 
 void Midi::onConnect(MidiEvent handler)
 {
-    connectHandler = handler;
+    connectHandler.insert(handler);
 }
 
 void Midi::onSystemRealtime(MidiEvent1 handler)
 {
-    systemRealTimeHandler = handler;
+    systemRealTimeHandler.insert(handler);
 }
 
 bool Midi::isConnected()

@@ -2,6 +2,7 @@
 
 #include <inttypes.h>
 #include <Arduino.h>
+#include <set>
 
 #define MIDI_UART_NUM UART_NUM_0
 
@@ -46,11 +47,11 @@ private:
     static void uart_event_task(void *pvParameters); // Event task
     static bool started;
 
-    static MidiEvent3 noteOnHandler;
-    static MidiEvent3 noteOffHandler;
-    static MidiEvent3 controllerChangeHandler;
-    static MidiEvent connectHandler;
-    static MidiEvent1 systemRealTimeHandler;
+    static std::set<MidiEvent3> noteOnHandler;
+    static std::set<MidiEvent3> noteOffHandler;
+    static std::set<MidiEvent3> controllerChangeHandler;
+    static std::set<MidiEvent> connectHandler;
+    static std::set<MidiEvent1> systemRealTimeHandler;
 
     static unsigned long lastMessageTime;
 

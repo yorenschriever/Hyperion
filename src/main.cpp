@@ -44,9 +44,11 @@ void release() { Debug.println("release"); }
 void longpress() { Debug.println("longpress"); }
 void rotate(int amount) { Debug.printf("rotate: %d\n", amount); }
 
+DebugClass Debug;
+
 void setup()
 {
-    Debug.begin(115200);
+    Debug.begin();
     Debug.println("Checking safemode");
 
     //Start 'safe mode' when rotary button is pressed during boot
@@ -92,7 +94,7 @@ void setup()
     Debug.println("Starting network");
     Ethernet::Initialize(HostName);
 
-    BPM::SetInstance(new TapBPM());
+    BPM::SetInstance(TapBPM::getInstance());
 
     Debug.println("Starting inputs");
     for (int j = 0; j < sizeof(pipes) / sizeof(Pipe); j++)
