@@ -26,7 +26,6 @@
 //#include “FreeRTOS_sockets.h”
 #define FREERTOS_SO_UDP_MAX_RX_PACKETS (16)
 
-#define UDPFASTMTU 3100 //1460
 
 #undef write
 #undef read
@@ -222,6 +221,34 @@ int UDPFast::beginMulticastPacket()
 //     return 1;
 // }
 
+int UDPFast::sendPacketFast(IPAddress ip, uint16_t port, uint8_t* data, int len)
+{
+    if (!Ethernet::isConnected())
+        return 0;
+
+    if (udp_server == -1)
+    {
+        if ((udp_server = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+        {
+            //log_e("could not create socket: %d", errno);
+            Debug.println("Cannot open socket");
+            return 0;
+        }
+
+    }
+
+    fcntl(udp_server, F_SETFL, O_NONBLOCK);
+
+    struct sockaddr_in recipient;
+    recipient.sin_addr.s_addr = ip;
+    recipient.sin_family = AF_INET;
+    recipient.sin_port = htons(port);
+    int sent = sendto(udp_server, data, len, 0, (struct sockaddr *)&recipient, sizeof(recipient));
+    if (sent < 0)
+        return 0;
+    return 1;
+}
+
 int UDPFast::sendPacketFast(const char* hostname, uint16_t port, uint8_t* data, int len)
 {
     if (!Ethernet::isConnected())
@@ -328,10 +355,12 @@ boolean UDPFast::setReceiveTimeout(int value)
     return true;
 }
 
-int UDPFast::waitPacketFast(uint8_t *buf)
+int UDPFast::waitPacketFast(uint8_t *buf, int maxsize)
 {
     struct sockaddr_in si_other;
     int slen = sizeof(si_other), len;
+    if (slen>maxsize)
+        slen=maxsize;
 
     if ((len = recvfrom(udp_server, buf, UDPFASTMTU, 0, (struct sockaddr *)&si_other, (socklen_t *)&slen)) == -1)
     {

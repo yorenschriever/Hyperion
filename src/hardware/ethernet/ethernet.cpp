@@ -185,7 +185,7 @@ void Ethernet::ResolveTask( void * pvParameters )
 IPAddress* Ethernet::Resolve(const char* hostname)
 {
 
-    //there is a built in mdns resovler, but i cant get it to work
+    //there is a built-in mdns resovler, but i cant get it to work
     //https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/kconfig.html#config-lwip-dns-support-mdns-queries
 
     if (!String(hostname).endsWith(".local"))

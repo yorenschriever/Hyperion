@@ -59,9 +59,15 @@ SinPattern
 BeatSomeFadePattern
 */
 
+    // Pipe(
+    //     new PatternInput<Monochrome>(12,new GlitchPattern()),
+    //     new UDPOutput("strobes.local",9619,500),
+    //     Pipe::transfer<Monochrome,Monochrome12>
+    // )
+
     Pipe(
-        new PatternInput<Monochrome>(12,new GlitchPattern()),
-        new UDPOutput("strobes.local",9619,500),
+        new PatternInput<Monochrome>(12,new BeatAllFadePattern()),
+        new PWMOutput(1500),
         Pipe::transfer<Monochrome,Monochrome12>
     )
 };

@@ -16,8 +16,11 @@
 #include "colours.h"
 #include "luts/lut.h"
 
-#include "patterns/helpers/bpm/tapBpm.h"
-#include "patterns/helpers/bpm/proDJLinkBpm.h"
+#include "patterns/helpers/tempo/tempo.h"
+#include "patterns/helpers/tempo/tapTempo.h"
+#include "patterns/helpers/tempo/proDJLinkTempo.h"
+#include "patterns/helpers/tempo/midiClockTempo.h"
+#include "patterns/helpers/tempo/udpTempo.h"
 
 #include "hardware/midi/midi.h"
 #include "hardware/ethernet/ethernet.h"
@@ -94,7 +97,11 @@ void setup()
     Debug.println("Starting network");
     Ethernet::Initialize(HostName);
 
-    BPM::SetInstance(TapBPM::getInstance());
+    //add tempo sources in order of importance. first has highest priority
+    Tempo::AddSource(ProDJLinkTempo::getInstance());
+    Tempo::AddSource(MidiClockTempo::getInstance());
+    Tempo::AddSource(TapTempo::getInstance()); 
+    Tempo::AddSource(UdpTempo::getInstance()); 
 
     Debug.println("Starting inputs");
     for (int j = 0; j < sizeof(pipes) / sizeof(Pipe); j++)
@@ -186,7 +193,8 @@ void UpdateDisplay(void *parameter)
         lastFpsUpdate = now;
 
         Debug.printf("FPS: %d of %d (%d%% miss)\t interval: %dms \t freeHeap: %d \t avg length: %d \t channel: %d \n", (int)outfps, (int)infps, (int)misses, (int)elapsedTime, ESP.getFreeHeap(), avglength, activeChannels);
-        Debug.printf("IPAddress: %s\n", Ethernet::GetIp().toString().c_str());
+        //Debug.printf("IPAddress: %s\n", Ethernet::GetIp().toString().c_str());
+        //Debug.printf("Tempo source: %s\n", Tempo::SourceName());
 
         Display::setFPS(infps,outfps,misses);
         Display::setLeds(totalLength);

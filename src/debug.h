@@ -10,7 +10,7 @@
 //to start listening for debug messages
 
 //#define DEBUGOVERSERIAL
-#define DEBUGOVERUDP
+//#define DEBUGOVERUDP
 
 class DebugClass
 {

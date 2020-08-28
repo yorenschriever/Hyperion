@@ -1,5 +1,7 @@
 #pragma once
 
+#include "tempo/tempo.h"
+
 enum WatcherType
 {
     Rising,
@@ -38,12 +40,12 @@ private:
     WatcherType type;
 };
 
-class BPMWatcher : public Watcher<int>
+class TempoWatcher : public Watcher<int>
 {
 public: 
-    BPMWatcher() : 
+    TempoWatcher() : 
         Watcher(
-            [] () { return BPM::GetInstance()->GetBeatNumber(); } ,
+            Tempo::GetBeatNumber ,
             Changing
         )
     {}

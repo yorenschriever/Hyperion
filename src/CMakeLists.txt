@@ -17,6 +17,7 @@ set(app_sources
 	"hardware/apcmini/apcmini.cpp"
 	"hardware/pca9685/pca9685.cpp"
 	"hardware/sharedResources.cpp"
+	"patterns/helpers/tempo/tempo.cpp"
 
 )
 

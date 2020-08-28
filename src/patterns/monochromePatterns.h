@@ -98,7 +98,7 @@ class TemperatureTestPattern : public Pattern<Monochrome>
 
 class BeatAllFadePattern : public Pattern<Monochrome>
 {
-    BPMWatcher watcher = BPMWatcher();
+    TempoWatcher watcher = TempoWatcher();
     Fade fader = Fade(Linear, 100, Down);
 
     inline void Calculate(Monochrome *pixels, int width, bool firstFrame) override
@@ -115,7 +115,7 @@ class BeatAllFadePattern : public Pattern<Monochrome>
 
 class BeatShakePattern : public Pattern<Monochrome>
 {
-    BPMWatcher watcher = BPMWatcher();
+    TempoWatcher watcher = TempoWatcher();
     Fade fader = Fade(Linear, 150, Down, WaitAtEnd);
     Permute perm = Permute(0);
     
@@ -136,7 +136,7 @@ class BeatShakePattern : public Pattern<Monochrome>
 
 class BeatSingleFadePattern : public Pattern<Monochrome>
 {
-    BPMWatcher watcher = BPMWatcher();
+    TempoWatcher watcher = TempoWatcher();
     Fade fader = Fade(Linear, 200, Down, WaitAtEnd);
     int current=0;
 
@@ -155,7 +155,7 @@ class BeatSingleFadePattern : public Pattern<Monochrome>
 
 class BeatMultiFadePattern : public Pattern<Monochrome>
 {
-    BPMWatcher watcher = BPMWatcher();
+    TempoWatcher watcher = TempoWatcher();
     Fade fader = Fade(Linear, 200, Down, WaitAtEnd);
     Permute perm = Permute(0);
 

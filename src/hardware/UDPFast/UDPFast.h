@@ -38,6 +38,8 @@
 #define UDP_MAX_RX_PACKETS 1
 //#include <FreeRTOS_Sockets.h>
 
+#define UDPFASTMTU 3100 //1460
+
 #include <Arduino.h>
 #include <Udp.h>
 #include <cbuf.h>
@@ -67,10 +69,11 @@ public:
   size_t write(uint8_t){return 0;};
   size_t write(const uint8_t *buffer, size_t size){return 0;};
 
+  int sendPacketFast(IPAddress ip, uint16_t port, uint8_t* data, int len);
   int sendPacketFast(const char* hostname, uint16_t port, uint8_t* data, int len);
 
   bool setReceiveTimeout(int value);
-  int waitPacketFast(uint8_t* buf);
+  int waitPacketFast(uint8_t* buf, int maxsize=UDPFASTMTU);
   int parsePacketFast(uint8_t* buffer);
   boolean setMaxRxPackets(int max);
   void flushAllPackets();

@@ -199,9 +199,9 @@ class HSLLFOPattern : public Pattern<RGB>
 };
 
 
-class BPMPattern : public Pattern<RGB>
+class TempoPattern : public Pattern<RGB>
 {
-    Watcher<int> watcher = Watcher<int>([] () { return BPM::GetInstance()->GetBeatNumber(); } , Changing);
+    TempoWatcher watcher = TempoWatcher();
     
     Fade fader = Fade(Linear, 250, Down);
 
