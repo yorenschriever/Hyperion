@@ -246,7 +246,7 @@ int UDPFast::sendPacketFast(IPAddress ip, uint16_t port, uint8_t* data, int len)
     int sent = sendto(udp_server, data, len, 0, (struct sockaddr *)&recipient, sizeof(recipient));
     if (sent < 0)
         return 0;
-    return 1;
+     return 1;
 }
 
 int UDPFast::sendPacketFast(const char* hostname, uint16_t port, uint8_t* data, int len)
@@ -278,7 +278,7 @@ int UDPFast::sendPacketFast(const char* hostname, uint16_t port, uint8_t* data, 
     int sent = sendto(udp_server, data, len, 0, (struct sockaddr *)&recipient, sizeof(recipient));
     if (sent < 0)
         return 0;
-    return 1;
+     return 1;
 }
 
 // size_t UDPFast::write(uint8_t data)
@@ -375,7 +375,7 @@ int UDPFast::waitPacketFast(uint8_t *buf, int maxsize)
     return len;
 }
 
-#define FREERTOS_ZERO_COPY (1)
+//#define FREERTOS_ZERO_COPY (1)
 
 void UDPFast::flushAllPackets()
 {

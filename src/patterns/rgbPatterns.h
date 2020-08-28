@@ -215,3 +215,21 @@ class TempoPattern : public Pattern<RGB>
 
     }
 };
+
+class BPMIndicatorPattern : public Pattern<RGB>
+{
+    TempoWatcher watcher = TempoWatcher();
+    Fade fader = Fade(Linear, 200, Down);
+
+    inline void Calculate(RGB *pixels, int width, bool firstFrame) override
+    {
+        if (watcher.Triggered())
+            fader.reset();
+
+        RGB color = (Tempo::GetBeatNumber() % 4)==0 ? RGB(255,255,255) : RGB(255,0,0);
+        color.dim(255 * fader.getValue());
+
+        for (int index = 0; index < width; index++)
+            pixels[index] = color;
+    }
+};

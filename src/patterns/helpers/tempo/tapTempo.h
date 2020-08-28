@@ -28,6 +28,8 @@ public:
         Midi::onNoteOn([](uint8_t ch, uint8_t note, uint8_t velocity) {
             if (note == TAPMIDINOTE)
                 TapTempo::getInstance()->Tap();
+            if (note == TAPSTOPMIDINOTE)
+                TapTempo::getInstance()->Stop();
         });
 #endif
         return TapTempoTask;
@@ -61,6 +63,7 @@ private:
             firstTap = now;
             startingpoint = now; //for now the Tempo counter starting point is linked to the first tap
             tapCount = 0;
+            //beat(0,period/1000);//this wont be visible, because if there is no signal, the beatnumber will be 0, so setting it to 0 again doesnt trigger the watcher
         }
 
         tapCount++;

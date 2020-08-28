@@ -138,12 +138,12 @@ void loop()
     Rotary::handleQueue();
 
     //demo code that will scroll through the rainbow when rotating the rotary encoder
-    static byte colour;
-    int rot = Rotary::getRotation(); 
-    if (rot != 0){
-        colour += rot;
-        Rotary::setColour(Hue(colour));
-    }
+    // static byte colour;
+    // int rot = Rotary::getRotation(); 
+    // if (rot != 0){
+    //     colour += rot;
+    //     Rotary::setColour(Hue(colour));
+    // }
 }
 
 void clearall()

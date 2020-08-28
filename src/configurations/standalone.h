@@ -4,6 +4,7 @@
 #include "outputs/dmxOutput.h"
 #include "outputs/apcminiOutput.h"
 #include "outputs/neopixelOutput.h"
+#include "outputs/rotaryOutput.h"
 #include "inputs/udpInput.h"
 #include "inputs/apcminiInput.h"
 #include "inputs/dmxInput.h"
@@ -24,8 +25,10 @@ LUT *IncandescentLut = new IncandescentLUT(2.5, 4096, 400);
 
 //TODO proper config struct
 #define TAPMIDINOTE 98
+#define TAPSTOPMIDINOTE 89
 
 Pipe pipes[] = {
+
 
     Pipe(
         //create an apcmini input that creates monochrome patterns
@@ -66,14 +69,15 @@ Pipe pipes[] = {
             12,
             2,
             new Pattern<Monochrome> *[8] {
+                new OnPattern(),
+                new BeatMultiFadePattern(),
                 new SinPattern(),
-                    new SawPattern(),
-                    new RandomPattern(),
-                    new RandomPattern2(),
-                    new RandomFadePattern(),
-                    new MeteorPattern(),
-                    new SlowStrobePattern(),
-                    new FastStrobePattern()
+                new MeteorPattern(),
+                new BeatShakePattern(),
+
+                new OnPattern(),
+                new BeatAllFadePattern(),
+                new GlitchPattern()
             }),
         new PWMOutput(1500),
         Pipe::transfer<Monochrome, Monochrome12>,
@@ -133,6 +137,14 @@ Pipe pipes[] = {
             }),
         new UDPOutput("strobes.local",9619,100),
         Pipe::transfer<Monochrome,Monochrome12>),
+
+
+    Pipe(
+        new PatternInput<RGB>(1, new BPMIndicatorPattern()),
+        new RotaryOutput()
+        ),
+
+
 
     // Pipe(
     //     new PatternInput<RGB>(16, new WatcherPattern2()),

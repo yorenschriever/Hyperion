@@ -8,6 +8,9 @@
 #include "luts/colourCorrectionLut.h"
 #include "luts/gammaLut.h"
 #include "metaoutputs/temperatureControlledOutput.h"
+#include "outputs/rotaryOutput.h"
+#include "inputs/patternInput.h"
+#include "patterns/rgbPatterns.h"
 
 const char* HostName = "strobes";
 
@@ -24,6 +27,10 @@ Pipe pipes[] = {
             60),
         Pipe::transfer<Monochrome12,Monochrome12>,
         LedLut
-    )
+    ),
+
+        Pipe(
+        new PatternInput<RGB>(1, new BPMIndicatorPattern()),
+        new RotaryOutput())
 
 };
