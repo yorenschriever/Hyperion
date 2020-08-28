@@ -22,7 +22,7 @@ public:
     const char* Name() { return sourceName; }
 
 protected:
-    int beatNumber;
+    int beatNumber=-1;
     int timeBetweenBeats;
     unsigned long timeOfLastBeat;
     unsigned long timeOfSecondToLastBeat;

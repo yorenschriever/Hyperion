@@ -30,7 +30,8 @@ public:
             {
                 instance->validSignal=true;
                 instance->tickCount=0;
-                instance->timeOfLastBeat = millis();
+                //instance->timeOfLastBeat = millis();
+                instance->beat(0);
             }
             else if (msg == MIDICLOCKSTART)
             {
@@ -42,7 +43,7 @@ public:
             }
             else if (msg == MIDICLOCKSTOP)
             {
-                instance->beat(0); //reset the beatnumber, so we dont get an extra flash when the signal valid timeout resets the beat to 0
+                instance->beat(-1); //reset the beatnumber, so we dont get an extra flash when the signal valid timeout resets the beat to 0
                 instance->validSignal=false;
             }
             else if (msg == MIDICLOCKTICK)

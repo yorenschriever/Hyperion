@@ -20,7 +20,7 @@ int Tempo::GetBeatNumber()
     AbstractTempo *source = getActive();
     if (source)
         return source->GetBeatNumber();
-    return 0;
+    return -1;
 };
 
 int Tempo::TimeBetweenBeats()

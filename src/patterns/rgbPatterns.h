@@ -233,3 +233,24 @@ class BPMIndicatorPattern : public Pattern<RGB>
             pixels[index] = color;
     }
 };
+
+class BPMFillPattern : public Pattern<RGB>
+{
+    //TempoWatcher watcher = TempoWatcher();
+    //Fade fader = Fade(Linear, 200, Down);
+
+    inline void Calculate(RGB *pixels, int width, bool firstFrame) override
+    {
+        //if (watcher.Triggered())
+        //    fader.reset();
+
+        float fraction = Tempo::GetProgress(1);
+
+        RGB color = (Tempo::GetBeatNumber() % 4)==0 ? RGB(255,255,255) : RGB(255,0,0);
+        RGB off = RGB(0,0,0);
+        //color.dim(255 * fader.getValue());
+
+        for (int index = 0; index < width; index++)
+            pixels[index] = fraction * width < index ? color : off;
+    }
+};

@@ -93,7 +93,8 @@ Pipe pipes[] = {
                     new ColourOrderPattern(),
                     new MixingPattern(),
                     new AnimatedMixingPattern(),
-                    new PoissonPattern(),
+                    //new PoissonPattern(),
+                    new BPMFillPattern(),
                     new RainbowPattern(),
                     new RainbowPattern(),
                     new RainbowPattern()

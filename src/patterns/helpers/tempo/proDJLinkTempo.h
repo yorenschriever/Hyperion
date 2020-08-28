@@ -72,6 +72,7 @@ private:
                     this2->beatNumber += diff;
                 }
             }
+            this2->validSignal=true;
             Debug.printf("len=%d, id=%d, beat=%d, device=%d, master=%d\n", len, buffer[0x21], buffer[0x5c], buffer[0x5f], this2->master);
         }
 
