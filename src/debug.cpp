@@ -139,6 +139,6 @@ void DebugClass::println(const char *arg) {}
 void DebugClass::println(String arg) {}
 void DebugClass::println(const __FlashStringHelper *arg) {}
 void DebugClass::println(IPAddress arg) {}
-void DebugClass::printf(const char *data, ...)
+void DebugClass::printf(const char *data, ...){}
 
 #endif
