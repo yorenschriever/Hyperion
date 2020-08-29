@@ -5,6 +5,27 @@
 #include <Arduino.h>
 #include <driver/rmt.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "esp32-hal.h"
+#include "esp_intr.h"
+#include "driver/gpio.h"
+#include "driver/rmt.h"
+#include "driver/periph_ctrl.h"
+#include "freertos/semphr.h"
+#include "soc/rmt_struct.h"
+
+#include "esp_log.h"
+
+extern void spi_flash_op_lock(void);
+extern void spi_flash_op_unlock(void);
+
+#ifdef __cplusplus
+}
+#endif
+
 //mapping of esps gpio pins to channel 1-8 on the front panel
 const int pins[] = {5,4,14,2,15,32,0,33};
 
@@ -144,6 +165,8 @@ private:
             return;
         }
 
+    //spi_flash_op_lock();
+
         size_t size = 0;
         size_t num = 0;
         const uint8_t* psrc = static_cast<const uint8_t*>(src);
@@ -183,6 +206,8 @@ private:
 
         *translated_size = size;
         *item_num = num;
+
+        //spi_flash_op_unlock();
     }
 };
 
@@ -193,19 +218,19 @@ public:
     // ClkDiv of 2 provides for good resolution and plenty of reset resolution; but
     // a ClkDiv of 1 will provide enough space for the longest reset and does show
     // little better pulse accuracy
-    const static uint8_t RmtClockDivider = 2; 
+    const static DRAM_ATTR uint8_t RmtClockDivider = 2; 
 
-    inline constexpr static uint32_t FromNs(uint32_t ns)
+    inline constexpr static IRAM_ATTR uint32_t FromNs(uint32_t ns)
     {
         return ns / NsPerRmtTick;
     }
 
 
 protected:
-    const static uint32_t RmtCpu = 80000000L; // 80 mhz RMT clock
-    const static uint32_t NsPerSecond = 1000000000L;
-    const static uint32_t RmtTicksPerSecond = (RmtCpu / RmtClockDivider);
-    const static uint32_t NsPerRmtTick = (NsPerSecond / RmtTicksPerSecond); // about 25 
+    const static DRAM_ATTR uint32_t RmtCpu = 80000000L; // 80 mhz RMT clock
+    const static DRAM_ATTR uint32_t NsPerSecond = 1000000000L;
+    const static DRAM_ATTR uint32_t RmtTicksPerSecond = (RmtCpu / RmtClockDivider);
+    const static DRAM_ATTR uint32_t NsPerRmtTick = (NsPerSecond / RmtTicksPerSecond); // about 25 
 };
 
 class NeoEsp32RmtSpeedBase : public NeoEsp32RmtSpeed
@@ -213,36 +238,36 @@ class NeoEsp32RmtSpeedBase : public NeoEsp32RmtSpeed
 public:
 	// this is used rather than the rmt_item32_t as you can't correctly initialize
     // it as a static constexpr within the template
-	inline constexpr static uint32_t Item32Val(uint16_t nsHigh, uint16_t nsLow)
+	inline constexpr static IRAM_ATTR uint32_t Item32Val(uint16_t nsHigh, uint16_t nsLow)
 	{
 		return (FromNs(nsLow) << 16) | (1 << 15) | (FromNs(nsHigh));
 	}
 
-	const static rmt_idle_level_t IdleLevel = RMT_IDLE_LEVEL_LOW;
+	const static DRAM_ATTR rmt_idle_level_t IdleLevel = RMT_IDLE_LEVEL_LOW;
 };
 
 class NeoEsp32RmtSpeedWs2811 : public NeoEsp32RmtSpeedBase
 {
 public:
-    const static uint32_t RmtBit0 = Item32Val(300, 950); 
-    const static uint32_t RmtBit1 = Item32Val(900, 350); 
-    const static uint16_t RmtDurationReset = FromNs(300000); // 300us
+    const static DRAM_ATTR uint32_t RmtBit0 = Item32Val(300, 950); 
+    const static DRAM_ATTR uint32_t RmtBit1 = Item32Val(900, 350); 
+    const static DRAM_ATTR uint16_t RmtDurationReset = FromNs(300000); // 300us
 };
 
 class Ws2812x : public NeoEsp32RmtSpeedBase
 {
 public:
-	const static uint32_t RmtBit0 = Item32Val(400, 850);
-	const static uint32_t RmtBit1 = Item32Val(800, 450);
-	const static uint16_t RmtDurationReset = FromNs(300000); // 300us
+	const static DRAM_ATTR uint32_t RmtBit0 = Item32Val(400, 850);
+	const static DRAM_ATTR uint32_t RmtBit1 = Item32Val(800, 450);
+	const static DRAM_ATTR uint16_t RmtDurationReset = FromNs(300000); // 300us
 };
 
 class Sk6812 : public NeoEsp32RmtSpeedBase
 {
 public:
-    const static uint32_t RmtBit0 = Item32Val(400, 850); 
-    const static uint32_t RmtBit1 = Item32Val(800, 450); 
-    const static uint16_t RmtDurationReset = FromNs(80000); // 80us
+    const static DRAM_ATTR uint32_t RmtBit0 = Item32Val(400, 850); 
+    const static DRAM_ATTR uint32_t RmtBit1 = Item32Val(800, 450); 
+    const static DRAM_ATTR uint16_t RmtDurationReset = FromNs(80000); // 80us
 };
 
 // // normal is inverted signal
@@ -257,23 +282,23 @@ public:
 class Kpbs800 : public NeoEsp32RmtSpeedBase
 {
 public:
-    const static uint32_t RmtBit0 = Item32Val(400, 850); 
-    const static uint32_t RmtBit1 = Item32Val(800, 450); 
-    const static uint16_t RmtDurationReset = FromNs(50000); // 50us
+    const static DRAM_ATTR uint32_t RmtBit0 = Item32Val(400, 850); 
+    const static DRAM_ATTR uint32_t RmtBit1 = Item32Val(800, 450); 
+    const static DRAM_ATTR uint16_t RmtDurationReset = FromNs(50000); // 50us
 };
 
 class Kbps400 : public NeoEsp32RmtSpeedBase
 {
 public:
-    const static uint32_t RmtBit0 = Item32Val(800, 1700); 
-    const static uint32_t RmtBit1 = Item32Val(1600, 900); 
-    const static uint16_t RmtDurationReset = FromNs(50000); // 50us
+    const static DRAM_ATTR uint32_t RmtBit0 = Item32Val(800, 1700); 
+    const static DRAM_ATTR uint32_t RmtBit1 = Item32Val(1600, 900); 
+    const static DRAM_ATTR uint16_t RmtDurationReset = FromNs(50000); // 50us
 };
 
 class Apa106 : public NeoEsp32RmtSpeedBase
 {
 public:
-	const static uint32_t RmtBit0 = Item32Val(400, 1250);
-	const static uint32_t RmtBit1 = Item32Val(1250, 400);
-	const static uint16_t RmtDurationReset = FromNs(50000); // 50us
+	const static DRAM_ATTR uint32_t RmtBit0 = Item32Val(400, 1250);
+	const static DRAM_ATTR uint32_t RmtBit1 = Item32Val(1250, 400);
+	const static DRAM_ATTR uint16_t RmtDurationReset = FromNs(50000); // 50us
 };

@@ -214,7 +214,7 @@ IPAddress* Ethernet::Resolve(const char* hostname)
 
     Debug.printf("querying: %s\n",localHostname.c_str());
 
-    struct ip4_addr addr;
+    ip4_addr addr;
     addr.addr = 0;
     esp_err_t err = mdns_query_a(localHostname.c_str(), 2000,  &addr);
     if(err)

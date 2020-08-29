@@ -30,6 +30,7 @@ LUT *IncandescentLut = new IncandescentLUT(2.5, 4096, 400);
 Pipe pipes[] = {
 
 
+
     Pipe(
         //create an apcmini input that creates monochrome patterns
         new ApcminiInput<Monochrome>(
@@ -85,7 +86,7 @@ Pipe pipes[] = {
 
     Pipe(
         new ApcminiInput<RGB>(
-            16, //width of the pattern, in pixels
+            500, //width of the pattern, in pixels
             3,  //button column on the apc to listen to (0-7)
             //the patterns to attach to the buttons
             new Pattern<RGB> *[8] {
@@ -139,8 +140,10 @@ Pipe pipes[] = {
         new UDPOutput("strobes.local",9619,100),
         Pipe::transfer<Monochrome,Monochrome12>),
 
+    //putting this one at the beginning reduces its glitches,
+    //why could that be?
     Pipe(
-        new PatternInput<RGB>(16, 
+        new PatternInput<RGB>(160, 
         //new AnimatedMixingPattern()
         new BPMFillPattern()
         ),

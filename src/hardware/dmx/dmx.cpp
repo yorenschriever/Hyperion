@@ -2,11 +2,12 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
-#include "driver/uart.h"
+//#include "driver/uart.h"
 #include "strings.h"
 #include <cstring>
 #include <algorithm>
 #include "debug.h"
+#include "../midi/uartv4.h"
 
 #define DMX_SERIAL_INPUT_PIN 36  // pin for dmx rx
 #define DMX_SERIAL_OUTPUT_PIN 32 // pin for dmx tx
@@ -21,6 +22,7 @@
 #define DMX_DATA 2
 
 const int universeSize = 512;
+
 
 QueueHandle_t DMX::dmx_rx_queue;
 SemaphoreHandle_t DMX::sync_dmx;
@@ -38,7 +40,16 @@ volatile int DMX::tx_size = 0;
 int DMX::minchannels = 0;
 int DMX::trailingchannels = 0;
 bool DMX::initialized = false;
- 
+
+#define uart_set_pinc uart_set_pin4
+#define uart_param_configc uart_param_config4
+#define uart_driver_installc uart_driver_install4
+#define uart_read_bytesc uart_read_bytes4
+#define uart_flush_inputc uart_flush_input4
+#define uart_wait_tx_donec uart_wait_tx_done4
+#define uart_write_bytes_with_breakc uart_write_bytes_with_break4
+#define uart_write_bytesc uart_write_bytes4
+
 DMX::DMX()
 {
 }
@@ -61,13 +72,13 @@ void DMX::Initialize()
             .use_ref_tick = false       //not used
         };
 
-    ESP_ERROR_CHECK(uart_param_config(DMX_UART_NUM, &uart_config));
+    ESP_ERROR_CHECK(uart_param_configc(DMX_UART_NUM, &uart_config));
 
     // Set pins for UART
-    uart_set_pin(DMX_UART_NUM, DMX_SERIAL_OUTPUT_PIN, DMX_SERIAL_INPUT_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+    uart_set_pinc(DMX_UART_NUM, DMX_SERIAL_OUTPUT_PIN, DMX_SERIAL_INPUT_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 
     // install queue
-    uart_driver_install(DMX_UART_NUM, BUF_SIZE * 2, BUF_SIZE * 2, 20, &dmx_rx_queue, 0);
+    uart_driver_installc(DMX_UART_NUM, BUF_SIZE * 2, BUF_SIZE * 2, 20, &dmx_rx_queue, 0);
 
     // create receive task
     xTaskCreate(uart_event_task, "uart_event_task", 2048, NULL, 12, NULL);
@@ -131,7 +142,7 @@ void DMX::uart_event_task(void *pvParameters)
             {
             case UART_DATA:
                 // read the received data
-                uart_read_bytes(DMX_UART_NUM, dtmp, event.size, portMAX_DELAY);
+                uart_read_bytesc(DMX_UART_NUM, dtmp, event.size, portMAX_DELAY);
                 // check if break detected
                 if (dmx_state == DMX_BREAK)
                 {
@@ -167,7 +178,7 @@ void DMX::uart_event_task(void *pvParameters)
             case UART_BREAK:
                 // break detected
                 // clear queue und flush received bytes
-                uart_flush_input(DMX_UART_NUM);
+                uart_flush_inputc(DMX_UART_NUM);
                 xQueueReset(dmx_rx_queue);
                 dmx_state = DMX_BREAK;
                 break;
@@ -177,7 +188,7 @@ void DMX::uart_event_task(void *pvParameters)
             case UART_FIFO_OVF:
             default:
                 // error recevied, going to idle mode
-                uart_flush_input(DMX_UART_NUM);
+                uart_flush_inputc(DMX_UART_NUM);
                 xQueueReset(dmx_rx_queue);
                 dmx_state = DMX_IDLE;
                 break;
@@ -236,10 +247,10 @@ void DMX::SendDMXAsync(void *param)
 void DMX::SendBuffer(uint8_t *buf, int size)
 {
     //if (wait)
-    uart_wait_tx_done(DMX_UART_NUM, 500);
+    uart_wait_tx_donec(DMX_UART_NUM, 500);
 
-    const char nullBuf = 0;
-    uart_write_bytes_with_break(DMX_UART_NUM, &nullBuf, 1, 25); //break time is in bit length
+    static const DRAM_ATTR char nullBuf = 0;
+    uart_write_bytes_with_breakc(DMX_UART_NUM, &nullBuf, 1, 25); //break time is in bit length
 
     //https://github.com/espressif/esp-idf/issues/703
     // this solution is only making it worse. somehow it changes some butes (eg channel 10 is always off)
@@ -252,12 +263,22 @@ void DMX::SendBuffer(uint8_t *buf, int size)
     // uart_write_bytes(DMX_UART_NUM, (const char*) data, 10);
     // taskEXIT_CRITICAL(&myMutex);
 
-    uart_write_bytes(DMX_UART_NUM, &nullBuf, 1); //send the start byte (0)
-    uart_write_bytes(DMX_UART_NUM, (const char *)buf, size);
+    //this method causes glitches
+    // uart_write_bytesc(DMX_UART_NUM, &nullBuf, 1); //send the start byte (0)
+    // uart_write_bytesc(DMX_UART_NUM, (const char *)buf, size);
+    
+
+    uint8_t* buf2 = (uint8_t*) malloc(size+1);
+    buf2[0]=0;
+    memcpy(buf2+1,buf,size);
+    uart_write_bytesc(DMX_UART_NUM, (const char *)buf2, size+1);
+    free(buf2);
+
+
     //if (wait)
     //{
     vTaskDelay(5 / portTICK_PERIOD_MS);   //wait a little the the tx has time to start https://www.esp32.com/viewtopic.php?t=10469
-    uart_wait_tx_done(DMX_UART_NUM, 500); //wait till completed. at most 100 RTOS ticks (=100ms?)
+    uart_wait_tx_donec(DMX_UART_NUM, 500); //wait till completed. at most 100 RTOS ticks (=100ms?)
                                           //vTaskDelay(1 / portTICK_PERIOD_MS); //wait an additional inter frame period
     //}
 }

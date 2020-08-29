@@ -20,6 +20,8 @@ public:
 
     boolean Ready()
     {
+        if (millis() - lastFrame < maxFps)
+            return false; //limit the framerate to minimize the effect of temporal quantization (because we measure time in ms)
         return !this->busy;
     }
 
@@ -27,6 +29,7 @@ public:
     {
         this->busy = true;
         xSemaphoreGive(dirtySemaphore);
+        lastFrame = millis();
     }
 
     void Begin() override
@@ -34,6 +37,7 @@ public:
         PCA9685::Initialize();
         dirtySemaphore = xSemaphoreCreateBinary();
         xTaskCreatePinnedToCore(SendAsync, "SendRotaryAsync", 10000, this, 6, NULL, 1);
+        lastFrame = millis();
     }
 
     void Clear()
@@ -51,6 +55,8 @@ private:
     uint8_t values[3];
     volatile boolean busy = false;
     xSemaphoreHandle dirtySemaphore;
+    unsigned long lastFrame = 0;
+    int maxFps = 30;
 
     static void SendAsync(void *param) 
     {
