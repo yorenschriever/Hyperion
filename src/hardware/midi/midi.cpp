@@ -1,4 +1,7 @@
 #include "midi.h"
+
+#define CONFIG_UART_ISR_IN_IRAM 1
+
 #include "driver/uart.h"
 #include "freertos/FreeRTOS.h"
 #include "debug.h"
@@ -25,18 +28,19 @@ unsigned long Midi::lastMessageTime = 0;
 uint8_t Midi::noteValues[NUMBER_OF_NOTES];
 uint8_t Midi::controllerValues[NUMBER_OF_CONTROLLERS];
 
+
+
 void Midi::Initialize()
 {
+    //no need to configure it twice.
+    if (started)
+        return;
 
 #ifdef DEBUGOVERSERIAL
     Debug.println("USB midi driver is not installed because the debugger is already using this serial port to print debug data. Incoming and outgoing midi data is ignored.");
     started = false;
     return;
 #endif
-
-    //no need to configure it twice.
-    if (started)
-        return;
 
     memset(noteValues, 0, NUMBER_OF_NOTES);
     memset(controllerValues, 0, NUMBER_OF_CONTROLLERS);
@@ -57,9 +61,13 @@ void Midi::Initialize()
     ESP_ERROR_CHECK(uart_param_config(MIDI_UART_NUM, &uart_config));
 
     // Set pins for UART
-    //uart_set_pin(MIDI_UART_NUM, MIDI_SERIAL_OUTPUT_PIN, MIDI_SERIAL_INPUT_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+    //note that is use uart 2 for midi here, but connect it to pin 1 and 3, the pin where uart0 would normally
+    //be. uart 0 can still be used as serial output for debug messages by the chip
+    uart_set_pin(MIDI_UART_NUM, MIDI_SERIAL_OUTPUT_PIN, MIDI_SERIAL_INPUT_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 
     // install queue
+    //even though the documentation says i cannot use ESP_INTR_FLAG_IRAM here, it seems to solve the neopixelOutput flicker issue
+    //started = uart_driver_install(MIDI_UART_NUM, MIDI_BUF_SIZE * 2, MIDI_BUF_SIZE * 2, 20, &midi_rx_queue, ESP_INTR_FLAG_IRAM) == ESP_OK;
     started = uart_driver_install(MIDI_UART_NUM, MIDI_BUF_SIZE * 2, MIDI_BUF_SIZE * 2, 20, &midi_rx_queue, 0) == ESP_OK;
     if (!started)
         return;

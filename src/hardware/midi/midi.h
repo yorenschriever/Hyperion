@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <set>
 
-#define MIDI_UART_NUM UART_NUM_0
+#define MIDI_UART_NUM UART_NUM_2
 
 //do not increase otherwise you will get a bug that the last byte cannot be read
 //https://github.com/espressif/arduino-esp32/issues/1824
@@ -12,6 +12,11 @@
 
 #define NUMBER_OF_CONTROLLERS 120
 #define NUMBER_OF_NOTES 127
+
+#define CONFIG_UART_ISR_IN_IRAM 1
+
+#define MIDI_SERIAL_OUTPUT_PIN 1
+#define MIDI_SERIAL_INPUT_PIN 3
 
 //This class will read midi messages coming from the atmega328, which in turn gets them from 
 //the usb port on the front panel. 

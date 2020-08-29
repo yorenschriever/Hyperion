@@ -246,7 +246,7 @@ class BPMFillPattern : public Pattern<RGB>
 
         float fraction = Tempo::GetProgress(1);
 
-        RGB color = (Tempo::GetBeatNumber() % 4)==0 ? RGB(255,255,255) : RGB(255,0,0);
+        RGB color = (Tempo::GetBeatNumber() % 4)==0 ? RGB(15,15,15) : RGB(25,0,0);
         RGB off = RGB(0,0,0);
         //color.dim(255 * fader.getValue());
 

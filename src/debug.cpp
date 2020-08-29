@@ -7,11 +7,19 @@
 #include <cbuf.h>
 #include <lwip/sockets.h>
 #include <lwip/netdb.h>
+#include "driver/uart.h"
 #include "hardware/ethernet/ethernet.h"
 
-#if defined(DEBUGOVERSERIAL)
+#if defined(DEBUGOVERSERIAL) or defined(DEBUGOVERSERIALFRONT)
 
+#if defined(DEBUGOVERSERIALFRONT)
+void DebugClass::begin() { 
+    Serial.begin(115200); 
+    uart_set_pin(UART_NUM_0, 33, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+}
+#else 
 void DebugClass::begin() { Serial.begin(115200); }
+#endif
 void DebugClass::print(const char *arg) { Serial.print(arg); }
 void DebugClass::print(const unsigned char *arg) { Serial.print((const char *)arg); }
 void DebugClass::print(unsigned char arg) { Serial.print(arg); }

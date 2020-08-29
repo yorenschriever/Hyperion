@@ -8,9 +8,14 @@
 //connection stats from the dusplay, so be careful when changing this name
 //Uncomment the second line to enable debugging over udp. use ./debug command
 //to start listening for debug messages
+//uncomment the third line to send all debug commands to channel8 on the front panel.
+//now you can attach your own serial->usb adapter to the front panel. this is useful when
+//debugging midi, because it doesnt interfere with midi functions. it also prints
+//system messages like stack traces, which udpdebug cannot do.
 
 //#define DEBUGOVERSERIAL
 //#define DEBUGOVERUDP
+#define DEBUGOVERSERIALFRONT
 
 class DebugClass
 {

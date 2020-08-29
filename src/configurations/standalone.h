@@ -139,6 +139,16 @@ Pipe pipes[] = {
         new UDPOutput("strobes.local",9619,100),
         Pipe::transfer<Monochrome,Monochrome12>),
 
+    Pipe(
+        new PatternInput<RGB>(16, 
+        //new AnimatedMixingPattern()
+        new BPMFillPattern()
+        ),
+        new NeopixelOutput<Kpbs800>(2),
+        Pipe::transfer<RGB, GRB>,
+        NeopixelLut
+    ),
+
 
     Pipe(
         new PatternInput<RGB>(1, new BPMIndicatorPattern()),
