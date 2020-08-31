@@ -46,6 +46,10 @@ public:
         return active || fadeout.getValue(fadeOutShapeSize) > 0;
     }
 
+    float getValue(){
+        return fadein.getValue() * (lastActive?1:fadeout.getValue());
+    }
+
     float getValue(int index, int width){
         return fadein.getValue(fadeInShape(index,width,fadeInShapeSize)) * (lastActive?1:fadeout.getValue(fadeOutShape(index,width,fadeOutShapeSize)));
     }

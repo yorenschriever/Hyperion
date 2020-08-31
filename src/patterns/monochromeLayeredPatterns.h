@@ -1,7 +1,10 @@
 #pragma once
 #include "pattern.h"
 
-class LayeredSinPattern : public LayeredPattern<Monochrome>
+namespace Layered
+{
+
+class SinPattern : public LayeredPattern<Monochrome>
 {
     int direction;
 
@@ -11,7 +14,7 @@ class LayeredSinPattern : public LayeredPattern<Monochrome>
     );
 
 public:
-    LayeredSinPattern(int direction=1){
+    SinPattern(int direction=1){
         this->direction=direction;
     }
 
@@ -26,7 +29,7 @@ public:
 
 };
 
-class LayeredSlowStrobePattern : public LayeredPattern<Monochrome>
+class SlowStrobePattern : public LayeredPattern<Monochrome>
 {
     inline void Calculate(Monochrome *pixels, int width, bool active) override
     {
@@ -40,12 +43,19 @@ class LayeredSlowStrobePattern : public LayeredPattern<Monochrome>
 
 
 
-class LayeredBlinderPattern : public LayeredPattern<Monochrome>
+class BlinderPattern : public LayeredPattern<Monochrome>
 {
-    Transition transition = Transition(
-        400,fromLeft,600,
-        400,fromCenter,600
-    );
+    public:
+    BlinderPattern(FadeShape in=none, FadeShape out=none)
+    {
+        transition = Transition(
+            100,in,200,
+            600,out,500
+        );
+    } 
+     
+protected:
+    Transition transition;
 
     inline void Calculate(Monochrome *pixels, int width, bool active) override
     {
@@ -57,3 +67,148 @@ class LayeredBlinderPattern : public LayeredPattern<Monochrome>
     }
 };
 
+
+
+class BeatAllFadePattern : public LayeredPattern<Monochrome>
+{
+    TempoWatcher watcher = TempoWatcher();
+    FadeDown fader = FadeDown(100);
+
+    inline void Calculate(Monochrome *pixels, int width, bool active) override
+    {
+        if (!active && fader.getValue()==0)
+            return;
+
+        fader.duration = Midi::controllerValue(49)*2+50;
+
+        if (watcher.Triggered())
+            fader.reset();
+
+        for (int index = 0; index < width; index++)
+            pixels[index] += 255 * fader.getValue();
+    }
+};
+
+class BeatShakePattern : public LayeredPattern<Monochrome>
+{
+    TempoWatcher watcher = TempoWatcher();
+    FadeDown fader = FadeDown(150, WaitAtEnd);
+    Permute perm = Permute(0);
+    
+    inline void Calculate(Monochrome *pixels, int width, bool active) override
+    {
+        if (!active && fader.getValue(width*10)==0)
+            return; 
+
+        perm.setSize(width);
+
+        if (watcher.Triggered())
+        {
+            perm.permute();
+            fader.reset();
+        }
+
+        for (int index = 0; index < width; index++)
+            pixels[index] += 255 * fader.getValue(perm.at[index]*10);
+    }
+};
+
+class BeatSingleFadePattern : public LayeredPattern<Monochrome>
+{
+    TempoWatcher watcher = TempoWatcher();
+    FadeDown fader = FadeDown(200, WaitAtEnd);
+    int current=0;
+
+    inline void Calculate(Monochrome *pixels, int width, bool active) override
+    {
+        if (!active && fader.getValue()==0)
+            return;
+
+        if (watcher.Triggered())
+        {
+            current = random(width);
+            fader.reset();
+        }
+
+        for (int index = 0; index < width; index++)
+            pixels[index] += index==current ? 255 * fader.getValue() : 0;
+    }
+};
+
+class BeatMultiFadePattern : public LayeredPattern<Monochrome>
+{
+    TempoWatcher watcher = TempoWatcher();
+    FadeDown fader = FadeDown(200, WaitAtEnd);
+    Permute perm = Permute(0);
+
+    inline void Calculate(Monochrome *pixels, int width, bool active) override
+    {
+        if (!active && fader.getValue()==0)
+            return;
+
+        perm.setSize(width);
+
+        if (watcher.Triggered())
+        {
+            perm.permute();
+            fader.reset();
+        }
+
+        for (int index = 0; index < width; index++)
+            pixels[index] += perm.at[index]<width/2 ? 255 * fader.getValue() : 0;
+    }
+};
+
+class GlitchPattern : public LayeredPattern<Monochrome>
+{
+    Timeline timeline = Timeline(25);
+    Permute perm = Permute(0);
+
+    inline void Calculate(Monochrome *pixels, int width, bool active) override
+    {
+        if (!active)
+            return;
+
+        timeline.FrameStart();
+        perm.setSize(width);
+        //if (!timeline.Happened(0))
+        //    return;
+
+        if (timeline.Happened(0))
+            perm.permute();
+
+        for (int index = 0; index < width/2; index++)
+            pixels[perm.at[index]] += 255;
+
+        // if (timeline.Happened(25))
+        //     for (int index = 0; index < width; index++)
+        //         pixels[index] = 0;
+    }
+};
+
+class OnPattern : public LayeredPattern<Monochrome>
+{
+    uint8_t intensity;
+
+    Transition transition = Transition(
+        400,none,0,
+        400,none,0
+    );
+
+public:
+    OnPattern(uint8_t intensity=1){
+        this->intensity=intensity;
+    }
+    inline void Calculate(Monochrome *pixels, int width, bool active) override
+    {
+        if (!transition.Calculate(active))
+            return; //the fade out is done. we can skip calculating pattern data
+
+        Monochrome value = Monochrome(intensity) * transition.getValue();
+
+        for (int index = 0; index < width; index++)
+            pixels[index] += value;
+    }
+};
+
+}

@@ -40,50 +40,50 @@ Pipe pipes[] = {
             30,
             0,
             new LayeredPattern<Monochrome> *[8] {
-                new LayeredSinPattern(),
-                    new LayeredSinPattern(1),
-                    new LayeredSinPattern(-1),
-                    new LayeredSinPattern(),
-                    new LayeredSinPattern(),
-                    new LayeredSinPattern(),
-                    new LayeredSlowStrobePattern(),
-                    new LayeredBlinderPattern()
+                new Layered::SinPattern(),
+                new Layered::SinPattern(1),
+                new Layered::SinPattern(-1),
+                new Layered::SinPattern(),
+                new Layered::SinPattern(),
+                new Layered::SinPattern(),
+                new Layered::SlowStrobePattern(),
+                new Layered::BlinderPattern()
             }),
         new DMXOutput(1)
         //new NullOutput()
         ),
 
-    Pipe(
-        //create an apcmini input that creates monochrome patterns
-        new ApcminiInput<Monochrome>(
-            30,
-            1,
-            new Pattern<Monochrome> *[8] {
-                new SinPattern(),
-                    new SawPattern(),
-                    new RandomPattern(),
-                    new RandomPattern2(),
-                    new MeteorPattern(),
-                    new RandomFadePattern(),
-                    new SlowStrobePattern(),
-                    new FastStrobePattern()
-            }),
-        new DMXOutput(31)),
+    // Pipe(
+    //     //create an apcmini input that creates monochrome patterns
+    //     new ApcminiInput<Monochrome>(
+    //         30,
+    //         1,
+    //         new Pattern<Monochrome> *[8] {
+    //             new SinPattern(),
+    //                 new SawPattern(),
+    //                 new RandomPattern(),
+    //                 new RandomPattern2(),
+    //                 new MeteorPattern(),
+    //                 new RandomFadePattern(),
+    //                 new SlowStrobePattern(),
+    //                 new FastStrobePattern()
+    //         }),
+    //     new DMXOutput(31)),
 
     Pipe(
-        new ApcminiInput<Monochrome>(
+        new LayeredApcminiInput<Monochrome>(
             12,
             2,
-            new Pattern<Monochrome> *[8] {
-                new OnPattern(),
-                new BeatMultiFadePattern(),
-                new SinPattern(),
-                new MeteorPattern(),
-                new BeatShakePattern(),
+            new LayeredPattern<Monochrome> *[8] {
+                new Layered::OnPattern(100),
+                new Layered::BeatMultiFadePattern(),
+                new Layered::SinPattern(),
+                new Layered::SinPattern(-1),
+                new Layered::BeatShakePattern(),
 
-                new OnPattern(),
-                new BeatAllFadePattern(),
-                new GlitchPattern()
+                new Layered::BlinderPattern(fromCenter,fromCenter),
+                new Layered::BeatAllFadePattern(),
+                new Layered::GlitchPattern()
             }),
         new PWMOutput(1500),
         Pipe::transfer<Monochrome, Monochrome12>,
@@ -109,41 +109,41 @@ Pipe pipes[] = {
         Pipe::transfer<RGB, GRB>,
         NeopixelLut),
 
-    Pipe(
-        new ApcminiInput<Monochrome>(
-            12, //width of the pattern, in pixels
-            6,  //button column on the apc to listen to (0-7)
-            //the patterns to attach to the buttons
-            new Pattern<Monochrome> *[8] {
-                new OnPattern(),
-                new SinPattern(),
-                new BeatSingleFadePattern(),
-                new BeatMultiFadePattern(),
-                new BeatShakePattern(),
-                new OnPattern(),
-                new GlitchPattern(),
-                new SlowStrobePattern()
-            }),
-        new UDPOutput("lasers.local",9619,100),
-        Pipe::transfer<Monochrome,Monochrome12>),
+    // Pipe(
+    //     new ApcminiInput<Monochrome>(
+    //         12, //width of the pattern, in pixels
+    //         6,  //button column on the apc to listen to (0-7)
+    //         //the patterns to attach to the buttons
+    //         new Pattern<Monochrome> *[8] {
+    //             new OnPattern(),
+    //             new SinPattern(),
+    //             new BeatSingleFadePattern(),
+    //             new BeatMultiFadePattern(),
+    //             new BeatShakePattern(),
+    //             new OnPattern(),
+    //             new GlitchPattern(),
+    //             new SlowStrobePattern()
+    //         }),
+    //     new UDPOutput("lasers.local",9619,100),
+    //     Pipe::transfer<Monochrome,Monochrome12>),
 
-    Pipe(
-        new ApcminiInput<Monochrome>(
-            12, //width of the pattern, in pixels
-            7,  //button column on the apc to listen to (0-7)
-            //the patterns to attach to the buttons
-            new Pattern<Monochrome> *[8] {
-                new BeatAllFadePattern(),
-                new BeatSingleFadePattern(),
-                new GlitchPattern(),
-                new BeatShakePattern(),
-                new SlowStrobePattern(),
-                new OnPattern(),
-                new GlitchPattern(),
-                new FastStrobePattern()
-            }),
-        new UDPOutput("strobes.local",9619,100),
-        Pipe::transfer<Monochrome,Monochrome12>),
+    // Pipe(
+    //     new ApcminiInput<Monochrome>(
+    //         12, //width of the pattern, in pixels
+    //         7,  //button column on the apc to listen to (0-7)
+    //         //the patterns to attach to the buttons
+    //         new Pattern<Monochrome> *[8] {
+    //             new BeatAllFadePattern(),
+    //             new BeatSingleFadePattern(),
+    //             new GlitchPattern(),
+    //             new BeatShakePattern(),
+    //             new SlowStrobePattern(),
+    //             new OnPattern(),
+    //             new GlitchPattern(),
+    //             new FastStrobePattern()
+    //         }),
+    //     new UDPOutput("strobes.local",9619,100),
+    //     Pipe::transfer<Monochrome,Monochrome12>),
 
     // Pipe(
     //     new PatternInput<RGB>(16, 
