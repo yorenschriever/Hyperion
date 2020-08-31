@@ -6,7 +6,7 @@ set(app_sources
 	"main.cpp"
 
 #put this before midi and dmx code
-	"hardware/midi/uartv4.c"
+	"hardware/uart_iram/uart_iram.c"
 
 	"hardware/ethernet/ethernet.cpp"
 	"hardware/firmwareUpdate/firmwareUpdate.cpp"

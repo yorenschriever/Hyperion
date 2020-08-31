@@ -138,7 +138,9 @@ void DebugClass::transmit(const char *data, int len)
 
 #else
 
-void DebugClass::begin() {}
+void DebugClass::begin() {
+    uart_driver_delete(UART_NUM_0);
+}
 void DebugClass::print(const char *arg) {}
 void DebugClass::print(const unsigned char *arg) {}
 void DebugClass::print(unsigned char arg) {}

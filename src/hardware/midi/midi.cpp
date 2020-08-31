@@ -5,7 +5,7 @@
 #include "driver/uart.h"
 #include "freertos/FreeRTOS.h"
 #include "debug.h"
-#include "uartv4.h"
+#include "hardware/uart_iram/uart_iram.h"
 
 //https://www.midi.org/specifications/item/table-1-summary-of-midi-message
 
@@ -59,16 +59,16 @@ void Midi::Initialize()
             .use_ref_tick = false       //not used
         };
 
-    ESP_ERROR_CHECK(uart_param_config4(MIDI_UART_NUM, &uart_config));
+    ESP_ERROR_CHECK(uart_param_config_iram(MIDI_UART_NUM, &uart_config));
 
     // Set pins for UART
     //note that is use uart 2 for midi here, but connect it to pin 1 and 3, the pin where uart0 would normally
     //be. uart 0 can still be used as serial output for debug messages by the chip
-    uart_set_pin4(MIDI_UART_NUM, MIDI_SERIAL_OUTPUT_PIN, MIDI_SERIAL_INPUT_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+    uart_set_pin_iram(MIDI_UART_NUM, MIDI_SERIAL_OUTPUT_PIN, MIDI_SERIAL_INPUT_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 
     // install queue
     //even though the documentation says i cannot use ESP_INTR_FLAG_IRAM here, it seems to solve the neopixelOutput flicker issue
-    started = uart_driver_install4(MIDI_UART_NUM, MIDI_BUF_SIZE * 2, MIDI_BUF_SIZE * 2, 20, &midi_rx_queue, ESP_INTR_FLAG_IRAM) == ESP_OK;
+    started = uart_driver_install_iram(MIDI_UART_NUM, MIDI_BUF_SIZE * 2, MIDI_BUF_SIZE * 2, 20, &midi_rx_queue, ESP_INTR_FLAG_IRAM) == ESP_OK;
     //started = uart_driver_install(MIDI_UART_NUM, MIDI_BUF_SIZE * 2, MIDI_BUF_SIZE * 2, 20, &midi_rx_queue, 0) == ESP_OK;
     if (!started)
         return;
@@ -84,7 +84,7 @@ void Midi::uart_event_task(void *pvParameters)
     while (true)
     {
         uint8_t data[1];
-        int length = uart_read_bytes4(MIDI_UART_NUM, data, 1, 1000);
+        int length = uart_read_bytes_iram(MIDI_UART_NUM, data, 1, 1000);
 
         if (length <= 0)
             continue;
@@ -152,7 +152,7 @@ void Midi::sendNoteOn(uint8_t channel, uint8_t note, uint8_t velocity)
     buffer[0] = NOTEON | channel;
     buffer[1] = note;
     buffer[2] = velocity;
-    uart_write_bytes4(MIDI_UART_NUM, (const char *)buffer, sizeof(buffer));
+    uart_write_bytes_iram(MIDI_UART_NUM, (const char *)buffer, sizeof(buffer));
 }
 
 void Midi::sendNoteOff(uint8_t channel, uint8_t note, uint8_t velocity)
@@ -163,7 +163,7 @@ void Midi::sendNoteOff(uint8_t channel, uint8_t note, uint8_t velocity)
     buffer[0] = NOTEOFF | channel;
     buffer[1] = note;
     buffer[2] = velocity;
-    uart_write_bytes4(MIDI_UART_NUM, (const char *)buffer, sizeof(buffer));
+    uart_write_bytes_iram(MIDI_UART_NUM, (const char *)buffer, sizeof(buffer));
 }
 
 void Midi::sendControllerChange(uint8_t channel, uint8_t controller, uint8_t value)
@@ -174,14 +174,14 @@ void Midi::sendControllerChange(uint8_t channel, uint8_t controller, uint8_t val
     buffer[0] = CONTROLLERCHANGE | channel;
     buffer[1] = controller;
     buffer[2] = value;
-    uart_write_bytes4(MIDI_UART_NUM, (const char *)buffer, sizeof(buffer));
+    uart_write_bytes_iram(MIDI_UART_NUM, (const char *)buffer, sizeof(buffer));
 }
 
 bool Midi::waitTxDone(int timeout)
 {
     if (!started)
         return false;
-    return uart_wait_tx_done4(MIDI_UART_NUM, timeout) == ESP_OK;
+    return uart_wait_tx_done_iram(MIDI_UART_NUM, timeout) == ESP_OK;
 return true;
 }
 

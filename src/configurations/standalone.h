@@ -140,17 +140,15 @@ Pipe pipes[] = {
         new UDPOutput("strobes.local",9619,100),
         Pipe::transfer<Monochrome,Monochrome12>),
 
-    //putting this one at the beginning reduces its glitches,
-    //why could that be?
-    Pipe(
-        new PatternInput<RGB>(160, 
-        //new AnimatedMixingPattern()
-        new BPMFillPattern()
-        ),
-        new NeopixelOutput<Kpbs800>(2),
-        Pipe::transfer<RGB, GRB>,
-        NeopixelLut
-    ),
+    // Pipe(
+    //     new PatternInput<RGB>(16, 
+    //     //new AnimatedMixingPattern()
+    //     new BPMFillPattern()
+    //     ),
+    //     new NeopixelOutput<Kpbs800>(2),
+    //     Pipe::transfer<RGB, GRB>,
+    //     NeopixelLut
+    // ),
 
 
     Pipe(

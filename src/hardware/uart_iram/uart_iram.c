@@ -46,7 +46,7 @@ this practically removed all midi related glitches
 #include "freertos/task.h"
 #include "freertos/ringbuf.h"
 #include "soc/uart_periph.h"
-#include "uartv4.h"
+#include "uart_iram.h"
 #include "driver/gpio.h"
 #include "driver/uart_select.h"
 
@@ -160,7 +160,7 @@ static portMUX_TYPE uart_spinlock[UART_NUM_MAX] = {
 };
 static portMUX_TYPE uart_selectlock = portMUX_INITIALIZER_UNLOCKED;
 
-esp_err_t uart_set_word_length4(uart_port_t uart_num, uart_word_length_t data_bit)
+esp_err_t uart_set_word_length_iram(uart_port_t uart_num, uart_word_length_t data_bit)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     UART_CHECK((data_bit < UART_DATA_BITS_MAX), "data bit error", ESP_FAIL);
@@ -170,14 +170,14 @@ esp_err_t uart_set_word_length4(uart_port_t uart_num, uart_word_length_t data_bi
     return ESP_OK;
 }
 
-esp_err_t uart_get_word_length4(uart_port_t uart_num, uart_word_length_t* data_bit)
+esp_err_t uart_get_word_length_iram(uart_port_t uart_num, uart_word_length_t* data_bit)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     *(data_bit) = UART[uart_num]->conf0.bit_num;
     return ESP_OK;
 }
 
-esp_err_t uart_set_stop_bits4(uart_port_t uart_num, uart_stop_bits_t stop_bit)
+esp_err_t uart_set_stop_bits_iram(uart_port_t uart_num, uart_stop_bits_t stop_bit)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     UART_CHECK((stop_bit < UART_STOP_BITS_MAX), "stop bit error", ESP_FAIL);
@@ -195,7 +195,7 @@ esp_err_t uart_set_stop_bits4(uart_port_t uart_num, uart_stop_bits_t stop_bit)
     return ESP_OK;
 }
 
-esp_err_t uart_get_stop_bits4(uart_port_t uart_num, uart_stop_bits_t* stop_bit)
+esp_err_t uart_get_stop_bits_iram(uart_port_t uart_num, uart_stop_bits_t* stop_bit)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     //workaround for hardware bug, when uart stop bit set as 2-bit mode.
@@ -207,7 +207,7 @@ esp_err_t uart_get_stop_bits4(uart_port_t uart_num, uart_stop_bits_t* stop_bit)
     return ESP_OK;
 }
 
-esp_err_t uart_set_parity4(uart_port_t uart_num, uart_parity_t parity_mode)
+esp_err_t uart_set_parity_iram(uart_port_t uart_num, uart_parity_t parity_mode)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     UART_ENTER_CRITICAL(&uart_spinlock[uart_num]);
@@ -217,7 +217,7 @@ esp_err_t uart_set_parity4(uart_port_t uart_num, uart_parity_t parity_mode)
     return ESP_OK;
 }
 
-esp_err_t uart_get_parity4(uart_port_t uart_num, uart_parity_t* parity_mode)
+esp_err_t uart_get_parity_iram(uart_port_t uart_num, uart_parity_t* parity_mode)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     int val = UART[uart_num]->conf0.val;
@@ -233,7 +233,7 @@ esp_err_t uart_get_parity4(uart_port_t uart_num, uart_parity_t* parity_mode)
     return ESP_OK;
 }
 
-esp_err_t uart_set_baudrate4(uart_port_t uart_num, uint32_t baud_rate)
+esp_err_t uart_set_baudrate_iram(uart_port_t uart_num, uint32_t baud_rate)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     esp_err_t ret = ESP_OK;
@@ -257,7 +257,7 @@ esp_err_t uart_set_baudrate4(uart_port_t uart_num, uint32_t baud_rate)
     return ret;
 }
 
-esp_err_t uart_get_baudrate4(uart_port_t uart_num, uint32_t* baudrate)
+esp_err_t uart_get_baudrate_iram(uart_port_t uart_num, uint32_t* baudrate)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     UART_ENTER_CRITICAL(&uart_spinlock[uart_num]);
@@ -271,7 +271,7 @@ esp_err_t uart_get_baudrate4(uart_port_t uart_num, uint32_t* baudrate)
     return ESP_OK;
 }
 
-esp_err_t uart_set_line_inverse4(uart_port_t uart_num, uint32_t inverse_mask)
+esp_err_t uart_set_line_inverse_iram(uart_port_t uart_num, uint32_t inverse_mask)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     UART_CHECK((((inverse_mask & ~UART_LINE_INV_MASK) == 0) || (inverse_mask == 0)), "inverse_mask error", ESP_FAIL);
@@ -282,7 +282,7 @@ esp_err_t uart_set_line_inverse4(uart_port_t uart_num, uint32_t inverse_mask)
     return ESP_OK;
 }
 
-esp_err_t uart_set_sw_flow_ctrl4(uart_port_t uart_num, bool enable,  uint8_t rx_thresh_xon,  uint8_t rx_thresh_xoff)
+esp_err_t uart_set_sw_flow_ctrl_iram(uart_port_t uart_num, bool enable,  uint8_t rx_thresh_xon,  uint8_t rx_thresh_xoff)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     UART_CHECK((rx_thresh_xon < UART_FIFO_LEN), "rx flow xon thresh error", ESP_FAIL);
@@ -299,7 +299,7 @@ esp_err_t uart_set_sw_flow_ctrl4(uart_port_t uart_num, bool enable,  uint8_t rx_
 }
 
 //only when UART_HW_FLOWCTRL_RTS is set , will the rx_thresh value be set.
-esp_err_t uart_set_hw_flow_ctrl4(uart_port_t uart_num, uart_hw_flowcontrol_t flow_ctrl, uint8_t rx_thresh)
+esp_err_t uart_set_hw_flow_ctrl_iram(uart_port_t uart_num, uart_hw_flowcontrol_t flow_ctrl, uint8_t rx_thresh)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     UART_CHECK((rx_thresh < UART_FIFO_LEN), "rx flow thresh error", ESP_FAIL);
@@ -320,7 +320,7 @@ esp_err_t uart_set_hw_flow_ctrl4(uart_port_t uart_num, uart_hw_flowcontrol_t flo
     return ESP_OK;
 }
 
-esp_err_t uart_get_hw_flow_ctrl4(uart_port_t uart_num, uart_hw_flowcontrol_t* flow_ctrl)
+esp_err_t uart_get_hw_flow_ctrl_iram(uart_port_t uart_num, uart_hw_flowcontrol_t* flow_ctrl)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     uart_hw_flowcontrol_t val = UART_HW_FLOWCTRL_DISABLE;
@@ -334,7 +334,7 @@ esp_err_t uart_get_hw_flow_ctrl4(uart_port_t uart_num, uart_hw_flowcontrol_t* fl
     return ESP_OK;
 }
 
-static esp_err_t uart_reset_rx_fifo4(uart_port_t uart_num)
+static esp_err_t uart_reset_rx_fifo_iram(uart_port_t uart_num)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     //Due to hardware issue, we can not use fifo_rst to reset uart fifo.
@@ -347,7 +347,7 @@ static esp_err_t uart_reset_rx_fifo4(uart_port_t uart_num)
     return ESP_OK;
 }
 
-esp_err_t UART_ISR_ATTR uart_clear_intr_status4(uart_port_t uart_num, uint32_t clr_mask)
+esp_err_t UART_ISR_ATTR uart_clear_intr_status_iram(uart_port_t uart_num, uint32_t clr_mask)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     //intr_clr register is write-only
@@ -355,7 +355,7 @@ esp_err_t UART_ISR_ATTR uart_clear_intr_status4(uart_port_t uart_num, uint32_t c
     return ESP_OK;
 }
 
-esp_err_t UART_ISR_ATTR uart_enable_intr_mask4(uart_port_t uart_num, uint32_t enable_mask)
+esp_err_t UART_ISR_ATTR uart_enable_intr_mask_iram(uart_port_t uart_num, uint32_t enable_mask)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     UART_ENTER_CRITICAL(&uart_spinlock[uart_num]);
@@ -365,7 +365,7 @@ esp_err_t UART_ISR_ATTR uart_enable_intr_mask4(uart_port_t uart_num, uint32_t en
     return ESP_OK;
 }
 
-esp_err_t UART_ISR_ATTR uart_disable_intr_mask4(uart_port_t uart_num, uint32_t disable_mask)
+esp_err_t UART_ISR_ATTR uart_disable_intr_mask_iram(uart_port_t uart_num, uint32_t disable_mask)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     UART_ENTER_CRITICAL(&uart_spinlock[uart_num]);
@@ -374,14 +374,14 @@ esp_err_t UART_ISR_ATTR uart_disable_intr_mask4(uart_port_t uart_num, uint32_t d
     return ESP_OK;
 }
 
-static void uart_disable_intr_mask_from_isr4(uart_port_t uart_num, uint32_t disable_mask)
+static void uart_disable_intr_mask_from_isr_iram(uart_port_t uart_num, uint32_t disable_mask)
 {
     UART_ENTER_CRITICAL_ISR(&uart_spinlock[uart_num]);
     CLEAR_PERI_REG_MASK(UART_INT_ENA_REG(uart_num), disable_mask);
     UART_EXIT_CRITICAL_ISR(&uart_spinlock[uart_num]);
 }
 
-static void uart_enable_intr_mask_from_isr4(uart_port_t uart_num, uint32_t enable_mask)
+static void uart_enable_intr_mask_from_isr_iram(uart_port_t uart_num, uint32_t enable_mask)
 {
     UART_ENTER_CRITICAL_ISR(&uart_spinlock[uart_num]);
     SET_PERI_REG_MASK(UART_INT_CLR_REG(uart_num), enable_mask);
@@ -389,7 +389,7 @@ static void uart_enable_intr_mask_from_isr4(uart_port_t uart_num, uint32_t enabl
     UART_EXIT_CRITICAL_ISR(&uart_spinlock[uart_num]);
 }
 
-static esp_err_t uart_pattern_link_free4(uart_port_t uart_num)
+static esp_err_t uart_pattern_link_free_iram(uart_port_t uart_num)
 {
     UART_CHECK((p_uart_obj[uart_num]), "uart driver error", ESP_FAIL);
     if (p_uart_obj[uart_num]->rx_pattern_pos.data != NULL) {
@@ -404,7 +404,7 @@ static esp_err_t uart_pattern_link_free4(uart_port_t uart_num)
     return ESP_OK;
 }
 
-static esp_err_t UART_ISR_ATTR uart_pattern_enqueue4(uart_port_t uart_num, int pos)
+static esp_err_t UART_ISR_ATTR uart_pattern_enqueue_iram(uart_port_t uart_num, int pos)
 {
     UART_CHECK((p_uart_obj[uart_num]), "uart driver error", ESP_FAIL);
     esp_err_t ret = ESP_OK;
@@ -426,7 +426,7 @@ static esp_err_t UART_ISR_ATTR uart_pattern_enqueue4(uart_port_t uart_num, int p
     return ret;
 }
 
-static esp_err_t uart_pattern_dequeue4(uart_port_t uart_num)
+static esp_err_t uart_pattern_dequeue_iram(uart_port_t uart_num)
 {
     UART_CHECK((p_uart_obj[uart_num]), "uart driver error", ESP_FAIL);
     if(p_uart_obj[uart_num]->rx_pattern_pos.data == NULL) {
@@ -448,7 +448,7 @@ static esp_err_t uart_pattern_dequeue4(uart_port_t uart_num)
     }
 }
 
-static esp_err_t uart_pattern_queue_update4(uart_port_t uart_num, int diff_len)
+static esp_err_t uart_pattern_queue_update_iram(uart_port_t uart_num, int diff_len)
 {
     UART_CHECK((p_uart_obj[uart_num]), "uart driver error", ESP_FAIL);
     UART_ENTER_CRITICAL(&uart_spinlock[uart_num]);
@@ -469,7 +469,7 @@ static esp_err_t uart_pattern_queue_update4(uart_port_t uart_num, int diff_len)
     return ESP_OK;
 }
 
-int uart_pattern_pop_pos4(uart_port_t uart_num)
+int uart_pattern_pop_pos_iram(uart_port_t uart_num)
 {
     UART_CHECK((p_uart_obj[uart_num]), "uart driver error", (-1));
     UART_ENTER_CRITICAL(&uart_spinlock[uart_num]);
@@ -477,13 +477,13 @@ int uart_pattern_pop_pos4(uart_port_t uart_num)
     int pos = -1;
     if (pat_pos != NULL && pat_pos->rd != pat_pos->wr) {
         pos = pat_pos->data[pat_pos->rd];
-        uart_pattern_dequeue4(uart_num);
+        uart_pattern_dequeue_iram(uart_num);
     }
     UART_EXIT_CRITICAL(&uart_spinlock[uart_num]);
     return pos;
 }
 
-int uart_pattern_get_pos4(uart_port_t uart_num)
+int uart_pattern_get_pos_iram(uart_port_t uart_num)
 {
     UART_CHECK((p_uart_obj[uart_num]), "uart driver error", (-1));
     UART_ENTER_CRITICAL(&uart_spinlock[uart_num]);
@@ -496,7 +496,7 @@ int uart_pattern_get_pos4(uart_port_t uart_num)
     return pos;
 }
 
-esp_err_t uart_pattern_queue_reset4(uart_port_t uart_num, int queue_length)
+esp_err_t uart_pattern_queue_reset_iram(uart_port_t uart_num, int queue_length)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     UART_CHECK((p_uart_obj[uart_num]), "uart driver error", ESP_ERR_INVALID_STATE);
@@ -516,7 +516,7 @@ esp_err_t uart_pattern_queue_reset4(uart_port_t uart_num, int queue_length)
     return ESP_OK;
 }
 
-esp_err_t uart_enable_pattern_det_intr4(uart_port_t uart_num, char pattern_chr, uint8_t chr_num, int chr_tout, int post_idle, int pre_idle)
+esp_err_t uart_enable_pattern_det_intr_iram(uart_port_t uart_num, char pattern_chr, uint8_t chr_num, int chr_tout, int post_idle, int pre_idle)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     UART_CHECK(chr_tout >= 0 && chr_tout <= UART_RX_GAP_TOUT_V, "uart pattern set error\n", ESP_FAIL);
@@ -527,30 +527,30 @@ esp_err_t uart_enable_pattern_det_intr4(uart_port_t uart_num, char pattern_chr, 
     UART[uart_num]->at_cmd_gaptout.rx_gap_tout = chr_tout;
     UART[uart_num]->at_cmd_postcnt.post_idle_num = post_idle;
     UART[uart_num]->at_cmd_precnt.pre_idle_num = pre_idle;
-    return uart_enable_intr_mask4(uart_num, UART_AT_CMD_CHAR_DET_INT_ENA_M);
+    return uart_enable_intr_mask_iram(uart_num, UART_AT_CMD_CHAR_DET_INT_ENA_M);
 }
 
-esp_err_t uart_disable_pattern_det_intr4(uart_port_t uart_num)
+esp_err_t uart_disable_pattern_det_intr_iram(uart_port_t uart_num)
 {
-    return uart_disable_intr_mask4(uart_num, UART_AT_CMD_CHAR_DET_INT_ENA_M);
+    return uart_disable_intr_mask_iram(uart_num, UART_AT_CMD_CHAR_DET_INT_ENA_M);
 }
 
-esp_err_t uart_enable_rx_intr4(uart_port_t uart_num)
+esp_err_t uart_enable_rx_intr_iram(uart_port_t uart_num)
 {
-    return uart_enable_intr_mask4(uart_num, UART_RXFIFO_FULL_INT_ENA|UART_RXFIFO_TOUT_INT_ENA);
+    return uart_enable_intr_mask_iram(uart_num, UART_RXFIFO_FULL_INT_ENA|UART_RXFIFO_TOUT_INT_ENA);
 }
 
-esp_err_t uart_disable_rx_intr4(uart_port_t uart_num)
+esp_err_t uart_disable_rx_intr_iram(uart_port_t uart_num)
 {
-    return uart_disable_intr_mask4(uart_num, UART_RXFIFO_FULL_INT_ENA|UART_RXFIFO_TOUT_INT_ENA);
+    return uart_disable_intr_mask_iram(uart_num, UART_RXFIFO_FULL_INT_ENA|UART_RXFIFO_TOUT_INT_ENA);
 }
 
-esp_err_t uart_disable_tx_intr4(uart_port_t uart_num)
+esp_err_t uart_disable_tx_intr_iram(uart_port_t uart_num)
 {
-    return uart_disable_intr_mask4(uart_num, UART_TXFIFO_EMPTY_INT_ENA);
+    return uart_disable_intr_mask_iram(uart_num, UART_TXFIFO_EMPTY_INT_ENA);
 }
 
-esp_err_t UART_ISR_ATTR uart_enable_tx_intr4(uart_port_t uart_num, int enable, int thresh)
+esp_err_t UART_ISR_ATTR uart_enable_tx_intr_iram(uart_port_t uart_num, int enable, int thresh)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     UART_CHECK((thresh < UART_FIFO_LEN), "empty intr threshold error", ESP_FAIL);
@@ -562,7 +562,7 @@ esp_err_t UART_ISR_ATTR uart_enable_tx_intr4(uart_port_t uart_num, int enable, i
     return ESP_OK;
 }
 
-esp_err_t uart_isr_register4(uart_port_t uart_num, void (*fn)(void*), void * arg, int intr_alloc_flags,  uart_isr_handle_t *handle)
+esp_err_t uart_isr_register_iram(uart_port_t uart_num, void (*fn)(void*), void * arg, int intr_alloc_flags,  uart_isr_handle_t *handle)
 {
     int ret;
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
@@ -586,7 +586,7 @@ esp_err_t uart_isr_register4(uart_port_t uart_num, void (*fn)(void*), void * arg
 }
 
 
-esp_err_t uart_isr_free4(uart_port_t uart_num)
+esp_err_t uart_isr_free_iram(uart_port_t uart_num)
 {
     esp_err_t ret;
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
@@ -600,7 +600,7 @@ esp_err_t uart_isr_free4(uart_port_t uart_num)
 
 //internal signal can be output to multiple GPIO pads
 //only one GPIO pad can connect with input signal
-esp_err_t uart_set_pin4(uart_port_t uart_num, int tx_io_num, int rx_io_num, int rts_io_num, int cts_io_num)
+esp_err_t uart_set_pin_iram(uart_port_t uart_num, int tx_io_num, int rx_io_num, int rts_io_num, int cts_io_num)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     UART_CHECK((tx_io_num < 0 || (GPIO_IS_VALID_OUTPUT_GPIO(tx_io_num))), "tx_io_num error", ESP_FAIL);
@@ -664,7 +664,7 @@ esp_err_t uart_set_pin4(uart_port_t uart_num, int tx_io_num, int rx_io_num, int 
     return ESP_OK;
 }
 
-esp_err_t uart_set_rts4(uart_port_t uart_num, int level)
+esp_err_t uart_set_rts_iram(uart_port_t uart_num, int level)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     UART_CHECK((UART[uart_num]->conf1.rx_flow_en != 1), "disable hw flowctrl before using sw control", ESP_FAIL);
@@ -674,7 +674,7 @@ esp_err_t uart_set_rts4(uart_port_t uart_num, int level)
     return ESP_OK;
 }
 
-esp_err_t uart_set_dtr4(uart_port_t uart_num, int level)
+esp_err_t uart_set_dtr_iram(uart_port_t uart_num, int level)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     UART_ENTER_CRITICAL(&uart_spinlock[uart_num]);
@@ -683,7 +683,7 @@ esp_err_t uart_set_dtr4(uart_port_t uart_num, int level)
     return ESP_OK;
 }
 
-esp_err_t uart_set_tx_idle_num4(uart_port_t uart_num, uint16_t idle_num)
+esp_err_t uart_set_tx_idle_num_iram(uart_port_t uart_num, uint16_t idle_num)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     UART_CHECK((idle_num <= UART_TX_IDLE_NUM_V), "uart idle num error", ESP_FAIL);
@@ -694,7 +694,7 @@ esp_err_t uart_set_tx_idle_num4(uart_port_t uart_num, uint16_t idle_num)
     return ESP_OK;
 }
 
-static periph_module_t get_periph_module4(uart_port_t uart_num)
+static periph_module_t get_periph_module_iram(uart_port_t uart_num)
 {
     periph_module_t periph_module = PERIPH_UART0_MODULE;
     if (uart_num == UART_NUM_0) {
@@ -713,17 +713,17 @@ static periph_module_t get_periph_module4(uart_port_t uart_num)
     return periph_module;
 }
 
-esp_err_t uart_param_config4(uart_port_t uart_num, const uart_config_t *uart_config)
+esp_err_t uart_param_config_iram(uart_port_t uart_num, const uart_config_t *uart_config)
 {
     esp_err_t r;
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     UART_CHECK((uart_config), "param null", ESP_FAIL);
-    periph_module_t periph_module = get_periph_module4(uart_num);
+    periph_module_t periph_module = get_periph_module_iram(uart_num);
     if (uart_num != CONFIG_ESP_CONSOLE_UART_NUM) {
         periph_module_reset(periph_module);
     }
     periph_module_enable(periph_module);
-    r = uart_set_hw_flow_ctrl4(uart_num, uart_config->flow_ctrl, uart_config->rx_flow_ctrl_thresh);
+    r = uart_set_hw_flow_ctrl_iram(uart_num, uart_config->flow_ctrl, uart_config->rx_flow_ctrl_thresh);
     if (r != ESP_OK) return r;
 
     UART[uart_num]->conf0.val =
@@ -732,18 +732,18 @@ esp_err_t uart_param_config4(uart_port_t uart_num, const uart_config_t *uart_con
         | ((uart_config->flow_ctrl & UART_HW_FLOWCTRL_CTS) ? UART_TX_FLOW_EN : 0x0)
         | (uart_config->use_ref_tick ? 0 : UART_TICK_REF_ALWAYS_ON_M);
 
-    r = uart_set_baudrate4(uart_num, uart_config->baud_rate);
+    r = uart_set_baudrate_iram(uart_num, uart_config->baud_rate);
     if (r != ESP_OK) return r;
-    r = uart_set_tx_idle_num4(uart_num, UART_TX_IDLE_NUM_DEFAULT);
+    r = uart_set_tx_idle_num_iram(uart_num, UART_TX_IDLE_NUM_DEFAULT);
     if (r != ESP_OK) return r;
-    r = uart_set_stop_bits4(uart_num, uart_config->stop_bits);
+    r = uart_set_stop_bits_iram(uart_num, uart_config->stop_bits);
     //A hardware reset does not reset the fifo,
     //so we need to reset the fifo manually.
-    uart_reset_rx_fifo4(uart_num);
+    uart_reset_rx_fifo_iram(uart_num);
     return r;
 }
 
-esp_err_t uart_intr_config4(uart_port_t uart_num, const uart_intr_config_t *intr_conf)
+esp_err_t uart_intr_config_iram(uart_port_t uart_num, const uart_intr_config_t *intr_conf)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     UART_CHECK((intr_conf), "param null", ESP_FAIL);
@@ -772,7 +772,7 @@ esp_err_t uart_intr_config4(uart_port_t uart_num, const uart_intr_config_t *intr
     return ESP_OK;
 }
 
-static int UART_ISR_ATTR uart_find_pattern_from_last4(uint8_t* buf, int length, uint8_t pat_chr, int pat_num)
+static int UART_ISR_ATTR uart_find_pattern_from_last_iram(uint8_t* buf, int length, uint8_t pat_chr, int pat_num)
 {
     int cnt = 0;
     int len = length;
@@ -791,7 +791,7 @@ static int UART_ISR_ATTR uart_find_pattern_from_last4(uint8_t* buf, int length, 
 }
 
 //internal isr handler for default driver code.
-static void UART_ISR_ATTR uart_rx_intr_handler_default4(void *param)
+static void UART_ISR_ATTR uart_rx_intr_handler_default_iram(void *param)
 {
     uart_obj_t *p_uart = (uart_obj_t*) param;
     uint8_t uart_num = p_uart->uart_num;
@@ -811,8 +811,8 @@ static void UART_ISR_ATTR uart_rx_intr_handler_default4(void *param)
         }
         uart_event.type = UART_EVENT_MAX;
         if(uart_intr_status & UART_TXFIFO_EMPTY_INT_ST_M) {
-            uart_clear_intr_status4(uart_num, UART_TXFIFO_EMPTY_INT_CLR_M);
-            uart_disable_intr_mask_from_isr4(uart_num, UART_TXFIFO_EMPTY_INT_ENA_M);
+            uart_clear_intr_status_iram(uart_num, UART_TXFIFO_EMPTY_INT_CLR_M);
+            uart_disable_intr_mask_from_isr_iram(uart_num, UART_TXFIFO_EMPTY_INT_ENA_M);
             if(p_uart->tx_waiting_brk) {
                 continue;
             }
@@ -904,8 +904,8 @@ static void UART_ISR_ATTR uart_rx_intr_handler_default4(void *param)
                     }
                 }
                 if (en_tx_flg) {
-                    uart_clear_intr_status4(uart_num, UART_TXFIFO_EMPTY_INT_CLR_M);
-                    uart_enable_intr_mask_from_isr4(uart_num, UART_TXFIFO_EMPTY_INT_ENA_M);
+                    uart_clear_intr_status_iram(uart_num, UART_TXFIFO_EMPTY_INT_CLR_M);
+                    uart_enable_intr_mask_from_isr_iram(uart_num, UART_TXFIFO_EMPTY_INT_ENA_M);
                 }
             }
         }
@@ -929,13 +929,13 @@ static void UART_ISR_ATTR uart_rx_intr_handler_default4(void *param)
 
                 //Get the buffer from the FIFO
                 if (uart_intr_status & UART_AT_CMD_CHAR_DET_INT_ST_M) {
-                    uart_clear_intr_status4(uart_num, UART_AT_CMD_CHAR_DET_INT_CLR_M);
+                    uart_clear_intr_status_iram(uart_num, UART_AT_CMD_CHAR_DET_INT_CLR_M);
                     uart_event.type = UART_PATTERN_DET;
                     uart_event.size = rx_fifo_len;
-                    pat_idx = uart_find_pattern_from_last4(p_uart->rx_data_buf, rx_fifo_len - 1, pat_chr, pat_num);
+                    pat_idx = uart_find_pattern_from_last_iram(p_uart->rx_data_buf, rx_fifo_len - 1, pat_chr, pat_num);
                 } else {
                     //After Copying the Data From FIFO ,Clear intr_status
-                    uart_clear_intr_status4(uart_num, UART_RXFIFO_TOUT_INT_CLR_M | UART_RXFIFO_FULL_INT_CLR_M);
+                    uart_clear_intr_status_iram(uart_num, UART_RXFIFO_TOUT_INT_CLR_M | UART_RXFIFO_FULL_INT_CLR_M);
                     uart_event.type = UART_DATA;
                     uart_event.size = rx_fifo_len;
                     UART_ENTER_CRITICAL_ISR(&uart_selectlock);
@@ -949,13 +949,13 @@ static void UART_ISR_ATTR uart_rx_intr_handler_default4(void *param)
                 //Mainly for applications that uses flow control or small ring buffer.
                 if(pdFALSE == xRingbufferSendFromISR(p_uart->rx_ring_buf, p_uart->rx_data_buf, p_uart->rx_stash_len, &HPTaskAwoken)) {
                     p_uart->rx_buffer_full_flg = true;
-                    uart_disable_intr_mask_from_isr4(uart_num, UART_RXFIFO_TOUT_INT_ENA_M | UART_RXFIFO_FULL_INT_ENA_M);
+                    uart_disable_intr_mask_from_isr_iram(uart_num, UART_RXFIFO_TOUT_INT_ENA_M | UART_RXFIFO_FULL_INT_ENA_M);
                     if (uart_event.type == UART_PATTERN_DET) {
                         if (rx_fifo_len < pat_num) {
                             //some of the characters are read out in last interrupt
-                            uart_pattern_enqueue4(uart_num, p_uart->rx_buffered_len - (pat_num - rx_fifo_len));
+                            uart_pattern_enqueue_iram(uart_num, p_uart->rx_buffered_len - (pat_num - rx_fifo_len));
                         } else {
-                            uart_pattern_enqueue4(uart_num,
+                            uart_pattern_enqueue_iram(uart_num,
                                     pat_idx <= -1 ?
                                             //can not find the pattern in buffer,
                                             p_uart->rx_buffered_len + p_uart->rx_stash_len :
@@ -972,18 +972,18 @@ static void UART_ISR_ATTR uart_rx_intr_handler_default4(void *param)
                     if (uart_intr_status & UART_AT_CMD_CHAR_DET_INT_ST_M) {
                         if (rx_fifo_len < pat_num) {
                             //some of the characters are read out in last interrupt
-                            uart_pattern_enqueue4(uart_num, p_uart->rx_buffered_len - (pat_num - rx_fifo_len));
+                            uart_pattern_enqueue_iram(uart_num, p_uart->rx_buffered_len - (pat_num - rx_fifo_len));
                         } else if(pat_idx >= 0) {
                             // find pattern in statsh buffer.
-                            uart_pattern_enqueue4(uart_num, p_uart->rx_buffered_len + pat_idx);
+                            uart_pattern_enqueue_iram(uart_num, p_uart->rx_buffered_len + pat_idx);
                         }
                     }
                     p_uart->rx_buffered_len += p_uart->rx_stash_len;
                     UART_EXIT_CRITICAL_ISR(&uart_spinlock[uart_num]);
                 }
             } else {
-                uart_disable_intr_mask_from_isr4(uart_num, UART_RXFIFO_FULL_INT_ENA_M | UART_RXFIFO_TOUT_INT_ENA_M);
-                uart_clear_intr_status4(uart_num, UART_RXFIFO_FULL_INT_CLR_M | UART_RXFIFO_TOUT_INT_CLR_M);
+                uart_disable_intr_mask_from_isr_iram(uart_num, UART_RXFIFO_FULL_INT_ENA_M | UART_RXFIFO_TOUT_INT_ENA_M);
+                uart_clear_intr_status_iram(uart_num, UART_RXFIFO_FULL_INT_CLR_M | UART_RXFIFO_TOUT_INT_CLR_M);
                 if(uart_intr_status & UART_AT_CMD_CHAR_DET_INT_ST_M) {
                     uart_reg->int_clr.at_cmd_char_det = 1;
                     uart_event.type = UART_PATTERN_DET;
@@ -994,7 +994,7 @@ static void UART_ISR_ATTR uart_rx_intr_handler_default4(void *param)
         } else if(uart_intr_status & UART_RXFIFO_OVF_INT_ST_M) {
             // When fifo overflows, we reset the fifo.
             UART_ENTER_CRITICAL_ISR(&uart_spinlock[uart_num]);
-            uart_reset_rx_fifo4(uart_num);
+            uart_reset_rx_fifo_iram(uart_num);
             uart_reg->int_clr.rxfifo_ovf = 1;
             UART_EXIT_CRITICAL_ISR(&uart_spinlock[uart_num]);
             uart_event.type = UART_FIFO_OVF;
@@ -1038,8 +1038,8 @@ static void UART_ISR_ATTR uart_rx_intr_handler_default4(void *param)
                 xSemaphoreGiveFromISR(p_uart->tx_brk_sem, &HPTaskAwoken);
             }
         } else if(uart_intr_status & UART_TX_BRK_IDLE_DONE_INT_ST_M) {
-            uart_disable_intr_mask_from_isr4(uart_num, UART_TX_BRK_IDLE_DONE_INT_ENA_M);
-            uart_clear_intr_status4(uart_num, UART_TX_BRK_IDLE_DONE_INT_CLR_M);
+            uart_disable_intr_mask_from_isr_iram(uart_num, UART_TX_BRK_IDLE_DONE_INT_ENA_M);
+            uart_clear_intr_status_iram(uart_num, UART_TX_BRK_IDLE_DONE_INT_CLR_M);
         } else if(uart_intr_status & UART_AT_CMD_CHAR_DET_INT_ST_M) {
             uart_reg->int_clr.at_cmd_char_det = 1;
             uart_event.type = UART_PATTERN_DET;
@@ -1047,21 +1047,21 @@ static void UART_ISR_ATTR uart_rx_intr_handler_default4(void *param)
                 || (uart_intr_status & UART_RS485_FRM_ERR_INT_ENA)
                 || (uart_intr_status & UART_RS485_PARITY_ERR_INT_ENA)) {
             // RS485 collision or frame error interrupt triggered
-            uart_clear_intr_status4(uart_num, UART_RS485_CLASH_INT_CLR_M);
+            uart_clear_intr_status_iram(uart_num, UART_RS485_CLASH_INT_CLR_M);
             UART_ENTER_CRITICAL_ISR(&uart_spinlock[uart_num]);
-            uart_reset_rx_fifo4(uart_num);
+            uart_reset_rx_fifo_iram(uart_num);
             // Set collision detection flag
             p_uart_obj[uart_num]->coll_det_flg = true; 
             UART_EXIT_CRITICAL_ISR(&uart_spinlock[uart_num]);
             uart_event.type = UART_EVENT_MAX;
         } else if(uart_intr_status & UART_TX_DONE_INT_ST_M) {
-            uart_disable_intr_mask_from_isr4(uart_num, UART_TX_DONE_INT_ENA_M);
-            uart_clear_intr_status4(uart_num, UART_TX_DONE_INT_CLR_M);
+            uart_disable_intr_mask_from_isr_iram(uart_num, UART_TX_DONE_INT_ENA_M);
+            uart_clear_intr_status_iram(uart_num, UART_TX_DONE_INT_CLR_M);
             // If RS485 half duplex mode is enable then reset FIFO and 
             // reset RTS pin to start receiver driver
             if (UART_IS_MODE_SET(uart_num, UART_MODE_RS485_HALF_DUPLEX)) {
                 UART_ENTER_CRITICAL_ISR(&uart_spinlock[uart_num]);
-                uart_reset_rx_fifo4(uart_num); // Allows to avoid hardware issue with the RXFIFO reset
+                uart_reset_rx_fifo_iram(uart_num); // Allows to avoid hardware issue with the RXFIFO reset
                 uart_reg->conf0.sw_rts = 1;
                 UART_EXIT_CRITICAL_ISR(&uart_spinlock[uart_num]);
             }
@@ -1083,7 +1083,7 @@ static void UART_ISR_ATTR uart_rx_intr_handler_default4(void *param)
 }
 
 /**************************************************************/
-esp_err_t UART_ISR_ATTR uart_wait_tx_done4(uart_port_t uart_num, TickType_t ticks_to_wait)
+esp_err_t UART_ISR_ATTR uart_wait_tx_done_iram(uart_port_t uart_num, TickType_t ticks_to_wait)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     UART_CHECK((p_uart_obj[uart_num]), "uart driver error", ESP_FAIL);
@@ -1101,7 +1101,7 @@ esp_err_t UART_ISR_ATTR uart_wait_tx_done4(uart_port_t uart_num, TickType_t tick
         xSemaphoreGive(p_uart_obj[uart_num]->tx_mux);
         return ESP_OK;
     }
-    uart_enable_intr_mask4(uart_num, UART_TX_DONE_INT_ENA_M);
+    uart_enable_intr_mask_iram(uart_num, UART_TX_DONE_INT_ENA_M);
 
     TickType_t ticks_end = xTaskGetTickCount();
     if (ticks_end - ticks_start > ticks_to_wait) {
@@ -1112,7 +1112,7 @@ esp_err_t UART_ISR_ATTR uart_wait_tx_done4(uart_port_t uart_num, TickType_t tick
     //take 2nd tx_done_sem, wait given from ISR
     res = xSemaphoreTake(p_uart_obj[uart_num]->tx_done_sem, (portTickType)ticks_to_wait);
     if(res == pdFALSE) {
-        uart_disable_intr_mask4(uart_num, UART_TX_DONE_INT_ENA_M);
+        uart_disable_intr_mask_iram(uart_num, UART_TX_DONE_INT_ENA_M);
         xSemaphoreGive(p_uart_obj[uart_num]->tx_mux);
         return ESP_ERR_TIMEOUT;
     }
@@ -1120,7 +1120,7 @@ esp_err_t UART_ISR_ATTR uart_wait_tx_done4(uart_port_t uart_num, TickType_t tick
     return ESP_OK;
 }
 
-static esp_err_t UART_ISR_ATTR uart_set_break4(uart_port_t uart_num, int break_num)
+static esp_err_t UART_ISR_ATTR uart_set_break_iram(uart_port_t uart_num, int break_num)
 {
     UART_ENTER_CRITICAL(&uart_spinlock[uart_num]);
     UART[uart_num]->idle_conf.tx_brk_num = break_num;
@@ -1133,7 +1133,7 @@ static esp_err_t UART_ISR_ATTR uart_set_break4(uart_port_t uart_num, int break_n
 
 //Fill UART tx_fifo and return a number,
 //This function by itself is not thread-safe, always call from within a muxed section.
-static int uart_fill_fifo4(uart_port_t uart_num, const char* buffer, uint32_t len)
+static int uart_fill_fifo_iram(uart_port_t uart_num, const char* buffer, uint32_t len)
 {
     uint8_t i = 0;
     uint8_t tx_fifo_cnt = UART[uart_num]->status.txfifo_cnt;
@@ -1150,7 +1150,7 @@ static int uart_fill_fifo4(uart_port_t uart_num, const char* buffer, uint32_t le
     return copy_cnt;
 }
 
-int uart_tx_chars4(uart_port_t uart_num, const char* buffer, uint32_t len)
+int uart_tx_chars_iram(uart_port_t uart_num, const char* buffer, uint32_t len)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", (-1));
     UART_CHECK((p_uart_obj[uart_num]), "uart driver error", (-1));
@@ -1159,12 +1159,12 @@ int uart_tx_chars4(uart_port_t uart_num, const char* buffer, uint32_t len)
         return 0;
     }
     xSemaphoreTake(p_uart_obj[uart_num]->tx_mux, (portTickType)portMAX_DELAY);
-    int tx_len = uart_fill_fifo4(uart_num, (const char*) buffer, len);
+    int tx_len = uart_fill_fifo_iram(uart_num, (const char*) buffer, len);
     xSemaphoreGive(p_uart_obj[uart_num]->tx_mux);
     return tx_len;
 }
 
-static int UART_ISR_ATTR uart_tx_all4(uart_port_t uart_num, const char* src, size_t size, bool brk_en, int brk_len)
+static int UART_ISR_ATTR uart_tx_all_iram(uart_port_t uart_num, const char* src, size_t size, bool brk_en, int brk_len)
 {
     if(size == 0) {
         return 0;
@@ -1191,23 +1191,23 @@ static int UART_ISR_ATTR uart_tx_all4(uart_port_t uart_num, const char* src, siz
             xRingbufferSend(p_uart_obj[uart_num]->tx_ring_buf, (void*) (src + offset), send_size, portMAX_DELAY);
             size -= send_size;
             offset += send_size;
-            uart_enable_tx_intr4(uart_num, 1, UART_EMPTY_THRESH_DEFAULT);
+            uart_enable_tx_intr_iram(uart_num, 1, UART_EMPTY_THRESH_DEFAULT);
         }
     } else {
         while(size) {
             //semaphore for tx_fifo available
             if(pdTRUE == xSemaphoreTake(p_uart_obj[uart_num]->tx_fifo_sem, (portTickType)portMAX_DELAY)) {
-                size_t sent = uart_fill_fifo4(uart_num, (char*) src, size);
+                size_t sent = uart_fill_fifo_iram(uart_num, (char*) src, size);
                 if(sent < size) {
                     p_uart_obj[uart_num]->tx_waiting_fifo = true;
-                    uart_enable_tx_intr4(uart_num, 1, UART_EMPTY_THRESH_DEFAULT);
+                    uart_enable_tx_intr_iram(uart_num, 1, UART_EMPTY_THRESH_DEFAULT);
                 }
                 size -= sent;
                 src += sent;
             }
         }
         if(brk_en) {
-            uart_set_break4(uart_num, brk_len);
+            uart_set_break_iram(uart_num, brk_len);
             xSemaphoreTake(p_uart_obj[uart_num]->tx_brk_sem, (portTickType)portMAX_DELAY);
         }
         xSemaphoreGive(p_uart_obj[uart_num]->tx_fifo_sem);
@@ -1216,25 +1216,25 @@ static int UART_ISR_ATTR uart_tx_all4(uart_port_t uart_num, const char* src, siz
     return original_size;
 }
 
-int UART_ISR_ATTR uart_write_bytes4(uart_port_t uart_num, const char* src, size_t size)
+int UART_ISR_ATTR uart_write_bytes_iram(uart_port_t uart_num, const char* src, size_t size)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", (-1));
     UART_CHECK((p_uart_obj[uart_num] != NULL), "uart driver error", (-1));
     UART_CHECK(src, "buffer null", (-1));
-    return uart_tx_all4(uart_num, src, size, 0, 0);
+    return uart_tx_all_iram(uart_num, src, size, 0, 0);
 }
 
-int UART_ISR_ATTR uart_write_bytes_with_break4(uart_port_t uart_num, const char* src, size_t size, int brk_len)
+int UART_ISR_ATTR uart_write_bytes_with_break_iram(uart_port_t uart_num, const char* src, size_t size, int brk_len)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", (-1));
     UART_CHECK((p_uart_obj[uart_num]), "uart driver error", (-1));
     UART_CHECK((size > 0), "uart size error", (-1));
     UART_CHECK((src), "uart data null", (-1));
     UART_CHECK((brk_len > 0 && brk_len < 256), "break_num error", (-1));
-    return uart_tx_all4(uart_num, src, size, 1, brk_len);
+    return uart_tx_all_iram(uart_num, src, size, 1, brk_len);
 }
 
-static bool uart_check_buf_full4(uart_port_t uart_num)
+static bool uart_check_buf_full_iram(uart_port_t uart_num)
 {
     if(p_uart_obj[uart_num]->rx_buffer_full_flg) {
         BaseType_t res = xRingbufferSend(p_uart_obj[uart_num]->rx_ring_buf, p_uart_obj[uart_num]->rx_data_buf, p_uart_obj[uart_num]->rx_stash_len, 1);
@@ -1243,14 +1243,14 @@ static bool uart_check_buf_full4(uart_port_t uart_num)
             p_uart_obj[uart_num]->rx_buffered_len += p_uart_obj[uart_num]->rx_stash_len;
             p_uart_obj[uart_num]->rx_buffer_full_flg = false;
             UART_EXIT_CRITICAL(&uart_spinlock[uart_num]);
-            uart_enable_rx_intr4(p_uart_obj[uart_num]->uart_num);
+            uart_enable_rx_intr_iram(p_uart_obj[uart_num]->uart_num);
             return true;
         }
     }
     return false;
 }
 
-int uart_read_bytes4(uart_port_t uart_num, uint8_t* buf, uint32_t length, TickType_t ticks_to_wait)
+int uart_read_bytes_iram(uart_port_t uart_num, uint8_t* buf, uint32_t length, TickType_t ticks_to_wait)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", (-1));
     UART_CHECK((buf), "uart data null", (-1));
@@ -1273,7 +1273,7 @@ int uart_read_bytes4(uart_port_t uart_num, uint8_t* buf, uint32_t length, TickTy
                 //When using dual cores, `rx_buffer_full_flg` may read and write on different cores at same time,
                 //which may lose synchronization. So we also need to call `uart_check_buf_full` once when ringbuffer is empty
                 //to solve the possible asynchronous issues.
-                if(uart_check_buf_full4(uart_num)) {
+                if(uart_check_buf_full_iram(uart_num)) {
                     //This condition will never be true if `uart_read_bytes`
                     //and `uart_rx_intr_handler_default` are scheduled on the same core.
                     continue;
@@ -1291,7 +1291,7 @@ int uart_read_bytes4(uart_port_t uart_num, uint8_t* buf, uint32_t length, TickTy
         memcpy(buf + copy_len, p_uart_obj[uart_num]->rx_ptr, len_tmp);
         UART_ENTER_CRITICAL(&uart_spinlock[uart_num]);
         p_uart_obj[uart_num]->rx_buffered_len -= len_tmp;
-        uart_pattern_queue_update4(uart_num, len_tmp);
+        uart_pattern_queue_update_iram(uart_num, len_tmp);
         p_uart_obj[uart_num]->rx_ptr += len_tmp;
         UART_EXIT_CRITICAL(&uart_spinlock[uart_num]);
         p_uart_obj[uart_num]->rx_cur_remain -= len_tmp;
@@ -1301,7 +1301,7 @@ int uart_read_bytes4(uart_port_t uart_num, uint8_t* buf, uint32_t length, TickTy
             vRingbufferReturnItem(p_uart_obj[uart_num]->rx_ring_buf, p_uart_obj[uart_num]->rx_head_ptr);
             p_uart_obj[uart_num]->rx_head_ptr = NULL;
             p_uart_obj[uart_num]->rx_ptr = NULL;
-            uart_check_buf_full4(uart_num);
+            uart_check_buf_full_iram(uart_num);
         }
     }
 
@@ -1309,7 +1309,7 @@ int uart_read_bytes4(uart_port_t uart_num, uint8_t* buf, uint32_t length, TickTy
     return copy_len;
 }
 
-esp_err_t uart_get_buffered_data_len4(uart_port_t uart_num, size_t* size)
+esp_err_t uart_get_buffered_data_len_iram(uart_port_t uart_num, size_t* size)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     UART_CHECK((p_uart_obj[uart_num]), "uart driver error", ESP_FAIL);
@@ -1317,9 +1317,9 @@ esp_err_t uart_get_buffered_data_len4(uart_port_t uart_num, size_t* size)
     return ESP_OK;
 }
 
-esp_err_t uart_flush4(uart_port_t uart_num) __attribute__((alias("uart_flush_input4")));
+esp_err_t uart_flush_iram(uart_port_t uart_num) __attribute__((alias("uart_flush_input_iram")));
 
-esp_err_t uart_flush_input4(uart_port_t uart_num)
+esp_err_t uart_flush_input_iram(uart_port_t uart_num)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     UART_CHECK((p_uart_obj[uart_num]), "uart driver error", ESP_FAIL);
@@ -1329,13 +1329,13 @@ esp_err_t uart_flush_input4(uart_port_t uart_num)
 
     //rx sem protect the ring buffer read related functions
     xSemaphoreTake(p_uart->rx_mux, (portTickType)portMAX_DELAY);
-    uart_disable_rx_intr4(p_uart_obj[uart_num]->uart_num);
+    uart_disable_rx_intr_iram(p_uart_obj[uart_num]->uart_num);
     while(true) {
         if(p_uart->rx_head_ptr) {
             vRingbufferReturnItem(p_uart->rx_ring_buf, p_uart->rx_head_ptr);
             UART_ENTER_CRITICAL(&uart_spinlock[uart_num]);
             p_uart_obj[uart_num]->rx_buffered_len -= p_uart->rx_cur_remain;
-            uart_pattern_queue_update4(uart_num, p_uart->rx_cur_remain);
+            uart_pattern_queue_update_iram(uart_num, p_uart->rx_cur_remain);
             UART_EXIT_CRITICAL(&uart_spinlock[uart_num]);
             p_uart->rx_ptr = NULL;
             p_uart->rx_cur_remain = 0;
@@ -1355,7 +1355,7 @@ esp_err_t uart_flush_input4(uart_port_t uart_num)
         }
         UART_ENTER_CRITICAL(&uart_spinlock[uart_num]);
         p_uart_obj[uart_num]->rx_buffered_len -= size;
-        uart_pattern_queue_update4(uart_num, size);
+        uart_pattern_queue_update_iram(uart_num, size);
         UART_EXIT_CRITICAL(&uart_spinlock[uart_num]);
         vRingbufferReturnItem(p_uart->rx_ring_buf, data);
         if(p_uart_obj[uart_num]->rx_buffer_full_flg) {
@@ -1371,13 +1371,13 @@ esp_err_t uart_flush_input4(uart_port_t uart_num)
     p_uart->rx_ptr = NULL;
     p_uart->rx_cur_remain = 0;
     p_uart->rx_head_ptr = NULL;
-    uart_reset_rx_fifo4(uart_num);
-    uart_enable_rx_intr4(p_uart_obj[uart_num]->uart_num);
+    uart_reset_rx_fifo_iram(uart_num);
+    uart_enable_rx_intr_iram(p_uart_obj[uart_num]->uart_num);
     xSemaphoreGive(p_uart->rx_mux);
     return ESP_OK;
 }
 
-esp_err_t uart_driver_install4(uart_port_t uart_num, int rx_buffer_size, int tx_buffer_size, int queue_size, QueueHandle_t *uart_queue, int intr_alloc_flags)
+esp_err_t uart_driver_install_iram(uart_port_t uart_num, int rx_buffer_size, int tx_buffer_size, int queue_size, QueueHandle_t *uart_queue, int intr_alloc_flags)
 {
     esp_err_t r;
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
@@ -1420,7 +1420,7 @@ esp_err_t uart_driver_install4(uart_port_t uart_num, int rx_buffer_size, int tx_
         p_uart_obj[uart_num]->tx_brk_len = 0;
         p_uart_obj[uart_num]->tx_waiting_brk = 0;
         p_uart_obj[uart_num]->rx_buffered_len = 0;
-        uart_pattern_queue_reset4(uart_num, UART_PATTERN_DET_QLEN_DEFAULT);
+        uart_pattern_queue_reset_iram(uart_num, UART_PATTERN_DET_QLEN_DEFAULT);
 
         if(uart_queue) {
             p_uart_obj[uart_num]->xQueueUart = xQueueCreate(queue_size, sizeof(uart_event_t));
@@ -1448,7 +1448,7 @@ esp_err_t uart_driver_install4(uart_port_t uart_num, int rx_buffer_size, int tx_
         return ESP_FAIL;
     }
 
-    r=uart_isr_register4(uart_num, uart_rx_intr_handler_default4, p_uart_obj[uart_num], intr_alloc_flags, &p_uart_obj[uart_num]->intr_handle);
+    r=uart_isr_register_iram(uart_num, uart_rx_intr_handler_default_iram, p_uart_obj[uart_num], intr_alloc_flags, &p_uart_obj[uart_num]->intr_handle);
     if (r!=ESP_OK) goto err;
     uart_intr_config_t uart_intr = {
         .intr_enable_mask = UART_RXFIFO_FULL_INT_ENA_M
@@ -1461,17 +1461,17 @@ esp_err_t uart_driver_install4(uart_port_t uart_num, int rx_buffer_size, int tx_
         .rx_timeout_thresh = UART_TOUT_THRESH_DEFAULT,
         .txfifo_empty_intr_thresh = UART_EMPTY_THRESH_DEFAULT
     };
-    r=uart_intr_config4(uart_num, &uart_intr);
+    r=uart_intr_config_iram(uart_num, &uart_intr);
     if (r!=ESP_OK) goto err;
     return r;
 
 err:
-    uart_driver_delete4(uart_num);
+    uart_driver_delete_iram(uart_num);
     return r;
 }
 
 //Make sure no other tasks are still using UART before you call this function
-esp_err_t uart_driver_delete4(uart_port_t uart_num)
+esp_err_t uart_driver_delete_iram(uart_port_t uart_num)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_FAIL);
     if(p_uart_obj[uart_num] == NULL) {
@@ -1479,9 +1479,9 @@ esp_err_t uart_driver_delete4(uart_port_t uart_num)
         return ESP_OK;
     }
     esp_intr_free(p_uart_obj[uart_num]->intr_handle);
-    uart_disable_rx_intr4(uart_num);
-    uart_disable_tx_intr4(uart_num);
-    uart_pattern_link_free4(uart_num);
+    uart_disable_rx_intr_iram(uart_num);
+    uart_disable_tx_intr_iram(uart_num);
+    uart_pattern_link_free_iram(uart_num);
 
     if(p_uart_obj[uart_num]->tx_fifo_sem) {
         vSemaphoreDelete(p_uart_obj[uart_num]->tx_fifo_sem);
@@ -1520,30 +1520,30 @@ esp_err_t uart_driver_delete4(uart_port_t uart_num)
     p_uart_obj[uart_num] = NULL;
 
     if (uart_num != CONFIG_ESP_CONSOLE_UART_NUM) {
-       periph_module_t periph_module = get_periph_module4(uart_num);
+       periph_module_t periph_module = get_periph_module_iram(uart_num);
        periph_module_disable(periph_module);
     }
     return ESP_OK;
 }
 
-bool uart_is_driver_installed4(uart_port_t uart_num)
+bool uart_is_driver_installed_iram(uart_port_t uart_num)
 {
     return uart_num < UART_NUM_MAX && (p_uart_obj[uart_num] != NULL);
 }
 
-void uart_set_select_notif_callback4(uart_port_t uart_num, uart_select_notif_callback_t uart_select_notif_callback)
+void uart_set_select_notif_callback_iram(uart_port_t uart_num, uart_select_notif_callback_t uart_select_notif_callback)
 {
     if (uart_num < UART_NUM_MAX && p_uart_obj[uart_num]) {
         p_uart_obj[uart_num]->uart_select_notif_callback = (uart_select_notif_callback_t) uart_select_notif_callback;
     }
 }
 
-portMUX_TYPE *uart_get_selectlock4()
+portMUX_TYPE *uart_get_selectlock_iram()
 {
     return &uart_selectlock;
 }
 // Set UART mode
-esp_err_t uart_set_mode4(uart_port_t uart_num, uart_mode_t mode) 
+esp_err_t uart_set_mode_iram(uart_port_t uart_num, uart_mode_t mode) 
 {
     UART_CHECK((p_uart_obj[uart_num]), "uart driver error", ESP_ERR_INVALID_STATE);
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_ERR_INVALID_ARG);
@@ -1570,7 +1570,7 @@ esp_err_t uart_set_mode4(uart_port_t uart_num, uart_mode_t mode)
         UART[uart_num]->rs485_conf.rx_busy_tx_en = 1;
         UART[uart_num]->rs485_conf.en = 1;
         // Enable collision detection interrupts
-        uart_enable_intr_mask4(uart_num, UART_RXFIFO_TOUT_INT_ENA
+        uart_enable_intr_mask_iram(uart_num, UART_RXFIFO_TOUT_INT_ENA
                                         | UART_RXFIFO_FULL_INT_ENA
                                         | UART_RS485_CLASH_INT_ENA
                                         | UART_RS485_FRM_ERR_INT_ENA
@@ -1602,7 +1602,7 @@ esp_err_t uart_set_mode4(uart_port_t uart_num, uart_mode_t mode)
     return ESP_OK;
 }
 
-esp_err_t uart_set_rx_timeout4(uart_port_t uart_num, const uint8_t tout_thresh) 
+esp_err_t uart_set_rx_timeout_iram(uart_port_t uart_num, const uint8_t tout_thresh) 
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_ERR_INVALID_ARG);
     UART_CHECK((tout_thresh < 127), "tout_thresh max value is 126", ESP_ERR_INVALID_ARG);
@@ -1625,7 +1625,7 @@ esp_err_t uart_set_rx_timeout4(uart_port_t uart_num, const uint8_t tout_thresh)
     return ESP_OK;
 }
 
-esp_err_t uart_get_collision_flag4(uart_port_t uart_num, bool* collision_flag)
+esp_err_t uart_get_collision_flag_iram(uart_port_t uart_num, bool* collision_flag)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_ERR_INVALID_ARG);
     UART_CHECK((collision_flag != NULL), "wrong parameter pointer", ESP_ERR_INVALID_ARG);
@@ -1636,7 +1636,7 @@ esp_err_t uart_get_collision_flag4(uart_port_t uart_num, bool* collision_flag)
     return ESP_OK;
 }
 
-esp_err_t uart_set_wakeup_threshold4(uart_port_t uart_num, int wakeup_threshold)
+esp_err_t uart_set_wakeup_threshold_iram(uart_port_t uart_num, int wakeup_threshold)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_ERR_INVALID_ARG);
     UART_CHECK((wakeup_threshold <= UART_ACTIVE_THRESHOLD_V &&
@@ -1647,7 +1647,7 @@ esp_err_t uart_set_wakeup_threshold4(uart_port_t uart_num, int wakeup_threshold)
     return ESP_OK;
 }
 
-esp_err_t uart_get_wakeup_threshold4(uart_port_t uart_num, int* out_wakeup_threshold)
+esp_err_t uart_get_wakeup_threshold_iram(uart_port_t uart_num, int* out_wakeup_threshold)
 {
     UART_CHECK((uart_num < UART_NUM_MAX), "uart_num error", ESP_ERR_INVALID_ARG);
     UART_CHECK((out_wakeup_threshold != NULL), "argument is NULL", ESP_ERR_INVALID_ARG);

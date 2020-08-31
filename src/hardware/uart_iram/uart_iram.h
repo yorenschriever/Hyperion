@@ -166,7 +166,7 @@ extern "C" {
  *     - true  driver is installed
  *     - false driver is not installed
  */
-bool uart_is_driver_installed4(uart_port_t uart_num);
+bool uart_is_driver_installed_iram(uart_port_t uart_num);
 
 /**
  * @brief Set UART data bits.
@@ -178,7 +178,7 @@ bool uart_is_driver_installed4(uart_port_t uart_num);
  *     - ESP_OK   Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t uart_set_word_length4(uart_port_t uart_num, uart_word_length_t data_bit);
+esp_err_t uart_set_word_length_iram(uart_port_t uart_num, uart_word_length_t data_bit);
 
 /**
  * @brief Get UART data bits.
@@ -190,7 +190,7 @@ esp_err_t uart_set_word_length4(uart_port_t uart_num, uart_word_length_t data_bi
  *     - ESP_FAIL  Parameter error
  *     - ESP_OK    Success, result will be put in (*data_bit)
  */
-esp_err_t uart_get_word_length4(uart_port_t uart_num, uart_word_length_t* data_bit);
+esp_err_t uart_get_word_length_iram(uart_port_t uart_num, uart_word_length_t* data_bit);
 
 /**
  * @brief Set UART stop bits.
@@ -202,7 +202,7 @@ esp_err_t uart_get_word_length4(uart_port_t uart_num, uart_word_length_t* data_b
  *     - ESP_OK   Success
  *     - ESP_FAIL Fail
  */
-esp_err_t uart_set_stop_bits4(uart_port_t uart_num, uart_stop_bits_t stop_bits);
+esp_err_t uart_set_stop_bits_iram(uart_port_t uart_num, uart_stop_bits_t stop_bits);
 
 /**
  * @brief Get UART stop bits.
@@ -214,7 +214,7 @@ esp_err_t uart_set_stop_bits4(uart_port_t uart_num, uart_stop_bits_t stop_bits);
  *     - ESP_FAIL Parameter error
  *     - ESP_OK   Success, result will be put in (*stop_bit)
  */
-esp_err_t uart_get_stop_bits4(uart_port_t uart_num, uart_stop_bits_t* stop_bits);
+esp_err_t uart_get_stop_bits_iram(uart_port_t uart_num, uart_stop_bits_t* stop_bits);
 
 /**
  * @brief Set UART parity mode.
@@ -226,7 +226,7 @@ esp_err_t uart_get_stop_bits4(uart_port_t uart_num, uart_stop_bits_t* stop_bits)
  *     - ESP_FAIL  Parameter error
  *     - ESP_OK    Success
  */
-esp_err_t uart_set_parity4(uart_port_t uart_num, uart_parity_t parity_mode);
+esp_err_t uart_set_parity_iram(uart_port_t uart_num, uart_parity_t parity_mode);
 
 /**
  * @brief Get UART parity mode.
@@ -239,7 +239,7 @@ esp_err_t uart_set_parity4(uart_port_t uart_num, uart_parity_t parity_mode);
  *     - ESP_OK    Success, result will be put in (*parity_mode)
  *
  */
-esp_err_t uart_get_parity4(uart_port_t uart_num, uart_parity_t* parity_mode);
+esp_err_t uart_get_parity_iram(uart_port_t uart_num, uart_parity_t* parity_mode);
 
 /**
  * @brief Set UART baud rate.
@@ -251,7 +251,7 @@ esp_err_t uart_get_parity4(uart_port_t uart_num, uart_parity_t* parity_mode);
  *     - ESP_FAIL Parameter error
  *     - ESP_OK   Success
  */
-esp_err_t uart_set_baudrate4(uart_port_t uart_num, uint32_t baudrate);
+esp_err_t uart_set_baudrate_iram(uart_port_t uart_num, uint32_t baudrate);
 
 /**
  * @brief Get UART baud rate.
@@ -264,7 +264,7 @@ esp_err_t uart_set_baudrate4(uart_port_t uart_num, uint32_t baudrate);
  *     - ESP_OK   Success, result will be put in (*baudrate)
  *
  */
-esp_err_t uart_get_baudrate4(uart_port_t uart_num, uint32_t* baudrate);
+esp_err_t uart_get_baudrate_iram(uart_port_t uart_num, uint32_t* baudrate);
 
 /**
  * @brief Set UART line inverse mode
@@ -279,7 +279,7 @@ esp_err_t uart_get_baudrate4(uart_port_t uart_num, uint32_t* baudrate);
  *     - ESP_OK   Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t uart_set_line_inverse4(uart_port_t uart_num, uint32_t inverse_mask);
+esp_err_t uart_set_line_inverse_iram(uart_port_t uart_num, uint32_t inverse_mask);
 
 /**
  * @brief Set hardware flow control.
@@ -293,7 +293,7 @@ esp_err_t uart_set_line_inverse4(uart_port_t uart_num, uint32_t inverse_mask);
  *     - ESP_OK   Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t uart_set_hw_flow_ctrl4(uart_port_t uart_num, uart_hw_flowcontrol_t flow_ctrl, uint8_t rx_thresh);
+esp_err_t uart_set_hw_flow_ctrl_iram(uart_port_t uart_num, uart_hw_flowcontrol_t flow_ctrl, uint8_t rx_thresh);
 
 /**
  * @brief Set software flow control.
@@ -307,7 +307,7 @@ esp_err_t uart_set_hw_flow_ctrl4(uart_port_t uart_num, uart_hw_flowcontrol_t flo
  *     - ESP_OK   Success
  *     - ESP_FAIL Parameter error
  */
- esp_err_t uart_set_sw_flow_ctrl4(uart_port_t uart_num, bool enable, uint8_t rx_thresh_xon,  uint8_t rx_thresh_xoff);
+ esp_err_t uart_set_sw_flow_ctrl_iram(uart_port_t uart_num, bool enable, uint8_t rx_thresh_xon,  uint8_t rx_thresh_xoff);
 
 /**
  * @brief Get hardware flow control mode
@@ -319,7 +319,7 @@ esp_err_t uart_set_hw_flow_ctrl4(uart_port_t uart_num, uart_hw_flowcontrol_t flo
  *     - ESP_FAIL Parameter error
  *     - ESP_OK   Success, result will be put in (*flow_ctrl)
  */
-esp_err_t uart_get_hw_flow_ctrl4(uart_port_t uart_num, uart_hw_flowcontrol_t* flow_ctrl);
+esp_err_t uart_get_hw_flow_ctrl_iram(uart_port_t uart_num, uart_hw_flowcontrol_t* flow_ctrl);
 
 /**
  * @brief Clear UART interrupt status
@@ -332,7 +332,7 @@ esp_err_t uart_get_hw_flow_ctrl4(uart_port_t uart_num, uart_hw_flowcontrol_t* fl
  *     - ESP_OK   Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t uart_clear_intr_status4(uart_port_t uart_num, uint32_t clr_mask);
+esp_err_t uart_clear_intr_status_iram(uart_port_t uart_num, uint32_t clr_mask);
 
 /**
  * @brief Set UART interrupt enable
@@ -345,7 +345,7 @@ esp_err_t uart_clear_intr_status4(uart_port_t uart_num, uint32_t clr_mask);
  *     - ESP_OK   Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t uart_enable_intr_mask4(uart_port_t uart_num, uint32_t enable_mask);
+esp_err_t uart_enable_intr_mask_iram(uart_port_t uart_num, uint32_t enable_mask);
 
 /**
  * @brief Clear UART interrupt enable bits
@@ -358,7 +358,7 @@ esp_err_t uart_enable_intr_mask4(uart_port_t uart_num, uint32_t enable_mask);
  *     - ESP_OK   Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t uart_disable_intr_mask4(uart_port_t uart_num, uint32_t disable_mask);
+esp_err_t uart_disable_intr_mask_iram(uart_port_t uart_num, uint32_t disable_mask);
 
 /**
  * @brief Enable UART RX interrupt (RX_FULL & RX_TIMEOUT INTERRUPT)
@@ -369,7 +369,7 @@ esp_err_t uart_disable_intr_mask4(uart_port_t uart_num, uint32_t disable_mask);
  *     - ESP_OK   Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t uart_enable_rx_intr4(uart_port_t uart_num);
+esp_err_t uart_enable_rx_intr_iram(uart_port_t uart_num);
 
 /**
  * @brief Disable UART RX interrupt (RX_FULL & RX_TIMEOUT INTERRUPT)
@@ -380,7 +380,7 @@ esp_err_t uart_enable_rx_intr4(uart_port_t uart_num);
  *     - ESP_OK   Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t uart_disable_rx_intr4(uart_port_t uart_num);
+esp_err_t uart_disable_rx_intr_iram(uart_port_t uart_num);
 
 /**
  * @brief Disable UART TX interrupt (TX_FULL & TX_TIMEOUT INTERRUPT)
@@ -391,7 +391,7 @@ esp_err_t uart_disable_rx_intr4(uart_port_t uart_num);
  *     - ESP_OK   Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t uart_disable_tx_intr4(uart_port_t uart_num);
+esp_err_t uart_disable_tx_intr_iram(uart_port_t uart_num);
 
 /**
  * @brief Enable UART TX interrupt (TX_FULL & TX_TIMEOUT INTERRUPT)
@@ -404,7 +404,7 @@ esp_err_t uart_disable_tx_intr4(uart_port_t uart_num);
  *     - ESP_OK   Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t uart_enable_tx_intr4(uart_port_t uart_num, int enable, int thresh);
+esp_err_t uart_enable_tx_intr_iram(uart_port_t uart_num, int enable, int thresh);
 
 /**
  * @brief Register UART interrupt handler (ISR).
@@ -423,7 +423,7 @@ esp_err_t uart_enable_tx_intr4(uart_port_t uart_num, int enable, int thresh);
  *     - ESP_OK   Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t uart_isr_register4(uart_port_t uart_num, void (*fn)(void*), void * arg, int intr_alloc_flags,  uart_isr_handle_t *handle);
+esp_err_t uart_isr_register_iram(uart_port_t uart_num, void (*fn)(void*), void * arg, int intr_alloc_flags,  uart_isr_handle_t *handle);
 
 /**
  * @brief Free UART interrupt handler registered by uart_isr_register. Must be called on the same core as
@@ -435,7 +435,7 @@ esp_err_t uart_isr_register4(uart_port_t uart_num, void (*fn)(void*), void * arg
  *     - ESP_OK   Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t uart_isr_free4(uart_port_t uart_num);
+esp_err_t uart_isr_free_iram(uart_port_t uart_num);
 
 /**
  * @brief Set UART pin number
@@ -456,7 +456,7 @@ esp_err_t uart_isr_free4(uart_port_t uart_num);
  *     - ESP_OK   Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t uart_set_pin4(uart_port_t uart_num, int tx_io_num, int rx_io_num, int rts_io_num, int cts_io_num);
+esp_err_t uart_set_pin_iram(uart_port_t uart_num, int tx_io_num, int rx_io_num, int rts_io_num, int cts_io_num);
 
 /**
  * @brief Manually set the UART RTS pin level.
@@ -469,7 +469,7 @@ esp_err_t uart_set_pin4(uart_port_t uart_num, int tx_io_num, int rx_io_num, int 
  *     - ESP_OK   Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t uart_set_rts4(uart_port_t uart_num, int level);
+esp_err_t uart_set_rts_iram(uart_port_t uart_num, int level);
 
 /**
  * @brief Manually set the UART DTR pin level.
@@ -481,7 +481,7 @@ esp_err_t uart_set_rts4(uart_port_t uart_num, int level);
  *     - ESP_OK   Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t uart_set_dtr4(uart_port_t uart_num, int level);
+esp_err_t uart_set_dtr_iram(uart_port_t uart_num, int level);
 
 /**
  * @brief Set UART idle interval after tx FIFO is empty
@@ -494,7 +494,7 @@ esp_err_t uart_set_dtr4(uart_port_t uart_num, int level);
  *     - ESP_OK   Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t uart_set_tx_idle_num4(uart_port_t uart_num, uint16_t idle_num);
+esp_err_t uart_set_tx_idle_num_iram(uart_port_t uart_num, uint16_t idle_num);
 
 /**
  * @brief Set UART configuration parameters.
@@ -506,7 +506,7 @@ esp_err_t uart_set_tx_idle_num4(uart_port_t uart_num, uint16_t idle_num);
  *     - ESP_OK   Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t uart_param_config4(uart_port_t uart_num, const uart_config_t *uart_config);
+esp_err_t uart_param_config_iram(uart_port_t uart_num, const uart_config_t *uart_config);
 
 /**
  * @brief Configure UART interrupts.
@@ -518,7 +518,7 @@ esp_err_t uart_param_config4(uart_port_t uart_num, const uart_config_t *uart_con
  *     - ESP_OK   Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t uart_intr_config4(uart_port_t uart_num, const uart_intr_config_t *intr_conf);
+esp_err_t uart_intr_config_iram(uart_port_t uart_num, const uart_intr_config_t *intr_conf);
 
 /**
  * @brief Install UART driver.
@@ -542,7 +542,7 @@ esp_err_t uart_intr_config4(uart_port_t uart_num, const uart_intr_config_t *intr
  *     - ESP_OK   Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t uart_driver_install4(uart_port_t uart_num, int rx_buffer_size, int tx_buffer_size, int queue_size, QueueHandle_t* uart_queue, int intr_alloc_flags);
+esp_err_t uart_driver_install_iram(uart_port_t uart_num, int rx_buffer_size, int tx_buffer_size, int queue_size, QueueHandle_t* uart_queue, int intr_alloc_flags);
 
 /**
  * @brief Uninstall UART driver.
@@ -553,7 +553,7 @@ esp_err_t uart_driver_install4(uart_port_t uart_num, int rx_buffer_size, int tx_
  *     - ESP_OK   Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t uart_driver_delete4(uart_port_t uart_num);
+esp_err_t uart_driver_delete_iram(uart_port_t uart_num);
 
 /**
  * @brief Wait until UART TX FIFO is empty.
@@ -566,7 +566,7 @@ esp_err_t uart_driver_delete4(uart_port_t uart_num);
  *     - ESP_FAIL Parameter error
  *     - ESP_ERR_TIMEOUT  Timeout
  */
-esp_err_t uart_wait_tx_done4(uart_port_t uart_num, TickType_t ticks_to_wait);
+esp_err_t uart_wait_tx_done_iram(uart_port_t uart_num, TickType_t ticks_to_wait);
 
 /**
  * @brief Send data to the UART port from a given buffer and length.
@@ -582,7 +582,7 @@ esp_err_t uart_wait_tx_done4(uart_port_t uart_num, TickType_t ticks_to_wait);
  *     - (-1)  Parameter error
  *     - OTHERS (>=0) The number of bytes pushed to the TX FIFO
  */
-int uart_tx_chars4(uart_port_t uart_num, const char* buffer, uint32_t len);
+int uart_tx_chars_iram(uart_port_t uart_num, const char* buffer, uint32_t len);
 
 /**
  * @brief Send data to the UART port from a given buffer and length,
@@ -601,7 +601,7 @@ int uart_tx_chars4(uart_port_t uart_num, const char* buffer, uint32_t len);
  *     - (-1) Parameter error
  *     - OTHERS (>=0) The number of bytes pushed to the TX FIFO
  */
-int uart_write_bytes4(uart_port_t uart_num, const char* src, size_t size);
+int uart_write_bytes_iram(uart_port_t uart_num, const char* src, size_t size);
 
 /**
  * @brief Send data to the UART port from a given buffer and length,
@@ -623,7 +623,7 @@ int uart_write_bytes4(uart_port_t uart_num, const char* src, size_t size);
  *     - (-1) Parameter error
  *     - OTHERS (>=0) The number of bytes pushed to the TX FIFO
  */
-int uart_write_bytes_with_break4(uart_port_t uart_num, const char* src, size_t size, int brk_len);
+int uart_write_bytes_with_break_iram(uart_port_t uart_num, const char* src, size_t size, int brk_len);
 
 /**
  * @brief UART read bytes from UART buffer
@@ -637,7 +637,7 @@ int uart_write_bytes_with_break4(uart_port_t uart_num, const char* src, size_t s
  *     - (-1) Error
  *     - OTHERS (>=0) The number of bytes read from UART FIFO
  */
-int uart_read_bytes4(uart_port_t uart_num, uint8_t* buf, uint32_t length, TickType_t ticks_to_wait);
+int uart_read_bytes_iram(uart_port_t uart_num, uint8_t* buf, uint32_t length, TickType_t ticks_to_wait);
 
 /**
  * @brief Alias of uart_flush_input.
@@ -650,7 +650,7 @@ int uart_read_bytes4(uart_port_t uart_num, uint8_t* buf, uint32_t length, TickTy
  *     - ESP_OK Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t uart_flush4(uart_port_t uart_num);
+esp_err_t uart_flush_iram(uart_port_t uart_num);
 
 /**
  * @brief Clear input buffer, discard all the data is in the ring-buffer.
@@ -661,7 +661,7 @@ esp_err_t uart_flush4(uart_port_t uart_num);
  *     - ESP_OK Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t uart_flush_input4(uart_port_t uart_num);
+esp_err_t uart_flush_input_iram(uart_port_t uart_num);
 
 /**
  * @brief   UART get RX ring buffer cached data length
@@ -673,7 +673,7 @@ esp_err_t uart_flush_input4(uart_port_t uart_num);
  *     - ESP_OK Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t uart_get_buffered_data_len4(uart_port_t uart_num, size_t* size);
+esp_err_t uart_get_buffered_data_len_iram(uart_port_t uart_num, size_t* size);
 
 /**
  * @brief   UART disable pattern detect function.
@@ -686,7 +686,7 @@ esp_err_t uart_get_buffered_data_len4(uart_port_t uart_num, size_t* size);
  *     - ESP_OK Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t uart_disable_pattern_det_intr4(uart_port_t uart_num);
+esp_err_t uart_disable_pattern_det_intr_iram(uart_port_t uart_num);
 
 /**
  * @brief UART enable pattern detect function.
@@ -707,7 +707,7 @@ esp_err_t uart_disable_pattern_det_intr4(uart_port_t uart_num);
  *     - ESP_OK Success
  *     - ESP_FAIL Parameter error
  */
-esp_err_t uart_enable_pattern_det_intr4(uart_port_t uart_num, char pattern_chr, uint8_t chr_num, int chr_tout, int post_idle, int pre_idle);
+esp_err_t uart_enable_pattern_det_intr_iram(uart_port_t uart_num, char pattern_chr, uint8_t chr_num, int chr_tout, int post_idle, int pre_idle);
 
 /**
  * @brief Return the nearest detected pattern position in buffer.
@@ -726,7 +726,7 @@ esp_err_t uart_enable_pattern_det_intr4(uart_port_t uart_num, char pattern_chr, 
  *     - (-1) No pattern found for current index or parameter error
  *     - others the pattern position in rx buffer.
  */
-int uart_pattern_pop_pos4(uart_port_t uart_num);
+int uart_pattern_pop_pos_iram(uart_port_t uart_num);
 
 /**
  * @brief Return the nearest detected pattern position in buffer.
@@ -745,7 +745,7 @@ int uart_pattern_pop_pos4(uart_port_t uart_num);
  *     - (-1) No pattern found for current index or parameter error
  *     - others the pattern position in rx buffer.
  */
-int uart_pattern_get_pos4(uart_port_t uart_num);
+int uart_pattern_get_pos_iram(uart_port_t uart_num);
 
 /**
  * @brief Allocate a new memory with the given length to save record the detected pattern position in rx buffer.
@@ -759,7 +759,7 @@ int uart_pattern_get_pos4(uart_port_t uart_num);
  *     - ESP_FAIL Parameter error
  *     - ESP_OK Success
  */
-esp_err_t uart_pattern_queue_reset4(uart_port_t uart_num, int queue_length);
+esp_err_t uart_pattern_queue_reset_iram(uart_port_t uart_num, int queue_length);
 
 /**
  * @brief UART set communication mode
@@ -771,7 +771,7 @@ esp_err_t uart_pattern_queue_reset4(uart_port_t uart_num, int queue_length);
  *     - ESP_OK Success
  *     - ESP_ERR_INVALID_ARG Parameter error
  */
-esp_err_t uart_set_mode4(uart_port_t uart_num, uart_mode_t mode);
+esp_err_t uart_set_mode_iram(uart_port_t uart_num, uart_mode_t mode);
 
 /**
  * @brief UART set threshold timeout for TOUT feature
@@ -787,7 +787,7 @@ esp_err_t uart_set_mode4(uart_port_t uart_num, uart_mode_t mode);
  *     - ESP_ERR_INVALID_ARG Parameter error
  *     - ESP_ERR_INVALID_STATE Driver is not installed
  */
-esp_err_t uart_set_rx_timeout4(uart_port_t uart_num, const uint8_t tout_thresh);
+esp_err_t uart_set_rx_timeout_iram(uart_port_t uart_num, const uint8_t tout_thresh);
 
 /**
  * @brief Returns collision detection flag for RS485 mode
@@ -802,7 +802,7 @@ esp_err_t uart_set_rx_timeout4(uart_port_t uart_num, const uint8_t tout_thresh);
  *     - ESP_OK Success
  *     - ESP_ERR_INVALID_ARG Parameter error
  */
-esp_err_t uart_get_collision_flag4(uart_port_t uart_num, bool* collision_flag);
+esp_err_t uart_get_collision_flag_iram(uart_port_t uart_num, bool* collision_flag);
 
 /**
  * @brief Set the number of RX pin signal edges for light sleep wakeup
@@ -837,7 +837,7 @@ esp_err_t uart_get_collision_flag4(uart_port_t uart_num, bool* collision_flag);
  *      - ESP_ERR_INVALID_ARG if uart_num is incorrect or wakeup_threshold is
  *        outside of [3, 0x3ff] range.
  */
-esp_err_t uart_set_wakeup_threshold4(uart_port_t uart_num, int wakeup_threshold);
+esp_err_t uart_set_wakeup_threshold_iram(uart_port_t uart_num, int wakeup_threshold);
 
 /**
  * @brief Get the number of RX pin signal edges for light sleep wakeup.
@@ -852,7 +852,7 @@ esp_err_t uart_set_wakeup_threshold4(uart_port_t uart_num, int wakeup_threshold)
  *      - ESP_OK on success
  *      - ESP_ERR_INVALID_ARG if out_wakeup_threshold is NULL
  */
-esp_err_t uart_get_wakeup_threshold4(uart_port_t uart_num, int* out_wakeup_threshold);
+esp_err_t uart_get_wakeup_threshold_iram(uart_port_t uart_num, int* out_wakeup_threshold);
 
 #ifdef __cplusplus
 }
