@@ -5,12 +5,15 @@
 #include "outputs/apcminiOutput.h"
 #include "outputs/neopixelOutput.h"
 #include "outputs/rotaryOutput.h"
+#include "outputs/nullOutput.h"
 #include "inputs/udpInput.h"
 #include "inputs/apcminiInput.h"
+#include "inputs/layeredApcminiInput.h"
 #include "inputs/dmxInput.h"
 #include "inputs/patternInput.h"
 #include "patterns/rgbPatterns.h"
 #include "patterns/monochromePatterns.h"
+#include "patterns/monochromeLayeredPatterns.h"
 #include "luts/colourCorrectionLut.h"
 #include "luts/incandescentLut.h"
 #include "outputs/udpOutput.h"
@@ -33,20 +36,22 @@ Pipe pipes[] = {
 
     Pipe(
         //create an apcmini input that creates monochrome patterns
-        new ApcminiInput<Monochrome>(
+        new LayeredApcminiInput<Monochrome>(
             30,
             0,
-            new Pattern<Monochrome> *[8] {
-                new SinPattern(),
-                    new SawPattern(),
-                    new RandomPattern(),
-                    new RandomPattern2(),
-                    new MeteorPattern(),
-                    new RandomFadePattern(),
-                    new SlowStrobePattern(),
-                    new FastStrobePattern()
+            new LayeredPattern<Monochrome> *[8] {
+                new LayeredSinPattern(),
+                    new LayeredSinPattern(1),
+                    new LayeredSinPattern(-1),
+                    new LayeredSinPattern(),
+                    new LayeredSinPattern(),
+                    new LayeredSinPattern(),
+                    new LayeredSlowStrobePattern(),
+                    new LayeredBlinderPattern()
             }),
-        new DMXOutput(1)),
+        new DMXOutput(1)
+        //new NullOutput()
+        ),
 
     Pipe(
         //create an apcmini input that creates monochrome patterns

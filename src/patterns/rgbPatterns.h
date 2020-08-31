@@ -90,7 +90,7 @@ class FadePattern : public Pattern<RGB>
     Interval<ConstantInterval> sometimes = Interval<ConstantInterval>(1000);
 
     //create a fader that fades back in 250ms
-    Fade fader = Fade(Linear, 250, Down);
+    Fade<Down> fader = Fade<Down>(250);
     RGBA red = RGBA(255, 0, 0, 255);
 
     inline void Calculate(RGB *pixels, int width, bool firstFrame) override
@@ -109,7 +109,7 @@ class PoissonPattern : public Pattern<RGB>
 {
     //create a random interval based on the poisson distribution with an average of 1000ms between each event
     Interval<PoissonInterval> sometimes = Interval<PoissonInterval>(1000);
-    Fade fader = Fade(Linear, 250, Down);
+    Fade<Down> fader = Fade<Down>(250);
     RGBA red = RGBA(255, 0, 0, 255);
 
     inline void Calculate(RGB *pixels, int width, bool firstFrame) override
@@ -129,7 +129,7 @@ class TimelinePattern : public Pattern<RGB>
     int ShaveAndAHaircut2Bits[8] = {0, 241, 319, 390, 461, 696, 1134, 1357};
     Timeline timeline = Timeline(3000);
 
-    Fade fader = Fade(Linear, 100, Down);
+    Fade<Down> fader = Fade<Down>(100);
     RGBA red = RGBA(255, 0, 0, 255);
 
     inline void Calculate(RGB *pixels, int width, bool firstFrame) override
@@ -150,7 +150,7 @@ class WatcherPattern : public Pattern<RGB>
 {
     Watcher<bool> watcher = Watcher<bool>(Rotary::isButtonPressed, Rising);
 
-    Fade fader = Fade(Linear, 300, Down);
+    Fade<Down> fader = Fade<Down>(300);
     RGBA red = RGBA(255, 0, 0, 255);
 
     inline void Calculate(RGB *pixels, int width, bool firstFrame) override
@@ -169,7 +169,7 @@ class WatcherPattern2 : public Pattern<RGB>
     //use a lambda function to pass the note status of a specific note to the watcher
     Watcher<uint8_t> watcher = Watcher<uint8_t>([] () { return Midi::noteStatus(1); }, Rising);
 
-    Fade fader = Fade(Linear, 300, Down);
+    Fade<Down> fader = Fade<Down>(300);
     RGBA red = RGBA(255, 0, 0, 255);
 
     void Initialize(){
@@ -203,7 +203,7 @@ class TempoPattern : public Pattern<RGB>
 {
     TempoWatcher watcher = TempoWatcher();
     
-    Fade fader = Fade(Linear, 250, Down);
+    Fade<Down> fader = Fade<Down>(250);
 
     inline void Calculate(RGB *pixels, int width, bool firstFrame) override
     {
@@ -219,7 +219,7 @@ class TempoPattern : public Pattern<RGB>
 class BPMIndicatorPattern : public Pattern<RGB>
 {
     TempoWatcher watcher = TempoWatcher();
-    Fade fader = Fade(Linear, 200, Down);
+    Fade<Down> fader = Fade<Down>(200);
 
     inline void Calculate(RGB *pixels, int width, bool firstFrame) override
     {
@@ -236,19 +236,12 @@ class BPMIndicatorPattern : public Pattern<RGB>
 
 class BPMFillPattern : public Pattern<RGB>
 {
-    //TempoWatcher watcher = TempoWatcher();
-    //Fade fader = Fade(Linear, 200, Down);
-
     inline void Calculate(RGB *pixels, int width, bool firstFrame) override
     {
-        //if (watcher.Triggered())
-        //    fader.reset();
-
         float fraction = Tempo::GetProgress(1);
 
         RGB color = (Tempo::GetBeatNumber() % 4)==0 ? RGB(15,15,15) : RGB(25,0,0);
         RGB off = RGB(0,0,0);
-        //color.dim(255 * fader.getValue());
 
         for (int index = 0; index < width; index++)
             pixels[index] = fraction * width < index ? color : off;

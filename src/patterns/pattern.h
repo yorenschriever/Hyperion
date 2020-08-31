@@ -10,6 +10,7 @@
 #include "helpers/timeline.h"
 #include "helpers/watcher.h"
 #include "helpers/permute.h"
+#include "helpers/transition.h"
 
 template<class T_COLOUR>
 class Pattern {
@@ -25,4 +26,14 @@ public:
     //fistFrame is true if on the first render after the pattern was selected
     virtual void Calculate(T_COLOUR* frameBuffer, int width, bool firstFrame);
 
+};
+
+//layered patterns work slightly different: they are executed regardless if
+//they are active. The framebuffer that they receive is already filled
+//with data from other patterns, and they have to mix their own layer into it.
+//This method allows fade-outs and blending.
+template<class T_COLOUR>
+class LayeredPattern : public Pattern<T_COLOUR> {
+public:
+    virtual void Calculate(T_COLOUR* frameBuffer, int width, bool active);
 };

@@ -61,6 +61,24 @@ public:
     operator RGB12();
     operator Monochrome12();
 
+    Monochrome operator+ (Monochrome other){
+        //layering is implemented as HTP
+        return Monochrome(std::max(L,other.L));
+    }
+
+    Monochrome& operator+= (const Monochrome& other){
+        //layering is implemented as HTP
+        L = std::max(L,other.L);
+        return *this;
+    }
+
+    Monochrome operator* (float scale){
+        return Monochrome(constrain(L*scale,0,0xFF));
+    }
+    Monochrome operator/ (float scale){
+        return Monochrome(constrain(L/scale,0,0xFF));
+    }
+
     uint8_t L;
 };
 

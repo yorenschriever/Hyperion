@@ -2,6 +2,10 @@
 
 #include <Arduino.h>
 
+//these are easier to type imo
+#define FadeDown Fade<Down>
+#define FadeUp Fade<Up>
+
 enum FadeEase
 {
     Linear,
@@ -21,14 +25,15 @@ enum FadeWaitPosition
     WaitAtEnd=1
 };
 
+template<FadeDirection DIRECTION = Down,FadeEase EASE =Linear>
 class Fade
 {
 
 private:
     unsigned long startingpoint;
 
-    FadeEase ease;
-    FadeDirection direction;
+    //FadeEase ease;
+    //FadeDirection direction;
     FadeWaitPosition waitPosition;
 
 public:
@@ -39,11 +44,15 @@ public:
      * direction: up or down
      * waitPosition: when using startDelay(), should the fade wait at start (phase=0) or at the end (phase=1)
      */ 
-    Fade(FadeEase ease, unsigned int duration, FadeDirection direction = Down, FadeWaitPosition waitPosition = WaitAtStart)
+    Fade(
+        //FadeEase ease, 
+        unsigned int duration, 
+        //FadeDirection direction = Down, 
+        FadeWaitPosition waitPosition = WaitAtStart)
     {
-        this->ease = ease;
+        //this->ease = ease;
         this->duration = duration;
-        this->direction = direction;
+        //this->direction = direction;
         this->waitPosition = waitPosition;
         reset();
     }
@@ -70,10 +79,10 @@ public:
     {
         float phase = getPhase(startDelay);
 
-        if (direction == Down)
+        if (DIRECTION == Down)
             phase = 1 - phase;
 
-        switch (ease)
+        switch (EASE)
         {
         case (Linear):
             return phase;
