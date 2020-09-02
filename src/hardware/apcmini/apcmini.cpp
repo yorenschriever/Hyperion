@@ -1,9 +1,18 @@
 #include "apcmini.h"
 #include "../midi/midi.h"
+#include "debug.h"
+#include "patterns/helpers/tempo/tempo.h"
 
 bool APCMini::allFlash = false;
 bool APCMini::allStatus[width * height];
+bool APCMini::allFlashStatus[width * height];
 uint8_t APCMini::faders[numfaders];
+bool APCMini::patternMode = false;
+uint8_t APCMini::patterns[width * height];
+int8_t APCMini::currentlyEditingPattern = -1;
+
+#define FLASHALLNOTE 82
+#define PATTERNMODENOTE 83
 
 void APCMini::Initialize()
 {
@@ -36,18 +45,79 @@ void APCMini::handleNoteOn(uint8_t channel, uint8_t note, uint8_t velocity)
 void APCMini::handleConnect()
 {
     //send all note statusses on connect, so the lights correspond to the active patterns after disconnecting/reconnecting
-    xTaskCreate(sendStatus, "APCMini status", 2048, NULL, 1, NULL);
+    xTaskCreate(displayStatusTask, "APCMini status", 2048, NULL, 1, NULL);
 }
 
-void APCMini::sendStatus(void *pvParameters)
+void APCMini::displayStatusTask(void *pvParameters)
+{
+    displayStatus();
+    displaySideStatus();
+    displayBottomStatus();
+    vTaskDelete(NULL);
+}
+
+void APCMini::displayStatus()
 {
     for (byte i = 0; i < height * width; i++)
     {
-        setNote(i, allStatus[i], true);
+        displayButtonStatus(i);
         if (i % 8 == 0)
-            vTaskDelay(10); //give things some tme to breathe
+            vTaskDelay(10); //give things some time to breathe
     }
-    vTaskDelete(NULL);
+}
+
+void APCMini::displayButtonStatus(int8_t button)
+{
+    if (button < 0 || button > width * height)
+        return;
+
+    uint8_t ledvalue = 0;
+    if (allFlashStatus[button])
+        ledvalue = 1;
+    else if (!allFlash && patternMode && currentlyEditingPattern == button) //we are editing this pattern
+        ledvalue = 6;                                                       //blinking orange
+    else if (allStatus[button])                                             //note is on
+        ledvalue = 1;                                                       //green
+    else if (patterns[button] > 0)                                          //this note has a pattern
+        ledvalue = 5;                                                       //orange
+
+    Midi::sendNoteOn(midichannel, button, ledvalue);
+    Midi::waitTxDone();
+}
+
+void APCMini::displayBottomStatus()
+{
+    if (patternMode && currentlyEditingPattern != -1)
+    {
+        for (byte beat = 0; beat < 8; beat++)
+        {
+            Midi::sendNoteOn(midichannel, beat + 64, (patterns[currentlyEditingPattern] & (1 << beat)) ? 1 : 0);
+            Midi::waitTxDone();
+        }
+        return;
+    }
+
+    for (byte beat = 0; beat < 8; beat++)
+    {
+        Midi::sendNoteOn(midichannel, beat + 64, 0);
+        Midi::waitTxDone();
+    }
+}
+
+void APCMini::displaySideStatus()
+{
+    Midi::sendNoteOn(midichannel, 82, allFlash);
+    Midi::waitTxDone();
+
+    Midi::sendNoteOn(midichannel, 83, patternMode);
+    Midi::waitTxDone();
+    for (byte i = 84; i <= 89; i++)
+    {
+        Midi::sendNoteOn(midichannel, i, 0);
+        Midi::waitTxDone();
+        if (i % 8 == 0)
+            vTaskDelay(10); //give things some time to breathe
+    }
 }
 
 void APCMini::handleControllerChange(uint8_t channel, uint8_t controller, uint8_t value)
@@ -63,15 +133,39 @@ void APCMini::handleControllerChange(uint8_t channel, uint8_t controller, uint8_
 
 void APCMini::handleKeyPress(uint8_t note, bool ison)
 {
+    if (note == PATTERNMODENOTE)
+    {
+        if (ison)
+            togglePatternMode();
+        return;
+    }
 
-    if (note == 82)
+    if (note == FLASHALLNOTE)
     {
         if (ison)
             toggleFlashAll();
         return;
     }
 
-    int flashBorder = allFlash ? (height * width) : (flashrows * width);
+    if (allFlash)
+    {
+        allFlashStatus[note] = ison;
+        displayButtonStatus(note);
+        return;
+    }
+
+    if (patternMode)
+    {
+        if (!ison)
+            return;
+        if (note < width * height)
+            switchPattern(note);
+        else if (note >= 64 && note <= 71)
+            togglePatternBeat(note - 64);
+        return;
+    }
+
+    int flashBorder = (flashrows * width);
     if (note < flashBorder)
     {
         setNote(note, ison, false);
@@ -97,9 +191,8 @@ void APCMini::handleKeyPress(uint8_t note, bool ison)
 void APCMini::toggleFlashAll()
 {
     allFlash = !allFlash;
-    Midi::sendNoteOn(midichannel, 82, allFlash * 100);
-    Midi::waitTxDone();
-    setAllOff();
+    displaySideStatus();
+    displayStatus();
 }
 
 void APCMini::setAllOff()
@@ -115,9 +208,7 @@ void APCMini::setNote(uint8_t note, bool ison, bool force)
 
     allStatus[note] = ison;
 
-    //set led on APC
-    Midi::sendNoteOn(midichannel, note, ison * 100);
-    Midi::waitTxDone();
+    displayButtonStatus(note);
 }
 
 void APCMini::releaseGroup(uint8_t note, bool recursiveCall)
@@ -131,7 +222,22 @@ bool APCMini::getStatus(uint8_t col, uint8_t row)
 {
     if (col >= width || row >= height)
         return false;
-    return allStatus[(height - row - 1) * width + col];
+    uint8_t note = (height - row - 1) * width + col;
+
+    if (allFlashStatus[note]) //currently being flashed
+        return true;
+
+    if (allStatus[note])
+        return true; //normally on
+
+    if (patterns[note] > 0) //currently triggered by a pattern
+    {
+        uint8_t beat = (Tempo::GetBeatNumber() / 4) % 8;
+        if (patterns[note] & (1 << beat))
+            return true;
+    }
+
+    return false;
 }
 
 uint8_t APCMini::getFader(uint8_t col)
@@ -139,4 +245,35 @@ uint8_t APCMini::getFader(uint8_t col)
     if (col >= numfaders)
         return 0;
     return faders[col];
+}
+
+void APCMini::togglePatternMode()
+{
+    patternMode = !patternMode;
+    displaySideStatus();
+    displayBottomStatus();
+    displayStatus();
+}
+
+void APCMini::switchPattern(uint8_t pat)
+{
+    if (pat >= width * height)
+        return;
+
+    uint8_t oldpat = currentlyEditingPattern;
+    currentlyEditingPattern = pat;
+
+    displayButtonStatus(oldpat);
+    displayButtonStatus(currentlyEditingPattern);
+    displayBottomStatus();
+}
+
+void APCMini::togglePatternBeat(uint8_t beat)
+{
+    if (beat >= 8)
+        return;
+
+    patterns[currentlyEditingPattern] ^= (1 << beat);
+
+    displayBottomStatus();
 }

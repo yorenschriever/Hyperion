@@ -29,6 +29,25 @@ public:
 
 };
 
+class FastStrobePattern : public LayeredPattern<Monochrome>
+{
+    Transition transition = Transition(
+        1000,none,0,
+        0,none,0
+    );
+
+    inline void Calculate(Monochrome *pixels, int width, bool active) override
+    {
+        if (!transition.Calculate(active))
+            return; //the fade out is done. we can skip calculating pattern data
+
+        Monochrome value = Monochrome(millis() % 50 < 25 ? 255 : 0) * transition.getValue();
+
+        for (int index = 0; index < width; index++)
+            pixels[index] = value;
+    }
+};
+
 class SlowStrobePattern : public LayeredPattern<Monochrome>
 {
     inline void Calculate(Monochrome *pixels, int width, bool active) override
@@ -40,7 +59,6 @@ class SlowStrobePattern : public LayeredPattern<Monochrome>
             pixels[index] = millis() % 100 < 25 ? 255 : 0;
     }
 };
-
 
 
 class BlinderPattern : public LayeredPattern<Monochrome>
@@ -201,6 +219,9 @@ public:
     }
     inline void Calculate(Monochrome *pixels, int width, bool active) override
     {
+        if (!active)
+            return;
+            
         if (!transition.Calculate(active))
             return; //the fade out is done. we can skip calculating pattern data
 

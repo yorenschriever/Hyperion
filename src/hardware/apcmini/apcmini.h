@@ -25,8 +25,7 @@ public:
 
     //get fader position (0-127)
     static uint8_t getFader(uint8_t col);
-    static void sendStatus(void *pvParameters);
-
+    
 private:
     APCMini();
     static void handleNoteOn(uint8_t channel, uint8_t note, uint8_t velocity);
@@ -35,6 +34,7 @@ private:
     static void handleConnect();
 
     static bool allFlash;
+    static bool allFlashStatus[width * height];
     static bool allStatus[width * height];
     static uint8_t faders[numfaders];
 
@@ -43,4 +43,17 @@ private:
     static void setAllOff();
     static void setNote(uint8_t note, bool ison, bool force);
     static void releaseGroup(uint8_t note, bool recursiveCall);
+
+    static void displayStatusTask(void *pvParameters);
+    static void displayStatus();
+    static void displayButtonStatus(int8_t button);
+    static void displayBottomStatus();
+    static void displaySideStatus();
+
+    static bool patternMode;
+    static uint8_t patterns[width*height];
+    static int8_t currentlyEditingPattern;
+    static void togglePatternMode();
+    static void switchPattern(uint8_t pat);
+    static void togglePatternBeat(uint8_t beat);
 };

@@ -16,6 +16,7 @@
 #include "patterns/monochromeLayeredPatterns.h"
 #include "luts/colourCorrectionLut.h"
 #include "luts/incandescentLut.h"
+#include "luts/gammaLut.h"
 #include "outputs/udpOutput.h"
 
 const char *HostName = "HyperionMaster";
@@ -25,6 +26,8 @@ const char *HostName = "HyperionMaster";
 //note the different order, fastled uses RGB, luts are in ouput order (GRB)
 LUT *NeopixelLut = new ColourCorrectionLUT(1.5, 255, 176, 255, 240);
 LUT *IncandescentLut = new IncandescentLUT(2.5, 4096, 400);
+LUT *IncandescentLut8 = new IncandescentLUT(2.5, 255, 24);
+LUT *GammaLut12 = new GammaLUT(2.5, 4096);
 
 //TODO proper config struct
 #define TAPMIDINOTE 98
@@ -43,8 +46,8 @@ Pipe pipes[] = {
                 new Layered::SinPattern(),
                 new Layered::SinPattern(1),
                 new Layered::SinPattern(-1),
-                new Layered::SinPattern(),
-                new Layered::SinPattern(),
+                new Layered::BeatShakePattern(),
+                new Layered::GlitchPattern(),
                 new Layered::SinPattern(),
                 new Layered::SlowStrobePattern(),
                 new Layered::BlinderPattern()
@@ -72,7 +75,7 @@ Pipe pipes[] = {
 
     Pipe(
         new LayeredApcminiInput<Monochrome>(
-            12,
+            10,
             2,
             new LayeredPattern<Monochrome> *[8] {
                 new Layered::OnPattern(100),
@@ -85,9 +88,12 @@ Pipe pipes[] = {
                 new Layered::BeatAllFadePattern(),
                 new Layered::GlitchPattern()
             }),
-        new PWMOutput(1500),
-        Pipe::transfer<Monochrome, Monochrome12>,
-        IncandescentLut),
+        //new PWMOutput(1500),
+        //Pipe::transfer<Monochrome, Monochrome12>,
+        //IncandescentLut
+        new DMXOutput(128),
+        Pipe::transfer<Monochrome, Monochrome>,
+        IncandescentLut8),
 
     Pipe(
         new ApcminiInput<RGB>(
@@ -109,41 +115,43 @@ Pipe pipes[] = {
         Pipe::transfer<RGB, GRB>,
         NeopixelLut),
 
-    // Pipe(
-    //     new ApcminiInput<Monochrome>(
-    //         12, //width of the pattern, in pixels
-    //         6,  //button column on the apc to listen to (0-7)
-    //         //the patterns to attach to the buttons
-    //         new Pattern<Monochrome> *[8] {
-    //             new OnPattern(),
-    //             new SinPattern(),
-    //             new BeatSingleFadePattern(),
-    //             new BeatMultiFadePattern(),
-    //             new BeatShakePattern(),
-    //             new OnPattern(),
-    //             new GlitchPattern(),
-    //             new SlowStrobePattern()
-    //         }),
-    //     new UDPOutput("lasers.local",9619,100),
-    //     Pipe::transfer<Monochrome,Monochrome12>),
+    Pipe(
+        new LayeredApcminiInput<Monochrome>(
+            10, //width of the pattern, in pixels
+            6,  //button column on the apc to listen to (0-7)
+            //the patterns to attach to the buttons
+            new LayeredPattern<Monochrome> *[8] {
+                new Layered::OnPattern(),
+                new Layered::SinPattern(),
+                new Layered::BeatSingleFadePattern(),
+                new Layered::BeatMultiFadePattern(),
+                new Layered::BeatShakePattern(),
+                new Layered::OnPattern(),
+                new Layered::GlitchPattern(),
+                new Layered::SlowStrobePattern()
+            }),
+        new UDPOutput("lasers.local",9619,100),
+        Pipe::transfer<Monochrome,Monochrome12>),
 
-    // Pipe(
-    //     new ApcminiInput<Monochrome>(
-    //         12, //width of the pattern, in pixels
-    //         7,  //button column on the apc to listen to (0-7)
-    //         //the patterns to attach to the buttons
-    //         new Pattern<Monochrome> *[8] {
-    //             new BeatAllFadePattern(),
-    //             new BeatSingleFadePattern(),
-    //             new GlitchPattern(),
-    //             new BeatShakePattern(),
-    //             new SlowStrobePattern(),
-    //             new OnPattern(),
-    //             new GlitchPattern(),
-    //             new FastStrobePattern()
-    //         }),
-    //     new UDPOutput("strobes.local",9619,100),
-    //     Pipe::transfer<Monochrome,Monochrome12>),
+    Pipe(
+        new LayeredApcminiInput<Monochrome>(
+            10, //width of the pattern, in pixels
+            7,  //button column on the apc to listen to (0-7)
+            //the patterns to attach to the buttons
+            new LayeredPattern<Monochrome> *[8] {
+                new Layered::BeatAllFadePattern(),
+                new Layered::BeatSingleFadePattern(),
+                new Layered::GlitchPattern(),
+                new Layered::BeatShakePattern(),
+                new Layered::SlowStrobePattern(),
+                new Layered::OnPattern(),
+                new Layered::GlitchPattern(),
+                new Layered::FastStrobePattern()
+            }),
+        new UDPOutput("strobes.local",9619,100),
+        Pipe::transfer<Monochrome,Monochrome12>
+        //,GammaLut12
+        ),
 
     // Pipe(
     //     new PatternInput<RGB>(16, 
