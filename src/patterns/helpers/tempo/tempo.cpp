@@ -19,7 +19,7 @@ int Tempo::GetBeatNumber()
 {
     AbstractTempo *source = getActive();
     if (source)
-        return source->GetBeatNumber();
+        return source->GetBeatNumber()+phraseOffset;
     return -1;
 };
 
@@ -52,7 +52,7 @@ float Tempo::GetProgress(int intervalsize)
     if (source->TimeBetweenBeats() == 0)
         return 0;
 
-    float coarse = float(source->GetBeatNumber() % intervalsize);
+    float coarse = float((source->GetBeatNumber()+phraseOffset) % intervalsize);
     float fine = float(millis() - source->TimeOfLastBeat()) / float(source->TimeBetweenBeats());
     float result = (coarse + fine) / intervalsize;
 
@@ -91,8 +91,18 @@ void Tempo::registerTask(TempoTaskType task)
         xTaskCreatePinnedToCore(TempoTask, "TempoTask", 5000, NULL, 1, NULL, 0);
 }
 
+
+void Tempo::AlignPhrase()
+{
+    //if this function is called this means that the current bar was the start of a phrase
+    //realign the beat counter
+    int beatnr = GetBeatNumber();
+    int barnr = (beatnr / 4) % 8;
+    //i dont want negative beatnumbers. always correct forwards, add 4*8.
+    phraseOffset = (phraseOffset -4*barnr + 4*8)%32;
+}
+
 std::set<AbstractTempo *> Tempo::sources;
 std::set<TempoTaskType> Tempo::tasks;
 TaskHandle_t Tempo::xHandle = NULL;
-
-
+int Tempo::phraseOffset=0;

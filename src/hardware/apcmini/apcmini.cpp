@@ -147,7 +147,7 @@ void APCMini::handleKeyPress(uint8_t note, bool ison)
         return;
     }
 
-    if (allFlash)
+    if (allFlash && note < width * height)
     {
         allFlashStatus[note] = ison;
         displayButtonStatus(note);

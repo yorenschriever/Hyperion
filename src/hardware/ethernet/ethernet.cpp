@@ -144,7 +144,7 @@ IPAddress* Ethernet::ResolveNoWait(const char* hostname)
     {
         //start lookup
         hostnameCache[hostname] = hostnameCacheItem {IPAddress((uint32_t)0),millis(),false};
-        Debug.println("hostname item created");
+        //Debug.println("hostname item created");
         xTaskCreate(ResolveTask,"ResolveTask",3000,(void*)hostname,0,NULL);
         return NULL;
     }
@@ -155,7 +155,7 @@ IPAddress* Ethernet::ResolveNoWait(const char* hostname)
             //Debug.println("less than 5 sec. waiting");
             return NULL;
         }
-        Debug.println("item was queried before, but not found, retry");
+        //Debug.println("item was queried before, but not found, retry");
         hostnameCache[hostname].updated=millis();
         xTaskCreate(ResolveTask,"ResolveTask",3000,(void*)hostname,0,NULL);
         return NULL;
@@ -163,7 +163,7 @@ IPAddress* Ethernet::ResolveNoWait(const char* hostname)
 
     if (millis() - it->second.updated  > 6000){
         //entry is older than 1 minute, refresh
-        Debug.println("refreshing hostname item");
+        //Debug.println("refreshing hostname item");
         hostnameCache[hostname].updated=millis();
         xTaskCreate(ResolveTask,"ResolveTask",3000,(void*)hostname,0,NULL);
     }
@@ -212,7 +212,7 @@ IPAddress* Ethernet::Resolve(const char* hostname)
     std::string localHostname = std::string(hostname);
     localHostname.resize(localHostname.size()  -6);
 
-    Debug.printf("querying: %s\n",localHostname.c_str());
+    //Debug.printf("querying: %s\n",localHostname.c_str());
 
     ip4_addr addr;
     addr.addr = 0;
@@ -228,7 +228,7 @@ IPAddress* Ethernet::Resolve(const char* hostname)
 
     Debug.printf(IPSTR, IP2STR(&addr));
 
-    Debug.printf("ip found: %s\n",IPAddress(addr.addr).toString().c_str());
+    //Debug.printf("ip found: %s\n",IPAddress(addr.addr).toString().c_str());
 
     hostnameCache[hostname].ip=IPAddress(addr.addr);
     hostnameCache[hostname].updated=millis();

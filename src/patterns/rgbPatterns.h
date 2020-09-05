@@ -238,7 +238,7 @@ class BPMFillPattern : public Pattern<RGB>
 {
     inline void Calculate(RGB *pixels, int width, bool firstFrame) override
     {
-        float fraction = Tempo::GetProgress(1);
+        float fraction = Tempo::GetProgress(32);
 
         RGB color = (Tempo::GetBeatNumber() % 4)==0 ? RGB(15,15,15) : RGB(25,0,0);
         RGB off = RGB(0,0,0);

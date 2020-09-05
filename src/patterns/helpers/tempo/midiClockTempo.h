@@ -28,23 +28,30 @@ public:
             MidiClockTempo *instance = MidiClockTempo::getInstance();
             if (msg == MIDICLOCKCONTINUE)
             {
+                instance->stopped=false;
                 instance->validSignal=true;
                 instance->tickCount=0;
-                //instance->timeOfLastBeat = millis();
-                instance->beat(0);
+                //instance->beat(0);
+                Debug.println("continue. aligned beat");
             }
             else if (msg == MIDICLOCKSTART)
             {
+                instance->stopped=false;
                 instance->validSignal=true;
-                //instance->beatNumber = -1;
                 instance->tickCount=0;
                 instance->beat(0);
-                //instance->timeOfLastBeat = millis();
+                Debug.println("start. reset beat to 0");
             }
             else if (msg == MIDICLOCKSTOP)
             {
-                instance->beat(-1); //reset the beatnumber, so we dont get an extra flash when the signal valid timeout resets the beat to 0
-                instance->validSignal=false;
+                if (instance->stopped){
+                    instance->beat(-1); //reset the beatnumber, so we dont get an extra flash when the signal valid timeout resets the beat to 0
+                    instance->validSignal=false;
+                    Debug.println("stopped 2x. stopped signal");
+                }
+                instance->tickCount=0;
+                instance->stopped=true;
+                Debug.println("stop. aligned beat.");
             }
             else if (msg == MIDICLOCKTICK)
             {
@@ -67,6 +74,7 @@ public:
 
 private:
     int tickCount = 0;
+    bool stopped=true;
 
     //private constructors, singleton
     MidiClockTempo() : AbstractTempo() {}

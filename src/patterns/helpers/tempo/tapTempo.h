@@ -2,8 +2,6 @@
 #include "abstractTempo.h"
 #include "hardware/rotary/rotary.h"
 #include "debug.h"
-#include "hardware/midi/midi.h"
-#include "configurations/configuration.h"
 
 //#define DEFAULTPERIOD 480000 //default at 125BPM
 #define DEFAULTPERIOD 0 //default off
@@ -21,32 +19,8 @@ public:
     TempoTaskType Initialize() override
     {
         sourceName="Tap";
-        Rotary::onPress([]() { TapTempo::getInstance()->Tap(); });
-        Rotary::onLongPress([]() { TapTempo::getInstance()->Stop(); });
-#ifdef TAPMIDINOTE //TODO proper config struct
-        Midi::Initialize();
-        Midi::onNoteOn([](uint8_t ch, uint8_t note, uint8_t velocity) {
-            if (note == TAPMIDINOTE)
-                TapTempo::getInstance()->Tap();
-            if (note == TAPSTOPMIDINOTE)
-                TapTempo::getInstance()->Stop();
-        });
-#endif
         return TapTempoTask;
     }
-
-private:
-    const int tapTimeout = 1000000; //if no tap is detected for tapTimeout us, the next tap will be interpreted as a new tap session
-    int period = DEFAULTPERIOD;     //default at 125BPM
-    unsigned long startingpoint;
-    unsigned long lastTap;
-    unsigned long firstTap;
-    int tapCount;
-
-    //private constructors, singleton
-    TapTempo() : AbstractTempo() {}
-    TapTempo(TapTempo const &);         // Don't Implement
-    void operator=(TapTempo const &); // Don't implement
 
     void Stop()
     {
@@ -54,6 +28,23 @@ private:
         beatNumber=-1;
         period=0;
     }
+
+    //this aligns the tempo to your tap without resetting the beat count or interval
+    void Align()
+    {
+        long offset = (micros()-startingpoint) % period;
+        if (offset > period/2)
+            offset -= period; //syning to the other side is closer
+        startingpoint += offset;
+    }
+
+    // 
+    // void BarAlign()
+    // {
+    //     unsigned long timepassed = micros()-startingpoint;
+    //     unsigned long timeinbar = timepassed % (period*4);
+    //     startingpoint = micros()-timeinbar; //micros() - timesincebarstart;
+    // }
 
     void Tap()
     {
@@ -82,6 +73,19 @@ private:
 
         timeBetweenBeats = period/1000;
     }
+
+private:
+    const int tapTimeout = 1000000; //if no tap is detected for tapTimeout us, the next tap will be interpreted as a new tap session
+    int period = DEFAULTPERIOD;     //default at 125BPM
+    unsigned long startingpoint;
+    unsigned long lastTap;
+    unsigned long firstTap;
+    int tapCount;
+
+    //private constructors, singleton
+    TapTempo() : AbstractTempo() {}
+    TapTempo(TapTempo const &);         // Don't Implement
+    void operator=(TapTempo const &); // Don't implement
 
     bool isTapping()
     {

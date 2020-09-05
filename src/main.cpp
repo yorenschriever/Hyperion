@@ -103,6 +103,18 @@ void setup()
     Tempo::AddSource(TapTempo::getInstance()); 
     Tempo::AddSource(UdpTempo::getInstance()); 
 
+    #ifdef TAPMIDINOTE
+    Midi::Initialize();
+    Midi::onNoteOn([](uint8_t ch, uint8_t note, uint8_t velocity) {
+        if (note == TAPMIDINOTE) TapTempo::getInstance()->Tap();
+        if (note == TAPSTOPMIDINOTE) TapTempo::getInstance()->Stop();
+        if (note == TAPALIGNMIDINOTE) TapTempo::getInstance()->Align();
+        if (note == TAPBARALIGNMINIDNOTE) Tempo::AlignPhrase();
+    });
+    #endif
+    Rotary::onPress([]() { TapTempo::getInstance()->Tap(); });
+    Rotary::onLongPress([]() { TapTempo::getInstance()->Stop(); });
+
     Debug.println("Starting inputs");
     for (int j = 0; j < sizeof(pipes) / sizeof(Pipe); j++)
         pipes[j].in->begin();

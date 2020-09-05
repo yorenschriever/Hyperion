@@ -26,6 +26,8 @@ public:
 
     static void BroadcastBeat(AbstractTempo *source);
 
+    static void AlignPhrase();
+
 private:
     
     static std::set<AbstractTempo *> sources;
@@ -36,4 +38,6 @@ private:
     static void TempoTask(void *param);
     static AbstractTempo *getActive();
     static void registerTask(TempoTaskType task);
+
+    static int phraseOffset;
 };

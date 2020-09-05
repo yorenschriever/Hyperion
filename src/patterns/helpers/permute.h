@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include <Arduino.h>
 #include <stdint.h>
+#include "random.h"
 
 //Permute can be used to get a random list of numers in random order
 class Permute
@@ -32,9 +32,11 @@ public:
 
     void permute()
     {
+        if (size==0)
+            return;
         unsigned i;
         for (i = 0; i <= size-2; i++) {
-            unsigned j = i+random(size-i); /* A random integer such that i ≤ j < n */
+            unsigned j = i+stableRandom(size-i); /* A random integer such that i ≤ j < n */
             /* Swap the randomly picked element with permutation[i] */
             int temp  = at[i];
             at[i]=at[j];
