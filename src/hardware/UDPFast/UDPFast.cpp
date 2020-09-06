@@ -22,10 +22,14 @@
 #include <errno.h>
 #include "debug.h"
 #include "../ethernet/ethernet.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/semphr.h"
 
 //#include “FreeRTOS_sockets.h”
 #define FREERTOS_SO_UDP_MAX_RX_PACKETS (16)
 
+xSemaphoreHandle socketMutex = xSemaphoreCreateMutex();
 
 #undef write
 #undef read
@@ -318,20 +322,23 @@ boolean UDPFast::setMaxRxPackets(int value)
     return true;
 }
 
-int UDPFast::parsePacketFast(uint8_t *buf)
+int UDPFast::parsePacketFast(uint8_t *buf, int maxsize)
 {
+    //recvfrom is not thread safe. wait at most 1 ms if someone else it using it.
+    if (xSemaphoreTake(socketMutex, (TickType_t)1) != pdTRUE)
+        return 0;
+
     struct sockaddr_in si_other;
     int slen = sizeof(si_other), len;
 
-    if ((len = recvfrom(udp_server, buf, UDPFASTMTU, MSG_DONTWAIT, (struct sockaddr *)&si_other, (socklen_t *)&slen)) == -1)
+    if ((len = recvfrom(udp_server, buf, maxsize, MSG_DONTWAIT, (struct sockaddr *)&si_other, (socklen_t *)&slen)) == -1)
     {
-        if (errno == EWOULDBLOCK)
-        {
-            return 0;
-        }
-        log_e("could not receive data: %d", errno);
+        if (errno != EWOULDBLOCK)
+            log_e("could not receive data: %d", errno);
+        xSemaphoreGive(socketMutex);
         return 0;
     }
+    xSemaphoreGive(socketMutex);
     return len;
 }
 
@@ -355,25 +362,55 @@ boolean UDPFast::setReceiveTimeout(int value)
     return true;
 }
 
-int UDPFast::waitPacketFast(uint8_t *buf, int maxsize)
-{
-    struct sockaddr_in si_other;
-    int slen = sizeof(si_other), len;
-    if (slen>maxsize)
-        slen=maxsize;
 
-    if ((len = recvfrom(udp_server, buf, UDPFASTMTU, 0, (struct sockaddr *)&si_other, (socklen_t *)&slen)) == -1)
-    {
-        if (errno == EWOULDBLOCK)
-        {
-            //Serial.printf("waitpacket wouldblock: %d\n", errno);
-            return -1;
-        }
-        log_e("could not receive data: %d", errno);
-        return 0;
-    }
-    return len;
-}
+
+// int UDPFast::waitPacketFast(uint8_t *buf, int maxsize)
+// {
+//     struct sockaddr_in si_other;
+//     int slen = sizeof(si_other), len;
+/*
+do not use waitpacket like this.
+
+interally lwip_recvfrom_udp_raw (osckets.c) will be used, which is not thread safe.
+it creates a buffer, then calls netconn_recv_udp_raw_netbuf_flags, which does the waiting.
+when it returns it copies the data that buffer to the one you provided, and then frees
+that buffer.
+
+in a multi threaded environment this willnot work, since it it highly likely that another
+waitPacketFast is called while waiting for data. apart from writing data to the same buffer,
+the buffer is also free 2 times, creating a cirital heap error, crashing the esp.
+
+*/
+//     if ((len = recvfrom(udp_server, buf, maxsize, 0, (struct sockaddr *)&si_other, (socklen_t *)&slen)) == -1)
+//     {
+//         if (errno == EWOULDBLOCK)
+//         {
+//             //Serial.printf("waitpacket wouldblock: %d\n", errno);
+//             return -1;
+//         }
+//         log_e("could not receive data: %d", errno);
+//         return 0;
+//     }
+//     return len;
+// }
+
+// int UDPFast::waitPacketFaster(uint8_t targetbuf)
+// {
+//     struct sockaddr_in si_other;
+//     int slen = sizeof(si_other), len;
+
+//     if ((len = recvfrom(udp_server, targetbuf, UDPFASTMTU, FREERTOS_ZERO_COPY, (struct sockaddr *)&si_other, (socklen_t *)&slen)) == -1)
+//     {
+//         if (errno == EWOULDBLOCK)
+//         {
+//             //Serial.printf("waitpacket wouldblock: %d\n", errno);
+//             return -1;
+//         }
+//         log_e("could not receive data: %d", errno);
+//         return 0;
+//     }
+//     return len;
+// }
 
 //#define FREERTOS_ZERO_COPY (1)
 

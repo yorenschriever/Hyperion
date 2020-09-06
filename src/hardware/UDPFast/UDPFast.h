@@ -73,8 +73,8 @@ public:
   int sendPacketFast(const char* hostname, uint16_t port, uint8_t* data, int len);
 
   bool setReceiveTimeout(int value);
-  int waitPacketFast(uint8_t* buf, int maxsize=UDPFASTMTU);
-  int parsePacketFast(uint8_t* buffer);
+  //int waitPacketFast(uint8_t* buf, int maxsize=UDPFASTMTU);
+  int parsePacketFast(uint8_t* buffer, int maxsize=UDPFASTMTU);
   boolean setMaxRxPackets(int max);
   void flushAllPackets();
   int parsePacket();

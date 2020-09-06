@@ -226,8 +226,7 @@ IPAddress* Ethernet::Resolve(const char* hostname)
         return NULL;
     }
 
-    Debug.printf(IPSTR, IP2STR(&addr));
-
+    //Debug.printf(IPSTR, IP2STR(&addr));
     //Debug.printf("ip found: %s\n",IPAddress(addr.addr).toString().c_str());
 
     hostnameCache[hostname].ip=IPAddress(addr.addr);

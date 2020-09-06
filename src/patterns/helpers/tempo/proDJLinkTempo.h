@@ -48,7 +48,7 @@ private:
         uint8_t buffer[1500]; //TODO heap, and only 0x11c bytes
 
         //https://djl-analysis.deepsymmetry.org/djl-analysis/beats.html#_footnoteref_1
-        int len = this2->syncSocket.waitPacketFast(buffer);
+        int len = this2->syncSocket.parsePacketFast(buffer);
         if (len > 0)
         {
             int device = buffer[0x5f];
@@ -76,7 +76,7 @@ private:
             Debug.printf("len=%d, id=%d, beat=%d, device=%d, master=%d\n", len, buffer[0x21], buffer[0x5c], buffer[0x5f], this2->master);
         }
 
-        len = this2->statusSocket.waitPacketFast(buffer);
+        len = this2->statusSocket.parsePacketFast(buffer);
         if (len > 0)
         {
             //Debug.printf("status %x, %x\n", len, buffer[0x0a]);
