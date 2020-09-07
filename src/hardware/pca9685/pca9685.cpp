@@ -153,7 +153,7 @@ void PCA9685::PCA9685Task(void *param)
         {
             if (xSemaphoreTake(PCA9685::dirtySemaphore, portMAX_DELAY)) //wait for show() to be called
             {
-                //delay(1);
+                delay(1);//i dont know why, but this makes it more stable.
                 PCA9685::busy=true;
                 memcpy(PCA9685::valuesBuf, PCA9685::values, sizeof(PCA9685::valuesBuf));
                 int edgepos = 0;

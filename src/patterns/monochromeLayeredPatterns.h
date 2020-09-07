@@ -23,6 +23,7 @@ public:
 class SinPattern : public LayeredPattern<Monochrome>
 {
     int direction;
+    float phase;
 
     Transition transition = Transition(
         1000,none,0,
@@ -30,8 +31,9 @@ class SinPattern : public LayeredPattern<Monochrome>
     );
 
 public:
-    SinPattern(int direction=4){
+    SinPattern(int direction=4, float phase=0){
         this->direction=direction;
+        this->phase=phase;
     }
 
     inline void Calculate(Monochrome *pixels, int width, bool active) override
@@ -40,7 +42,7 @@ public:
             return; //the fade out is done. we can skip calculating pattern data
 
         for (int index = 0; index < width; index++)
-            pixels[index] += Monochrome((uint8_t)(127.f + 127.f * cos(float(index) / float(width) * (2*3.1415) - direction * millis() / 1000.))) * transition.getValue(index,width);
+            pixels[index] += Monochrome((uint8_t)(127.f + 127.f * cos(float(index) / float(width) * (2*3.1415) - direction * millis() / 1000. + phase))) * transition.getValue(index,width);
     }
 
 };

@@ -5,7 +5,7 @@
 #include <Wire.h>
 #include "hardware/pca9685/pca9685.h"
 
-const byte PWM_LED_ORDER[] = {5,  4, 3,10, 9, 8, 7, 6, 2, 0, 1, 11}; 
+const byte PWM_LED_ORDER[] = {5,  4, 3,10, 9, 8, 7, 6, 2, 0, 1, 11}; //numbering on backside, pcb has a different numbering
 
 //This class controls the 12 pwm outputs on the back of the device
 class PWMOutput : public Output
