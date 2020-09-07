@@ -22,21 +22,18 @@ public:
     {
         if (millis() - lastFrame < maxFps)
             return false; //limit the framerate to minimize the effect of temporal quantization (because we measure time in ms)
-        return !this->busy;
+        return PCA9685::Ready();
     }
 
     void Show()
     {
-        this->busy = true;
-        xSemaphoreGive(dirtySemaphore);
+        Rotary::setColour(RGB(values[0],values[1],values[2]));
         lastFrame = millis();
     }
 
     void Begin() override
     {
         PCA9685::Initialize();
-        dirtySemaphore = xSemaphoreCreateBinary();
-        xTaskCreatePinnedToCore(SendAsync, "SendRotaryAsync", 10000, this, 6, NULL, 1);
         lastFrame = millis();
     }
 
@@ -53,22 +50,6 @@ public:
 
 private:
     uint8_t values[3];
-    volatile boolean busy = false;
-    xSemaphoreHandle dirtySemaphore;
     unsigned long lastFrame = 0;
     int maxFps = 30;
-
-    static void SendAsync(void *param) 
-    {
-        RotaryOutput *this2 = (RotaryOutput *)param;
-        while (true)
-        {
-            if (xSemaphoreTake(this2->dirtySemaphore, 0)) //wait for show() to be called
-            {
-                Rotary::setColour(RGB(this2->values[0],this2->values[1],this2->values[2]));
-                this2->busy = false;
-            }
-            delay(5);
-        }
-    }
 };

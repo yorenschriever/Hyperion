@@ -5,6 +5,7 @@
 #include "outputs/neopixelOutput.h"
 #include "outputs/pwmOutput.h"
 #include "outputs/udpOutput.h"
+#include "outputs/rotaryOutput.h"
 #include "metaoutputs/temperatureControlledOutput.h"
 #include "inputs/udpInput.h"
 #include "inputs/apcminiInput.h"
@@ -15,6 +16,7 @@
 #include "luts/colourCorrectionLut.h"
 #include "luts/gammaLut.h"
 #include "colours.h"
+#include "pipe.h"
 
 const char* HostName = "SinglePattern";
 
@@ -65,9 +67,41 @@ BeatSomeFadePattern
     //     Pipe::transfer<Monochrome,Monochrome12>
     // )
 
+    // Pipe(
+    //     new PatternInput<Monochrome>(12,new BeatAllFadePattern()),
+    //     new PWMOutput(1500),
+    //     Pipe::transfer<Monochrome,Monochrome12>
+    // )
+
     Pipe(
-        new PatternInput<Monochrome>(12,new BeatAllFadePattern()),
-        new PWMOutput(1500),
+        new PatternInput<Monochrome>(1,new SinPattern()),
+        new PWMOutput(1),
         Pipe::transfer<Monochrome,Monochrome12>
-    )
+    ),
+
+    Pipe(
+        new PatternInput<Monochrome>(3,new SinPattern()),
+        new PWMOutput(7),
+        Pipe::transfer<Monochrome,Monochrome12>
+    ),
+
+    Pipe(
+        new PatternInput<Monochrome>(12,new SinPattern()),
+        new PWMOutput(11),
+        Pipe::transfer<Monochrome,Monochrome12>
+    ),
+
+    // Pipe(
+    //     new PatternInput<RGB>(32,new BPMFillPattern()),
+    //     new NeopixelOutput<Kpbs800>(2),
+    //     Pipe::transfer<RGB, GRB>,
+    //     NeopixelLut),
+
+    // Pipe(
+    //     new PatternInput<RGB>(1, 
+    //     new BPMIndicatorPattern()
+    //     //new RainbowPattern()
+    //     ),
+    //     new RotaryOutput()
+    // ),
 };

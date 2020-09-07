@@ -21,6 +21,7 @@
 #include "pipe.h"
 
 const char *HostName = "HyperionMaster";
+#define PWMFrequency 100
 
 //I picked colour correction values that Fastled uses for neopixels "TypicalLEDStrip"
 //http://fastled.io/docs/3.1/group___color_enums.html
@@ -89,7 +90,7 @@ Pipe pipes[] = {
                 new Layered::BeatAllFadePattern(600),
                 new Layered::GlitchPattern()
             }),
-        //new PWMOutput(150),
+        //new PWMOutput(),
         //Pipe::transfer<Monochrome, Monochrome12>,
         //IncandescentLut
         new DMXOutput(128),

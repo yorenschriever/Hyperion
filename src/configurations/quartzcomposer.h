@@ -74,7 +74,7 @@ Pipe pipes[] = {
 
     Pipe(
         new UDPInput(9619),
-        new PWMOutput(1500),
+        new PWMOutput(),
         Pipe::transfer<RGB,Monochrome12>,
         IncandescentLut),
 

@@ -4,6 +4,8 @@
 #include "debug.h"
 #include "luts/lut.h"
 
+#define CONV8TO12 4096/255
+#define CONV12TO8 255/4096
 
 //Colours currently fulfill 2 purposes:
 //1. act as a struct to store colur data. This can be used by the 
@@ -188,9 +190,9 @@ public:
         //wont happen any time soon, and the only 12 bit values are upscaled
         //8bit values. Scaling them back down allows smaller luts, and thus
         //saves almost 4k in ram that would otherwise be used for nothing.
-        R = lut->luts[0 % lut->Dimension][R >> 4];
-        G = lut->luts[1 % lut->Dimension][G >> 4];
-        B = lut->luts[2 % lut->Dimension][B >> 4];
+        R = lut->luts[0 % lut->Dimension][R * CONV12TO8];
+        G = lut->luts[1 % lut->Dimension][G * CONV12TO8];
+        B = lut->luts[2 % lut->Dimension][B * CONV12TO8];
     }
 
     inline void dim(uint8_t value)
@@ -268,7 +270,7 @@ public:
         //wont happen any time soon, and the only 12 bit values are upscaled
         //8bit values. Scaling them back down allows smaller luts, and thus
         //saves almost 4k in ram that would otherwise be used for nothing.
-        L = lut->luts[0][L >> 4];
+        L = lut->luts[0][L * CONV12TO8];
     }
 
     inline void dim(uint8_t value)
@@ -451,8 +453,7 @@ public:
     uint8_t R, G, B, A;
 };
 
-#define CONV8TO12 4096/255
-#define CONV12TO8 255/4096
+
 
 inline Monochrome::operator RGB() { return RGB(L, L, L); }
 inline Monochrome::operator RGB12() { return RGB12(L * CONV8TO12, L * CONV8TO12, L * CONV8TO12); }

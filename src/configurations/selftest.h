@@ -76,7 +76,7 @@ Pipe pipes[] = {
         
     Pipe(
         new PatternInput<Monochrome>(12, new SinPattern()),
-        new PWMOutput(1500),
+        new PWMOutput(),
         Pipe::transfer<Monochrome,Monochrome12>,
         IncandescentLut
     ),

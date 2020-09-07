@@ -9,6 +9,7 @@
 #include "luts/incandescentLut.h"
 
 const char* HostName = "lasers";
+#define PWMFrequency 1500
 
 LUT* LasersLut = new IncandescentLUT(2.5, 4096, 400);
 
@@ -16,7 +17,7 @@ Pipe pipes[] = {
 
     Pipe(
         new UDPInput(9619),
-        new PWMOutput(1500),
+        new PWMOutput(),
         Pipe::transfer<Monochrome12,Monochrome12>,
         LasersLut),
 

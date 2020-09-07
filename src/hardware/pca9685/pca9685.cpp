@@ -1,6 +1,7 @@
 #include "pca9685.h"
 
 #include "../sharedResources.h"
+#include "debug.h"
 
 #define SDAPIN 13
 #define SCLPIN 16
@@ -20,6 +21,10 @@
 
 bool PCA9685::isInitialized = false;
 TwoWire *PCA9685::_i2c = NULL;
+volatile boolean PCA9685::busy = false;
+xSemaphoreHandle PCA9685::dirtySemaphore;
+uint16_t PCA9685::values[16];
+uint16_t PCA9685::valuesBuf[16];
 
 void PCA9685::Initialize()
 {
@@ -32,6 +37,9 @@ void PCA9685::Initialize()
     Reset();
 
     SetFrequency(1500);
+
+    dirtySemaphore = xSemaphoreCreateBinary();
+    xTaskCreatePinnedToCore(PCA9685Task, "PCA9685Task", 10000, NULL, 6, NULL, 1);
 
     isInitialized = true;
 }
@@ -102,3 +110,103 @@ bool PCA9685::WritePWMData(uint8_t *data, int length, int maximumWait)
     xSemaphoreGive(i2cMutex);
     return true;
 }
+
+bool PCA9685::Ready()
+{
+    return !busy;
+}
+
+void PCA9685::Write(uint8_t index, uint16_t value, bool invert)
+{
+    if (index > 15)
+        return;
+
+    if (value > 4096)
+        value = 4096;
+
+    if (invert)
+        value = 4096 - value;
+
+    values[index] = value;
+}
+
+//untested
+// bool PCA9685::Write(uint8_t index, uint16_t* newvalues, uint8_t numValues)
+// {
+//     int copylength = min(numValues * sizeof(uint16_t), (int)sizeof(PCA9685::values) - index * sizeof(uint16_t));
+//     if (copylength > 0)
+//         memcpy(values + index*sizeof(uint16_t), newvalues, copylength);
+// }
+
+void PCA9685::Show()
+{
+    busy = true;
+    xSemaphoreGive(dirtySemaphore);
+}
+
+void PCA9685::PCA9685Task(void *param)
+    {
+        uint8_t buffer[16 * 4 + 1];
+        buffer[0] = PCA9685_LED0_ON_L;
+        
+        while (true)
+        {
+            if (xSemaphoreTake(PCA9685::dirtySemaphore, portMAX_DELAY)) //wait for show() to be called
+            {
+                //delay(1);
+                PCA9685::busy=true;
+                memcpy(PCA9685::valuesBuf, PCA9685::values, sizeof(PCA9685::valuesBuf));
+                int edgepos = 0;
+
+                //todo make this settings
+                bool cascadedPWm = false;
+                bool pcaCascaded = false;
+
+                unsigned int on, off;
+
+                for (int i = 0; i < 16; i++)
+                {
+                    int value = PCA9685::valuesBuf[i];
+                    if (value==0) 
+                    {
+                        //this led is fully off, no pwm
+                        on = 0;
+                        off = 1<<12;
+                    } 
+                    else if (value >= 4096)
+                    {
+                        //this led is fully on, no pwm
+                        on = 1 << 12;
+                        off = 0;
+                    }
+                    else if (cascadedPWm)
+                    {
+                        //we start at the off-end of the previous led, to flatten out current
+                        on = edgepos;
+                        off = (edgepos + value) % 4096;
+                        edgepos = off;
+                    }
+                    else if (pcaCascaded)
+                    {
+                        on = edgepos;
+                        off = (on + value) % 4096;
+                        edgepos += 40;
+                    }
+                    else
+                    {
+                        //we always start at the start of each pwm cycle, so we are sure to update the value when the led is off
+                        on = 0;
+                        off = value;
+                    }
+                    buffer[i * 4 + 1] = (on & 0xFF);
+                    buffer[i * 4 + 2] = (on >> 8);
+                    buffer[i * 4 + 3] = (off & 0xFF);
+                    buffer[i * 4 + 4] = (off >> 8);
+                }
+
+                PCA9685::WritePWMData(buffer,sizeof(buffer),40);
+                delay(1);
+                PCA9685::busy = false;
+            }
+        }
+    }

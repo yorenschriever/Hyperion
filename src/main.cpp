@@ -92,7 +92,19 @@ void setup()
 
     clearall();
 
+    //PWM frequency in Hz, choose 100 for incandescent and 1500 for led
+    //A higher frequency looks better, because it produces less flicker.
+    //This works great for leds, but if currents are high (indandescent)
+    //The mosfets will heat up quickly. Also the produced noise will be
+    //more audible. Incandescent lamps have a slow response, so you wont
+    //see the flicker as much. Setting the pwm frequency lower is better
+    //in that case.
     PCA9685::Initialize();
+    #ifdef PWMFrequency 
+    PCA9685::SetFrequency(PWMFrequency);
+    #else
+    PCA9685::SetFrequency(100);
+    #endif
 
     Debug.println("Starting network");
     Ethernet::Initialize(HostName);

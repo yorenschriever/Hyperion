@@ -14,6 +14,8 @@
 
 const char* HostName = "strobes";
 
+#define PWMFrequency 1500
+
 LUT* LedLut = new GammaLUT(2,4096); 
 
 Pipe pipes[] = {
@@ -21,7 +23,7 @@ Pipe pipes[] = {
     Pipe(
         new UDPInput(9619),
         new TemperatureControlledOutput<Monochrome12>(
-            new PWMOutput(1500),
+            new PWMOutput(),
             0.77, 
             0.0058,  
             60),

@@ -37,47 +37,14 @@ void Rotary::Initialize(bool createQueueTask)
 
 bool Rotary::setColour(RGB colour)
 {
-    uint8_t buffer[3 * 4 + 1];
-    buffer[0] = PCA9685_LED0_ON_L + 13 * 4;
-    fillLedBuffer(buffer + 1, lut->luts[0], colour.R, INVERT);
-    fillLedBuffer(buffer + 5, lut->luts[1], colour.G, INVERT);
-    fillLedBuffer(buffer + 9, lut->luts[2], colour.B, INVERT);
+    RGB12 col12 = static_cast<RGB12>(colour);
+    col12.ApplyLut(lut);
 
-    return PCA9685::WritePWMData(buffer, sizeof(buffer), 100);
-}
-
-void Rotary::fillLedBuffer(uint8_t *buffer, uint16_t *lut, uint8_t value, bool invert)
-{
-    uint16_t lutVal = lut[value];
-
-    if (lutVal > 4096)
-        lutVal = 4096;
-
-    if (invert)
-        lutVal = 4096 - lutVal;
-
-    if (lutVal == 0)
-    {
-        buffer[0] = 0;
-        buffer[1] = 0;
-        buffer[2] = 0;
-        buffer[3] = 1 << 4;
-        return;
-    }
-
-    if (lutVal >= 4096)
-    {
-        buffer[0] = 0;
-        buffer[1] = 1 << 4;
-        buffer[2] = 0;
-        buffer[3] = 0;
-        return;
-    }
-
-    buffer[0] = 0;
-    buffer[1] = 0;
-    buffer[2] = lutVal & 0xFF;
-    buffer[3] = lutVal >> 8;
+    PCA9685::Write(13, col12.R, INVERT);
+    PCA9685::Write(14, col12.G, INVERT);
+    PCA9685::Write(15, col12.B, INVERT);
+    PCA9685::Show();
+    return true;
 }
 
 void Rotary::setLut(LUT *lut)
@@ -102,6 +69,7 @@ bool Rotary::isButtonPressed()
     return buttonState;
 }
 
+IRAM_ATTR
 void Rotary::rotateISR()
 {
     static int8_t rot_enc_table[] = {0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0};
@@ -202,6 +170,7 @@ void Rotary::onLongPress(InputEvent evt, bool asTask)
         startQueHandler();
 }
 
+IRAM_ATTR
 void Rotary::buttonISR()
 {   
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
