@@ -12,6 +12,7 @@
 #include "inputs/dmxInput.h"
 #include "inputs/patternInput.h"
 #include "patterns/rgbPatterns.h"
+#include "patterns/ledstripPatterns.h"
 #include "patterns/monochromePatterns.h"
 #include "patterns/monochromeLayeredPatterns.h"
 #include "luts/colourCorrectionLut.h"
@@ -26,7 +27,9 @@ const char *HostName = "HyperionMaster";
 //I picked colour correction values that Fastled uses for neopixels "TypicalLEDStrip"
 //http://fastled.io/docs/3.1/group___color_enums.html
 //note the different order, fastled uses RGB, luts are in ouput order (GRB)
-LUT *NeopixelLut = new ColourCorrectionLUT(1.5, 255, 176, 255, 240);
+//LUT *NeopixelLut = new ColourCorrectionLUT(1.5, 255, 176, 255, 240);
+
+LUT *NeopixelLut = new ColourCorrectionLUT(1.2, 255, 176, 200, 255);
 LUT *IncandescentLut = new IncandescentLUT(2.5, 4096, 400);
 LUT *IncandescentLut8 = new IncandescentLUT(2.5, 255, 24);
 LUT *GammaLut12 = new GammaLUT(2.5, 4096);
@@ -125,25 +128,47 @@ Pipe pipes[] = {
     ///////////////////////
     // NEOPIXEL LEDSTRIPS
     ///////////////////////
+
+
+    Pipe( 
+        new LayeredApcminiInput<RGBA>(
+            60, //width of the pattern, in pixels
+            3,   //button column on the apc to listen to (0-7)
+            new LayeredPattern<RGBA> *[8] {
+            //the patterns to attach to the buttons
+                new LedStrip::TripleFadePattern(),
+                new LedStrip::HueGlowPattern(),
+                new LedStrip::MeteorPattern(),
+                new LedStrip::ClivePattern(),
+                new LedStrip::GlitchPattern(),
+                new LedStrip::SinStripPattern(1,2),
+                new LedStrip::GradientPattern(),
+                new LedStrip::HueGlowPattern()
+            }),
+        new NeopixelOutput<Kpbs800>(2),
+        Pipe::transfer<RGBA, GRB>,
+        NeopixelLut),
+
     Pipe(
-        new ApcminiInput<RGB>(
-            500, //width of the pattern, in pixels
+        new LayeredApcminiInput<RGBA>(
+            60, //width of the pattern, in pixels
             3,   //button column on the apc to listen to (0-7)
             //the patterns to attach to the buttons
-            new Pattern<RGB> *[8] {
-                new RainbowPattern(),
-                    new ColourOrderPattern(),
-                    new MixingPattern(),
-                    new AnimatedMixingPattern(),
-                    //new PoissonPattern(),
-                    new BPMFillPattern(),
-                    new RainbowPattern(),
-                    new RainbowPattern(),
-                    new RainbowPattern()
+            new LayeredPattern<RGBA> *[8] {
+                new LedStrip::TripleFadePattern(),
+                new LedStrip::HueGlowPattern(),
+                new LedStrip::MeteorPattern(),
+                new LedStrip::ClivePattern(),
+                new LedStrip::GlitchPattern(),
+                new LedStrip::SinStripPattern(0,2),
+                new LedStrip::GradientPattern(),
+                new LedStrip::HueGlowPattern()
             }),
         new NeopixelOutput<Kpbs800>(1),
-        Pipe::transfer<RGB, GRB>,
+        Pipe::transfer<RGBA, GRB>,
         NeopixelLut),
+
+
 
     ///////////////////////
     // FAIRYLIGHTS

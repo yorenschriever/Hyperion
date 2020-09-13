@@ -11,7 +11,9 @@
 #include "inputs/apcminiInput.h"
 #include "inputs/dmxInput.h"
 #include "inputs/patternInput.h"
+#include "inputs/layeredPatternInput.h"
 #include "patterns/rgbPatterns.h"
+#include "patterns/ledstripPatterns.h"
 #include "patterns/monochromePatterns.h"
 #include "luts/colourCorrectionLut.h"
 #include "luts/gammaLut.h"
@@ -73,23 +75,23 @@ BeatSomeFadePattern
     //     Pipe::transfer<Monochrome,Monochrome12>
     // )
 
-    Pipe(
-        new PatternInput<Monochrome>(1,new SinPattern()),
-        new PWMOutput(1),
-        Pipe::transfer<Monochrome,Monochrome12>
-    ),
+    // Pipe(
+    //     new PatternInput<Monochrome>(1,new SinPattern()),
+    //     new PWMOutput(1),
+    //     Pipe::transfer<Monochrome,Monochrome12>
+    // ),
 
-    Pipe(
-        new PatternInput<Monochrome>(3,new SinPattern()),
-        new PWMOutput(7),
-        Pipe::transfer<Monochrome,Monochrome12>
-    ),
+    // Pipe(
+    //     new PatternInput<Monochrome>(3,new SinPattern()),
+    //     new PWMOutput(7),
+    //     Pipe::transfer<Monochrome,Monochrome12>
+    // ),
 
-    Pipe(
-        new PatternInput<Monochrome>(12,new SinPattern()),
-        new PWMOutput(11),
-        Pipe::transfer<Monochrome,Monochrome12>
-    ),
+    // Pipe(
+    //     new PatternInput<Monochrome>(12,new SinPattern()),
+    //     new PWMOutput(11),
+    //     Pipe::transfer<Monochrome,Monochrome12>
+    // ),
 
     // Pipe(
     //     new PatternInput<RGB>(32,new BPMFillPattern()),
@@ -104,4 +106,17 @@ BeatSomeFadePattern
     //     ),
     //     new RotaryOutput()
     // ),
+
+    Pipe(
+        new LayeredPatternInput<RGBA>(60,new LedStrip::HueGlowPattern()),
+        new NeopixelOutput<Kpbs800>(1),
+        Pipe::transfer<RGBA, GRB>,
+        NeopixelLut),
+
+    Pipe(
+        new LayeredPatternInput<RGBA>(60,new LedStrip::HueGlowPattern()),
+        new NeopixelOutput<Kpbs800>(2),
+        Pipe::transfer<RGBA, GRB>,
+        NeopixelLut),
+
 };

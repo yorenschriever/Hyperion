@@ -404,7 +404,8 @@ public:
         B = (B * value) >> 8;
     }
 
-    operator RGB() { return RGB(R*A>>8,G*A>>8,B*A>>8); }
+    operator RGB();
+    operator GRB();
 
     //overload some operators to quickly apply some blend modes
     //https://en.wikipedia.org/wiki/Blend_modes#Normal_blend_mode
@@ -413,27 +414,50 @@ public:
     //normal blend mode
     //https://en.wikipedia.org/wiki/Alpha_compositing
     RGBA operator+ (RGBA other){
-        //TODO, this is not the method described by wikipedia
-        //that one is the one i tried below.
-        return RGBA(
-            (this->R * other.A + other.R * (0xFF - other.A)) >> 8,
-            (this->G * other.A + other.G * (0xFF - other.A)) >> 8,
-            (this->B * other.A + other.B * (0xFF - other.A)) >> 8,
-            this->A);
-
-        //term in wiki => term here
-        //src => other
-        //dst => this
-        int outA = other.A + (this->A * (0xFF - other.A) >> 8);
-        if (outA == 0)
-            return RGBA(0,0,0,0); 
-
-        return RGBA(
-            (((other.R << 16) + (this->R * this->A * (255-other.A))) / outA) >> 8,
-            (((other.G << 16) + (this->G * this->A * (255-other.A))) / outA) >> 8,
-            (((other.B << 16) + (this->B * this->A * (255-other.A))) / outA) >> 8,
-            outA);
+        RGBA result = RGBA(*this);
+        result += other;
+        return result;
     }
+
+    RGBA& operator+= (const RGBA& other){
+        //this = bottom
+        //other = top
+        if (other.A==0)
+            return *this;
+        if (other.A==255){ 
+            R=other.R;
+            G=other.G;
+            B=other.B;
+            A=other.A;
+            return *this;
+        }
+        if (A==0){ //not sure about this one
+            R=other.R;
+            G=other.G;
+            B=other.B;
+            A=other.A;
+            return *this;
+        }
+            
+        //outA should be divided by 255, but i left it scaled up here, so i dont lose precision.
+        //this was very noticable when mixing two colours with low A
+        int outA = other.A * 255 + (this->A * (255 - other.A) ); 
+        if (outA==0){ //this is already covered by the checks above?
+            this->R = 0;
+            this->G = 0;
+            this->B = 0;
+            this->A = 0;
+            return *this; 
+        } 
+
+        this->R = ((other.R * other.A)*255 + (this->R * this->A)*(255-other.A)) / outA ;
+        this->G = ((other.G * other.A)*255 + (this->G * this->A)*(255-other.A)) / outA ;
+        this->B = ((other.B * other.A)*255 + (this->B * this->A)*(255-other.A)) / outA ;
+
+        this->A = outA / 255;
+        return *this;
+    }
+
 
     //TODO multiply blend mode
     // RGBA operator* (RGBA* other){
@@ -443,6 +467,8 @@ public:
     //         ?,
     //         this->A);
     // }
+
+
     RGBA operator* (float scale){
         return RGBA(R,G,B,constrain(A*scale,0,0xFF));
     }
@@ -454,6 +480,8 @@ public:
 };
 
 
+inline RGBA::operator RGB() { return RGB(R*A>>8,G*A>>8,B*A>>8); }
+inline RGBA::operator GRB() { return GRB(G*A>>8,R*A>>8,B*A>>8); }
 
 inline Monochrome::operator RGB() { return RGB(L, L, L); }
 inline Monochrome::operator RGB12() { return RGB12(L * CONV8TO12, L * CONV8TO12, L * CONV8TO12); }

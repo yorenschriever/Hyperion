@@ -16,7 +16,7 @@ private:
     float skew = 1;
 
 public:
-    LFO(int period)
+    LFO(int period=0)
     {
         this->period = period;
         reset();
@@ -25,10 +25,11 @@ public:
     int period;
 
     //LFO value between 0-1
-    float getValue() { return getValue(0); }
-    float getValue(float deltaPhase)
+    float getValue() { return getValue(0, this->period); }
+    float getValue(float deltaPhase) { return getValue(deltaPhase, period); }
+    float getValue(float deltaPhase, int periodArg)
     {
-        float phase = getPhase(deltaPhase);
+        float phase = getPhase(deltaPhase, periodArg);
 
         if (skew != 1)
             phase = pow(phase, skew);
@@ -37,12 +38,12 @@ public:
     }
 
     //value between 0-1
-    float getPhase() { return getPhase(0); }
-    float getPhase(float deltaPhase)
+    float getPhase() { return getPhase(0, period); }
+    float getPhase(float deltaPhase, int periodArg)
     {
-        int deltaPhaseMs = period * deltaPhase;
-        unsigned long phase = (millis() - startingpoint - deltaPhaseMs) % period;
-        return ((float)phase / (float)period);
+        int deltaPhaseMs = periodArg * deltaPhase;
+        unsigned long phase = (millis() - startingpoint - deltaPhaseMs) % periodArg;
+        return ((float)phase / (float)periodArg);
     }
 
     void reset()

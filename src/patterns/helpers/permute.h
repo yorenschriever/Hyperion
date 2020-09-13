@@ -14,7 +14,7 @@ private:
 public:
     int* at=0;
 
-    Permute(int size)
+    Permute(int size=0)
     {
         setSize(size);
     }
