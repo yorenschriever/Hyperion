@@ -11,28 +11,28 @@
 #include "outputs/rotaryOutput.h"
 #include "inputs/patternInput.h"
 #include "patterns/rgbPatterns.h"
+#include "configurationStruct.h"
 
-const char* HostName = "strobes";
+LUT *LedLut = new GammaLUT(2, 4096);
 
-#define PWMFrequency 1500
+void LoadConfiguration()
+{
 
-LUT* LedLut = new GammaLUT(2,4096); 
+    Configuration.hostname = "strobes";
+    Configuration.pwmFrequency = 1500;
 
-Pipe pipes[] = {
-
-    Pipe(
-        new UDPInput(9619),
-        new TemperatureControlledOutput<Monochrome12>(
-            new PWMOutput(),
-            0.77, 
-            0.0058,  
-            60),
-        Pipe::transfer<Monochrome12,Monochrome12>,
-        LedLut
-    ),
+    Configuration.pipes = {
+        Pipe(
+            new UDPInput(9619),
+            new TemperatureControlledOutput<Monochrome12>(
+                new PWMOutput(),
+                0.77,
+                0.0058,
+                60),
+            Pipe::transfer<Monochrome12, Monochrome12>,
+            LedLut),
 
         Pipe(
-        new PatternInput<RGB>(1, new BPMIndicatorPattern()),
-        new RotaryOutput())
-
-};
+            new PatternInput<RGB>(1, new BPMIndicatorPattern()),
+            new RotaryOutput())};
+}

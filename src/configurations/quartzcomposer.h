@@ -7,16 +7,23 @@
 #include "outputs/dmxOutput.h"
 #include "luts/colourCorrectionLut.h"
 #include "luts/incandescentLut.h"
-
-const char* HostName = "Hyperion";
+#include "configurationStruct.h"
 
 //I picked colour correction values that Fastled uses for neopixels "TypicalLEDStrip"
 //http://fastled.io/docs/3.1/group___color_enums.html
 //note the different order, fastled uses RGB, luts are in ouput order (GRB)
+//when i calibrated myself i found different values, see standalone.h
 LUT* NeopixelLut = new ColourCorrectionLUT(1.5,255, 176, 255, 240); 
 LUT* IncandescentLut = new IncandescentLUT(2.5, 4096, 400);
 
-Pipe pipes[] = {
+
+void LoadConfiguration()
+{
+
+    Configuration.hostname = "hyperion";
+    Configuration.pwmFrequency = 1500;
+
+    Configuration.pipes = {
 
     Pipe(
         new UDPInput(9611),
@@ -77,7 +84,6 @@ Pipe pipes[] = {
         new PWMOutput(),
         Pipe::transfer<RGB,Monochrome12>,
         IncandescentLut),
+    };
 
-
-
-};
+}

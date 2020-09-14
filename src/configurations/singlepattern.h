@@ -19,8 +19,7 @@
 #include "luts/gammaLut.h"
 #include "colours.h"
 #include "pipe.h"
-
-const char* HostName = "SinglePattern";
+#include "configurationStruct.h"
 
 //I picked colour correction values that Fastled uses for neopixels "TypicalLEDStrip"
 //http://fastled.io/docs/3.1/group___color_enums.html
@@ -28,95 +27,19 @@ const char* HostName = "SinglePattern";
 LUT* NeopixelLut = new ColourCorrectionLUT(1.5,255, 176, 255, 240); 
 LUT* LedLut = new GammaLUT(2,4096); 
 
-Pipe pipes[] = {
+void LoadConfiguration()
+{
 
-    // Pipe(
-    //     new PatternInput<RGB>(16,new AnimatedMixingPattern()),
-    //     new NeopixelOutput<Kpbs800>(1),
-    //     Pipe::transfer<RGB,GRB>,
-    //     NeopixelLut
-    // )
-    
-    // Pipe(
-    //     new PatternInput<Monochrome>(1,new TemperatureTestPattern()),
-    //     //new PWMOutput(150),
-    //     new TemperatureControlledOutput<Monochrome12>(
-    //         new PWMOutput(1500),
-    //         0.77, 
-    //         0.0058,  
-    //         60),
-    //     Pipe::transfer<Monochrome,Monochrome12>,
-    //     LedLut
-    // )
-/*
+    Configuration.hostname = "singlepattern";
+    Configuration.pwmFrequency = 1500;
 
-RandomFadePattern()
-SlowStrobePattern();
-FastStrobePattern
-BeatAllFadePattern
-BeatShakePattern
-BeatSingleFadePattern
-BeatSinglePattern
-GlitchPattern
-OnPattern
-SinPattern
-BeatSomeFadePattern
-*/
+    Configuration.pipes = {
+        Pipe(
+            new LayeredPatternInput<RGBA>(60,new LedStrip::HueGlowPattern()),
+            new NeopixelOutput<Kpbs800>(1),
+            Pipe::transfer<RGBA, GRB>,
+            NeopixelLut),
+    };
 
-    // Pipe(
-    //     new PatternInput<Monochrome>(12,new GlitchPattern()),
-    //     new UDPOutput("strobes.local",9619,500),
-    //     Pipe::transfer<Monochrome,Monochrome12>
-    // )
+}
 
-    // Pipe(
-    //     new PatternInput<Monochrome>(12,new BeatAllFadePattern()),
-    //     new PWMOutput(1500),
-    //     Pipe::transfer<Monochrome,Monochrome12>
-    // )
-
-    // Pipe(
-    //     new PatternInput<Monochrome>(1,new SinPattern()),
-    //     new PWMOutput(1),
-    //     Pipe::transfer<Monochrome,Monochrome12>
-    // ),
-
-    // Pipe(
-    //     new PatternInput<Monochrome>(3,new SinPattern()),
-    //     new PWMOutput(7),
-    //     Pipe::transfer<Monochrome,Monochrome12>
-    // ),
-
-    // Pipe(
-    //     new PatternInput<Monochrome>(12,new SinPattern()),
-    //     new PWMOutput(11),
-    //     Pipe::transfer<Monochrome,Monochrome12>
-    // ),
-
-    // Pipe(
-    //     new PatternInput<RGB>(32,new BPMFillPattern()),
-    //     new NeopixelOutput<Kpbs800>(2),
-    //     Pipe::transfer<RGB, GRB>,
-    //     NeopixelLut),
-
-    // Pipe(
-    //     new PatternInput<RGB>(1, 
-    //     new BPMIndicatorPattern()
-    //     //new RainbowPattern()
-    //     ),
-    //     new RotaryOutput()
-    // ),
-
-    Pipe(
-        new LayeredPatternInput<RGBA>(60,new LedStrip::HueGlowPattern()),
-        new NeopixelOutput<Kpbs800>(1),
-        Pipe::transfer<RGBA, GRB>,
-        NeopixelLut),
-
-    Pipe(
-        new LayeredPatternInput<RGBA>(60,new LedStrip::HueGlowPattern()),
-        new NeopixelOutput<Kpbs800>(2),
-        Pipe::transfer<RGBA, GRB>,
-        NeopixelLut),
-
-};

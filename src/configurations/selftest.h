@@ -15,8 +15,7 @@
 #include "patterns/monochromePatterns.h"
 #include "luts/colourCorrectionLut.h"
 #include "luts/incandescentLut.h"
-
-const char* HostName = "selftest";
+#include "configurationStruct.h"
 
 //I picked colour correction values that Fastled uses for neopixels "TypicalLEDStrip"
 //http://fastled.io/docs/3.1/group___color_enums.html
@@ -24,7 +23,11 @@ const char* HostName = "selftest";
 LUT* NeopixelLut = new ColourCorrectionLUT(1.5,255, 176, 255, 240); 
 LUT* IncandescentLut = new IncandescentLUT(2.5, 4096, 400);
 
-Pipe pipes[] = {
+void LoadConfiguration()
+{
+    Configuration.hostname = "selftest";
+
+    Configuration.pipes = {
 
     Pipe(
         new PatternInput<RGB>(16, new RainbowPattern()),
@@ -111,5 +114,6 @@ Pipe pipes[] = {
             }),
         new DMXOutput(1)
     )
+    };
 
-};
+}

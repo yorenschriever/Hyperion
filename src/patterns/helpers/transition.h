@@ -1,11 +1,6 @@
 #pragma once
 #include "fade.h"
 
-int none(int index, int width, int delay){ return 0;}
-int fromRight(int index, int width, int delay){ return delay * index / width;}
-int fromLeft(int index, int width, int delay){return delay * (width-index) / width;}
-int fromCenter(int index, int width, int delay){return (delay * std::abs(width - 2*index)) / width;}
-int fromSides(int index, int width, int delay){return (delay * std::abs(2*index-width)) / width;}
 
 using FadeShape = int(*)(int, int, int);
 
@@ -53,6 +48,15 @@ public:
     float getValue(int index, int width){
         return fadein.getValue(fadeInShape(index,width,fadeInShapeSize)) * (lastActive?1:fadeout.getValue(fadeOutShape(index,width,fadeOutShapeSize)));
     }
+
+
+
+    static int none(int index, int width, int delay){ return 0;}
+    static int fromRight(int index, int width, int delay){ return delay * index / width;}
+    static int fromLeft(int index, int width, int delay){return delay * (width-index) / width;}
+    static int fromCenter(int index, int width, int delay){return (delay * std::abs(width - 2*index)) / width;}
+    static int fromSides(int index, int width, int delay){return (delay * std::abs(2*index-width)) / width;}
+
 
 private:
     Fade<Up> fadein= Fade<Up> (0);

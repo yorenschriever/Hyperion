@@ -21,6 +21,7 @@
 #include "patterns/helpers/tempo/proDJLinkTempo.h"
 #include "patterns/helpers/tempo/midiClockTempo.h"
 #include "patterns/helpers/tempo/udpTempo.h"
+#include "patterns/helpers/params.h"
 
 #include "hardware/midi/midi.h"
 #include "hardware/ethernet/ethernet.h"
@@ -73,6 +74,9 @@ void setup()
     }
 
     Debug.println("Skipped safemode, normal boot");
+    
+    Debug.println("Loading configuration");
+    LoadConfiguration();
 
     Display::Initialize(); //initialize display before outputs
 
@@ -87,8 +91,8 @@ void setup()
     DMX::SetUniverseSize(37,7); //handle some quirks of the the midi device i use for testing
 
     Debug.println("Starting outputs");
-    for (int j = 0; j < sizeof(pipes) / sizeof(Pipe); j++)
-        pipes[j].out->Begin();
+    for (Pipe pipe : Configuration.pipes)
+        pipe.out->Begin();
 
     clearall();
 
@@ -100,14 +104,10 @@ void setup()
     //see the flicker as much. Setting the pwm frequency lower is better
     //in that case.
     PCA9685::Initialize();
-    #ifdef PWMFrequency 
-    PCA9685::SetFrequency(PWMFrequency);
-    #else
-    PCA9685::SetFrequency(100);
-    #endif
+    PCA9685::SetFrequency(Configuration.pwmFrequency);
 
     Debug.println("Starting network");
-    Ethernet::Initialize(HostName);
+    Ethernet::Initialize(Configuration.hostname);
 
     //add tempo sources in order of importance. first has highest priority
     Tempo::AddSource(ProDJLinkTempo::getInstance());
@@ -115,21 +115,20 @@ void setup()
     Tempo::AddSource(TapTempo::getInstance()); 
     Tempo::AddSource(UdpTempo::getInstance()); 
 
-    #ifdef TAPMIDINOTE
     Midi::Initialize();
     Midi::onNoteOn([](uint8_t ch, uint8_t note, uint8_t velocity) {
-        if (note == TAPMIDINOTE) TapTempo::getInstance()->Tap();
-        if (note == TAPSTOPMIDINOTE) TapTempo::getInstance()->Stop();
-        if (note == TAPALIGNMIDINOTE) TapTempo::getInstance()->Align();
-        if (note == TAPBARALIGNMINIDNOTE) Tempo::AlignPhrase();
+        if (note == Configuration.tapMidiNote) TapTempo::getInstance()->Tap();
+        if (note == Configuration.tapStopMidiNote) TapTempo::getInstance()->Stop();
+        if (note == Configuration.tapAlignMidiNote) TapTempo::getInstance()->Align();
+        if (note == Configuration.tapBarAlignMidiNote) Tempo::AlignPhrase();
     });
-    #endif
+
     Rotary::onPress([]() { TapTempo::getInstance()->Tap(); });
     Rotary::onLongPress([]() { TapTempo::getInstance()->Stop(); });
 
     Debug.println("Starting inputs");
-    for (int j = 0; j < sizeof(pipes) / sizeof(Pipe); j++)
-        pipes[j].in->begin();
+    for (Pipe pipe:Configuration.pipes)
+        pipe.in->begin();
 
     Debug.println("Done");
 
@@ -144,22 +143,19 @@ void setup()
 void loop()
 {
     //The main process loop
-    for (int j = 0; j < sizeof(pipes) / sizeof(Pipe); j++)
-    {
-        Pipe *pipe = &pipes[j];
-        pipe->process();
-    }
+    for (Pipe pipe : Configuration.pipes)
+        pipe.process();
 
-    for (int j = 0; j < sizeof(pipes) / sizeof(Pipe); j++)
-    {
-        Pipe *pipe = &pipes[j];
-        pipe->out->ShowGroup();
-    }
-
+    for (Pipe pipe : Configuration.pipes)
+        pipe.out->ShowGroup();
+   
     //check for over-the-air firmware updates (also works over ETH)
     FirmwareUpdate::Process();
 
     Rotary::handleQueue();
+
+    if (Configuration.paramCalculator)
+        Configuration.paramCalculator();
 
     //demo code that will scroll through the rainbow when rotating the rotary encoder
     // static byte colour;
@@ -172,11 +168,10 @@ void loop()
 
 void clearall()
 {
-    for (int j = 0; j < sizeof(pipes) / sizeof(Pipe); j++)
+    for (Pipe pipe : Configuration.pipes)
     {
-        Pipe *pipe = &pipes[j];
-        pipe->out->Clear();
-        pipe->out->Show();
+        pipe.out->Clear();
+        pipe.out->Show();
     }
 }
 
@@ -194,19 +189,18 @@ void UpdateDisplay(void *parameter)
         int totalMissedframes = 0;
         int totalTotalframes = 0;
         int totalLength = 0;
-        for (int j = 0; j < sizeof(pipes) / sizeof(Pipe); j++)
+        for (Pipe pipe : Configuration.pipes)
         {
-            Pipe *pipe = &pipes[j];
-            if (pipe->in->getTotalFrameCount() == 0)
+            if (pipe.in->getTotalFrameCount() == 0)
                 continue;
             
             activeChannels++;
-            totalUsedframes += pipe->in->getUsedFramecount();
-            totalMissedframes += pipe->in->getMissedFrameCount();
-            totalTotalframes += pipe->in->getTotalFrameCount();
-            pipe->in->resetFrameCount();
+            totalUsedframes += pipe.in->getUsedFramecount();
+            totalMissedframes += pipe.in->getMissedFrameCount();
+            totalTotalframes += pipe.in->getTotalFrameCount();
+            pipe.in->resetFrameCount();
 
-            totalLength += pipe->getNumPixels();
+            totalLength += pipe.getNumPixels();
         }
  
         float outfps = activeChannels == 0 ? 0 : (float)1000. * totalUsedframes / (elapsedTime) / activeChannels;

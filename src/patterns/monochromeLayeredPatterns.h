@@ -26,8 +26,8 @@ class SinPattern : public LayeredPattern<Monochrome>
     float phase;
 
     Transition transition = Transition(
-        1000,none,0,
-        1000,none,0
+        1000,Transition::none,0,
+        1000,Transition::none,0
     );
 
 public:
@@ -53,8 +53,8 @@ class GlowPattern : public LayeredPattern<Monochrome>
     Permute perm1 = Permute(0);
     Permute perm2 = Permute(0);
     Transition transition = Transition(
-        1000,none,0,
-        2000,none,0
+        1000,Transition::none,0,
+        2000,Transition::none,0
     );
 
 public:
@@ -85,8 +85,8 @@ public:
 class FastStrobePattern : public LayeredPattern<Monochrome>
 {
     Transition transition = Transition(
-        1000,none,0,
-        0,none,0
+        1000,Transition::none,0,
+        0,Transition::none,0
     );
 
     inline void Calculate(Monochrome *pixels, int width, bool active) override
@@ -117,7 +117,7 @@ class SlowStrobePattern : public LayeredPattern<Monochrome>
 class BlinderPattern : public LayeredPattern<Monochrome>
 {
     public:
-    BlinderPattern(FadeShape in=none, FadeShape out=none, uint8_t intensity=255, int fadein=200, int fadeout=600)
+    BlinderPattern(FadeShape in=Transition::none, FadeShape out=Transition::none, uint8_t intensity=255, int fadein=200, int fadeout=600)
     {
         transition = Transition(
             fadein,in,200,
@@ -257,8 +257,8 @@ class GlitchPattern : public LayeredPattern<Monochrome>
     Timeline timeline = Timeline(50);
     Permute perm = Permute(0);
     Transition transition = Transition(
-        200,none,0,
-        1000,none,0
+        200,Transition::none,0,
+        1000,Transition::none,0
     );
     inline void Calculate(Monochrome *pixels, int width, bool active) override
     {
@@ -283,8 +283,8 @@ class OnPattern : public LayeredPattern<Monochrome>
     uint8_t intensity;
 
     Transition transition = Transition(
-        400,none,0,
-        400,none,0
+        400,Transition::none,0,
+        400,Transition::none,0
     );
 
 public:

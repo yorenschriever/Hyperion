@@ -11,6 +11,7 @@
 #include "helpers/watcher.h"
 #include "helpers/permute.h"
 #include "helpers/transition.h"
+#include "helpers/params.h"
 
 template<class T_COLOUR>
 class Pattern {

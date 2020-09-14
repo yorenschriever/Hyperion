@@ -7,18 +7,23 @@
 #include "outputs/dmxOutput.h"
 #include "luts/colourCorrectionLut.h"
 #include "luts/incandescentLut.h"
-
-const char* HostName = "lasers";
-#define PWMFrequency 1500
+#include "configurationStruct.h"
 
 LUT* LasersLut = new IncandescentLUT(2.5, 4096, 400);
 
-Pipe pipes[] = {
+void LoadConfiguration()
+{
 
-    Pipe(
-        new UDPInput(9619),
-        new PWMOutput(),
-        Pipe::transfer<Monochrome12,Monochrome12>,
-        LasersLut),
+    Configuration.hostname = "lasers";
+    Configuration.pwmFrequency = 1500;
 
-};
+    Configuration.pipes = {
+        Pipe(
+            new UDPInput(9619),
+            new PWMOutput(),
+            Pipe::transfer<Monochrome12,Monochrome12>,
+            LasersLut),
+    };
+
+}
+

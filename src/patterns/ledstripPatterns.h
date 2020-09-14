@@ -20,7 +20,8 @@ namespace LedStrip
         FadeDown fade1 = FadeDown(100, WaitAtEnd);
         FadeDown fade2 = FadeDown(100, WaitAtEnd);
         FadeDown fade3 = FadeDown(100, WaitAtEnd);
-        Timeline tl = Timeline(1000);
+        Timeline tl;
+        TempoWatcher tw;
 
     public:
         inline void Calculate(RGBA *pixels, int width, bool active) override
@@ -28,20 +29,18 @@ namespace LedStrip
             if (!active)
                 return;
 
+            if (tw.Triggered() && Tempo::GetBeatNumber()%2==0) tl.reset();
             tl.FrameStart();
-            if (tl.Happened(0))
-                fade1.reset();
-            if (tl.Happened(150))
-                fade2.reset();
-            if (tl.Happened(300))
-                fade3.reset();
+            if (tl.Happened(0))   fade1.reset();
+            if (tl.Happened(150)) fade2.reset();
+            if (tl.Happened(300)) fade3.reset();
 
             for (int index = 0; index < width; index++)
             {
-                pixels[index] +=
-                    RGBA(127, 255, 0, fade1.getValue(fromCenter(index, width, 300)) * 255) +
-                    RGBA(127, 127, 0, fade2.getValue(fromCenter(index, width, 500)) * 255) +
-                    RGBA(127, 255, 0, fade3.getValue(fromCenter(index, width, 600)) * 255);
+                pixels[index] += //Params::getPrimaryColour();
+                    Params::getPrimaryColour()   * fade1.getValue(Transition::fromCenter(index, width, 300)) +
+                    Params::getPrimaryColour()   * fade2.getValue(Transition::fromCenter(index, width, 500)) +
+                    Params::getSecondaryColour() * fade3.getValue(Transition::fromCenter(index, width, 600));
             }
         }
     };
@@ -62,7 +61,7 @@ namespace LedStrip
             {
                 //int permutedQuantized = perm.at[index * numSegments / width] * width / numSegments;
                 //RGBA colour = RGBA(RGB(Hue(200)))* lfo.getValue(float(index)/width,500); // ((float)permutedQuantized / width / 5 + 0.2);
-                RGBA colour = RGBA(RGB(Hue(200)))* lfo.getValue(float(fromCenter(index,width,1000))/-1000,500);
+                RGBA colour = Params::getPrimaryColour() * lfo.getValue(float(Transition::fromCenter(index,width,1000))/-1000,500);
                 pixels[index] += colour;
                 // RGBA(127,255,0,fade1.getValue(fromCenter(index,width,300))*255) +
                 // RGBA(127,127,0,fade2.getValue(fromCenter(index,width,500))*255) +
@@ -76,10 +75,9 @@ namespace LedStrip
         FadeDown fade1 = FadeDown(400, WaitAtEnd);
         FadeDown fade2 = FadeDown(400, WaitAtEnd);
         FadeDown fade3 = FadeDown(400, WaitAtEnd);
-        Interval<PoissonInterval> sometimes1 = Interval<PoissonInterval>(1000);
-        Interval<PoissonInterval> sometimes2 = Interval<PoissonInterval>(1000);
-        Interval<PoissonInterval> sometimes3 = Interval<PoissonInterval>(1000);
-        //Timeline tl = Timeline(1000);
+        Interval<PoissonInterval> sometimes1 = Interval<PoissonInterval>(700);
+        Interval<PoissonInterval> sometimes2 = Interval<PoissonInterval>(700);
+        Interval<PoissonInterval> sometimes3 = Interval<PoissonInterval>(1500);
     public:
         inline void Calculate(RGBA *pixels, int width, bool active) override
         {
@@ -96,12 +94,9 @@ namespace LedStrip
             for (int index = 0; index < width; index++)
             {
                 pixels[index] +=
-                    RGBA(127, 255, 0,
-                         fade1.getValue(fromRight(index, width, 300)) * (fade1.getValue()) * 255) +
-                    RGBA(255, 127, 0,
-                         fade2.getValue(fromRight(index, width, 300)) * (fade2.getValue()) * 255) +
-                    RGBA(200, 200, 0,
-                         fade3.getValue(fromRight(index, width, 300)) * (fade3.getValue()) * 255);
+                    Params::getPrimaryColour() * fade1.getValue(Transition::fromRight(index, width, 300)) * (fade1.getValue()) +
+                    Params::getSecondaryColour() * fade2.getValue(Transition::fromRight(index, width, 300)) * (fade2.getValue()) +
+                    Params::getHighlightColour() * fade3.getValue(Transition::fromRight(index, width, 300)) * (fade3.getValue()) ;
             }
         }
     };
@@ -145,7 +140,7 @@ namespace LedStrip
             {
                 int permutedQuantized = perm.at[index * numSegments / width] * width / numSegments;
                 int interval = avgInterval + permutedQuantized * (avgInterval * precision) / width;
-                pixels[index] += RGBA(200, 0, 200, 255 * lfo.getValue(0, interval));
+                pixels[index] += Params::getPrimaryColour() * lfo.getValue(0, interval);
             }
         }
     };
@@ -157,8 +152,8 @@ namespace LedStrip
         Timeline timeline = Timeline(50);
         Permute perm = Permute(numSegments);
         Transition transition = Transition(
-            200, none, 0,
-            500, none, 0);
+            200, Transition::none, 0,
+            500, Transition::none, 0);
         inline void Calculate(RGBA *pixels, int width, bool active) override
         {
             if (!transition.Calculate(active))
@@ -169,12 +164,12 @@ namespace LedStrip
             if (timeline.Happened(0))
                 perm.permute();
 
-            uint8_t val = timeline.GetTimelinePosition() < 25 ? 255 * transition.getValue() : 0;
+            float val = timeline.GetTimelinePosition() < 25 ? transition.getValue() : 0;
 
             for (int index = 0; index < width; index++)
             {
                 int segmentNumber = perm.at[index * numSegments / width];
-                pixels[index] += RGBA(255, 255, 255, segmentNumber < numOn ? val : 0);
+                pixels[index] += Params::getHighlightColour() * (segmentNumber < numOn ? val : 0);
             }
         }
     };
@@ -184,8 +179,8 @@ namespace LedStrip
         int index, numStrips;
         LFO<SinFast> lfo = LFO<SinFast>(5000);
         Transition transition = Transition(
-            200, none, 0,
-            1000, none, 0);
+            200, Transition::none, 0,
+            1000, Transition::none, 0);
     public:
         SinStripPattern(int index, int numStrips){
             this->index=index;
@@ -197,7 +192,7 @@ namespace LedStrip
             if (!transition.Calculate(active))
                 return;
 
-            RGBA col = RGBA(255,100,0,transition.getValue() * lfo.getValue((float)index/numStrips) * 255);
+            RGBA col = Params::getPrimaryColour() * transition.getValue() * lfo.getValue((float)index/numStrips);
 
             for (int index = 0; index < width; index++)
                 pixels[index] += col;
@@ -206,11 +201,9 @@ namespace LedStrip
 
     class GradientPattern : public LayeredPattern<RGBA>
     {
-        RGBA col1 = RGBA(255,255,255,50);
-        RGBA col2 = RGBA(255,127,0,255);
         Transition transition = Transition(
-            200, none, 0,
-            1000, none, 0);
+            200, Transition::none, 0,
+            1000, Transition::none, 0);
     public:
 
         inline void Calculate(RGBA *pixels, int width, bool active) override
@@ -219,7 +212,7 @@ namespace LedStrip
                 return;
 
             for (int index = 0; index < width; index++){
-                pixels[index] += (col2 + col1*((float)index/(width-1)) ) * transition.getValue();
+                pixels[index] += (Params::getPrimaryColour() + Params::getHighlightColour() *((float)index/(width-1)) ) * transition.getValue();
             }
         }
     };
