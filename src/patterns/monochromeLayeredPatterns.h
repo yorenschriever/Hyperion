@@ -25,6 +25,7 @@ class SinPattern : public LayeredPattern<Monochrome>
     int direction;
     float phase;
 
+    LFO<SinFast> lfo;
     Transition transition = Transition(
         1000,Transition::none,0,
         1000,Transition::none,0
@@ -42,7 +43,7 @@ public:
             return; //the fade out is done. we can skip calculating pattern data
 
         for (int index = 0; index < width; index++)
-            pixels[index] += Monochrome((uint8_t)(127.f + 127.f * cos(float(index) / float(width) * (2*3.1415) - direction * millis() / 1000. + phase))) * transition.getValue(index,width);
+            pixels[index] += Monochrome(255*lfo.getValue(float(index) / width, direction*250)) * transition.getValue(index,width);
     }
 
 };

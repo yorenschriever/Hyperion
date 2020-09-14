@@ -8,7 +8,7 @@
 #define CONV12TO8 255/4096
 
 //Colours currently fulfill 2 purposes:
-//1. act as a struct to store colur data. This can be used by the 
+//1. act as a struct to store colour data. This can be used by the 
 //transfer function to convert different colour spaces.
 //2. as a method to create patterns: layer colours on top of eachother
 //I have chosen to combine both things into a single set of classes.
@@ -33,6 +33,8 @@ class GRB;
 class Monochrome12;
 class RGB12;
 class RGBA;
+class RGBWAmber;
+class Miniwash7;
 
 class Monochrome : Colour
 {
@@ -338,6 +340,7 @@ public:
     }
 
     operator RGB();
+    operator RGBA();
 
     uint8_t H;
 };
@@ -406,6 +409,7 @@ public:
 
     operator RGB();
     operator GRB();
+    operator RGBWAmber();
 
     //overload some operators to quickly apply some blend modes
     //https://en.wikipedia.org/wiki/Blend_modes#Normal_blend_mode
@@ -479,9 +483,181 @@ public:
     uint8_t R, G, B, A;
 };
 
+class RGBWAmber : Colour{
+    public:
+    RGBWAmber()
+    {
+        this->R = 0;
+        this->G = 0;
+        this->B = 0;
+        this->W = 0;
+        this->A = 0;
+        //this->U = 0;
+    }
 
-inline RGBA::operator RGB() { return RGB(R*A>>8,G*A>>8,B*A>>8); }
-inline RGBA::operator GRB() { return GRB(G*A>>8,R*A>>8,B*A>>8); }
+    RGBWAmber(uint8_t R, uint8_t G, uint8_t B, uint8_t W, uint8_t A) //, uint8_t U)
+    {
+        this->R = R;
+        this->G = G;
+        this->B = B;
+        this->W = W;
+        this->A = A;
+        //this->U = U;
+    }
+
+    inline void ApplyLut(LUT *lut)
+    {
+        R = lut->luts[0 % lut->Dimension][R];
+        G = lut->luts[1 % lut->Dimension][G];
+        B = lut->luts[2 % lut->Dimension][B];
+        W = lut->luts[3 % lut->Dimension][W];
+        A = lut->luts[4 % lut->Dimension][A];
+        //U = lut->luts[5 % lut->Dimension][U];
+    }
+
+    inline void dim(uint8_t value)
+    {
+        R = (R * value) >> 8;
+        G = (G * value) >> 8;
+        B = (B * value) >> 8;
+        W = (W * value) >> 8;
+        A = (A * value) >> 8;
+        //U = (U * value) >> 8;
+    }
+
+    uint8_t R=0, G=0, B=0, W=0, A=0; //, U;
+};
+
+class MovingHead : Colour {
+public:
+    MovingHead()
+    {
+    }
+
+    //pan/tilt angles in degrees
+    MovingHead(float pan, float tilt, RGBA colour, uint8_t uv=0)
+    {
+        this->pan=pan;
+        this->tilt=tilt;
+        this->colour=colour;
+        this->uv=uv;
+    }
+
+    inline void dim(uint8_t value)
+    {
+        colour.dim(value);
+    }
+
+
+    MovingHead operator+ (MovingHead other){
+        MovingHead result = MovingHead(*this);
+        result += other;
+        return result;
+    }
+
+    MovingHead& operator+= (const MovingHead& other){
+        //this = bottom
+        //other = top
+
+        //take LTP values from top layer
+        pan = other.pan;
+        tilt=other.tilt;
+
+        //HTP for uv channel
+        uv = std::max(uv,other.uv);
+
+        //mix RGB colours
+        colour += other.colour;
+
+        return *this;
+    }
+
+    MovingHead operator* (float scale){
+        return MovingHead(pan, tilt, colour * scale, constrain(uv * scale,0,255));
+    }
+
+    operator Miniwash7();
+
+    //angles in degrees
+    float pan=0;
+    float tilt=0;
+    RGBA colour;
+    uint8_t uv=0;
+};
+
+class Miniwash7 : Colour {
+    public:
+
+    Miniwash7()
+    {
+        this->pan = 0;
+        this->tilt = 0;
+        this->colour = RGBWAmber();
+        this->uv=0;
+    }
+
+    Miniwash7(uint16_t pan, uint16_t tilt, RGBWAmber colour, uint8_t uv=0)
+    {
+        this->pan=pan >> 8;
+        this->panfine=(pan & 0xFF)/8;
+        this->tilt=tilt >> 8;
+        this->tiltfine=(tilt & 0xFF)/8;
+        this->colour=colour;
+        this->uv=uv;
+    }
+
+    inline void dim(uint8_t value)
+    {
+        colour.dim(value);
+        uv = uv * value / 255;
+    }
+
+    inline void ApplyLut(LUT *lut)
+    {
+        colour.ApplyLut(lut);
+    }
+
+    uint8_t pan=0;
+    uint8_t panfine=0;
+    uint8_t tilt=0;
+    uint8_t tiltfine=0;
+    uint8_t padding1=0;
+    uint8_t strobedim=255;
+    RGBWAmber colour;
+    uint8_t uv=0;
+    uint8_t dontuse1=0;
+    uint8_t dontuse2=0;
+    uint8_t dontuse3=0;
+};
+
+inline MovingHead::operator Miniwash7() 
+{ 
+    return Miniwash7(
+        (constrain(pan,-180,360)+180)*0xFFFF/(180+360), 
+        (constrain(tilt,-90,90)+90)*0xFFFF/180, 
+        colour, 
+        uv); 
+}
+
+
+inline RGBA::operator RGB() { return RGB(R*A/255,G*A/255,B*A/255); }
+inline RGBA::operator GRB() { return GRB(G*A/255,R*A/255,B*A/255); }
+inline RGBA::operator RGBWAmber() { 
+    //return RGBWAmber(R*A/255, G*A/255, B*A/255, 0,0);
+
+    uint8_t Wnew = min(min(R,G),B);
+    uint8_t Rnew = R-Wnew;
+    uint8_t Gnew = G-Wnew;
+    uint8_t Bnew = B-Wnew;
+    //amber = (RGB: 255, 191, 0)
+    int amberinred = Rnew * 255 / 255;   //value 0-255 indicating how much amber we can extract from this channel
+    int amberingreen = Gnew * 255 / 191; //value 0-255 indicating how much amber we can extract from this channel
+    uint8_t Anew = std::min(amberinred,amberingreen); //the most amber we can extract from the channels combined
+    Rnew = Rnew - Anew;
+    Gnew = Gnew - (Anew * 191 / 255);
+
+    return RGBWAmber(Rnew*A/255, Gnew*A/255, Bnew*A/255, Wnew*A/255, Anew*A/255); 
+}
 
 inline Monochrome::operator RGB() { return RGB(L, L, L); }
 inline Monochrome::operator RGB12() { return RGB12(L * CONV8TO12, L * CONV8TO12, L * CONV8TO12); }
@@ -566,7 +742,10 @@ inline Hue::operator RGB()
         return RGB(WheelPos * 3, 255 - WheelPos * 3, 0);
     }
 }
-
+inline Hue::operator RGBA()
+{
+    return static_cast<RGBA>(static_cast<RGB>(*this));
+}
 
 inline HSV::operator RGB()
 {

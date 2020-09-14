@@ -12,12 +12,12 @@ public:
     //a pattern.
     //mostly used to fade in/out layered patterns 
     Transition(
-        unsigned int fadeInDuration=200,
-        FadeShape fadeInShape=none,
-        unsigned int fadeInShapeSize=0,
-        unsigned int fadeOutDuration=200,
-        FadeShape fadeOutShape=none,
-        unsigned int fadeOutShapeSize=0
+        unsigned int fadeInDuration,
+        FadeShape fadeInShape,
+        unsigned int fadeInShapeSize,
+        unsigned int fadeOutDuration,
+        FadeShape fadeOutShape,
+        unsigned int fadeOutShapeSize
     )
     {
         fadein.duration = fadeInDuration;
@@ -26,6 +26,20 @@ public:
         this->fadeOutShapeSize = fadeOutShapeSize;
         this->fadeInShape = fadeInShape;
         this->fadeOutShape = fadeOutShape;
+        lastActive=false;
+    }
+
+    Transition(
+        unsigned int fadeInDuration=200,
+        unsigned int fadeOutDuration=200
+    )
+    {
+        fadein.duration = fadeInDuration;
+        fadeout.duration = fadeOutDuration;
+        this->fadeInShapeSize = 0;
+        this->fadeOutShapeSize = 0;
+        this->fadeInShape = none;
+        this->fadeOutShape = none;
         lastActive=false;
     }
 

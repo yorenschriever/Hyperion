@@ -14,6 +14,7 @@
 #include "inputs/layeredPatternInput.h"
 #include "patterns/rgbPatterns.h"
 #include "patterns/ledstripPatterns.h"
+#include "patterns/movingheadPatterns.h"
 #include "patterns/monochromePatterns.h"
 #include "luts/colourCorrectionLut.h"
 #include "luts/gammaLut.h"
@@ -35,10 +36,10 @@ void LoadConfiguration()
 
     Configuration.pipes = {
         Pipe(
-            new LayeredPatternInput<RGBA>(60,new LedStrip::HueGlowPattern()),
-            new NeopixelOutput<Kpbs800>(1),
-            Pipe::transfer<RGBA, GRB>,
-            NeopixelLut),
+            new LayeredPatternInput<MovingHead>(3,new MovingheadPatterns::TestPattern()),
+            new DMXOutput(30),
+            Pipe::transfer<MovingHead,Miniwash7>
+        )
     };
 
 }

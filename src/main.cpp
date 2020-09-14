@@ -88,7 +88,7 @@ void setup()
     Rotary::onRotate(rotate);
 
     DMX::SendFullFrame(false); //speed up dmx transmission by only sending the bytes that have a value
-    DMX::SetUniverseSize(37,7); //handle some quirks of the the midi device i use for testing
+    DMX::SetUniverseSize(37,37); //handle some quirks of the the midi device i use for testing
 
     Debug.println("Starting outputs");
     for (Pipe pipe : Configuration.pipes)
@@ -213,6 +213,7 @@ void UpdateDisplay(void *parameter)
         Debug.printf("FPS: %d of %d (%d%% miss)\t interval: %dms \t freeHeap: %d \t avg length: %d \t channel: %d \n", (int)outfps, (int)infps, (int)misses, (int)elapsedTime, ESP.getFreeHeap(), avglength, activeChannels);
         //Debug.printf("IPAddress: %s\n", Ethernet::GetIp().toString().c_str());
         //Debug.printf("Tempo source: %s\n", Tempo::SourceName());
+        Debug.printf("sizeof miniwash %d\n", sizeof(Miniwash7));
 
         Display::setFPS(infps,outfps,misses);
         Display::setLeds(totalLength);

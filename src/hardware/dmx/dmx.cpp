@@ -209,6 +209,8 @@ void DMX::Write(uint8_t *data, int size, int index)
         memcpy(dmx_tx_buffer + index, data, copylength);
 
     tx_size = std::max((int)tx_size, index + copylength);
+
+    //Debug.printf("DMX write %d\n",index);
 }
 
 void DMX::SendDMXAsync(void *param)
@@ -241,7 +243,7 @@ void DMX::SendBuffer(uint8_t *buf, int size)
     uart_wait_tx_done_iram(DMX_UART_NUM, 500);
 
     static const DRAM_ATTR char nullBuf = 0;
-    uart_write_bytes_with_break_iram(DMX_UART_NUM, &nullBuf, 1, 25); //break time is in bit length
+    uart_write_bytes_with_break_iram(DMX_UART_NUM, &nullBuf, 1, 44); //break time is in bit length
 
     //https://github.com/espressif/esp-idf/issues/703
     // this solution is only making it worse. somehow it changes some bytes (eg channel 10 is always off)
@@ -270,7 +272,7 @@ void DMX::SendBuffer(uint8_t *buf, int size)
     //{
     vTaskDelay(5 / portTICK_PERIOD_MS);   //wait a little the the tx has time to start https://www.esp32.com/viewtopic.php?t=10469
     uart_wait_tx_done_iram(DMX_UART_NUM, 500); //wait till completed. at most 100 RTOS ticks (=100ms?)
-                                          //vTaskDelay(1 / portTICK_PERIOD_MS); //wait an additional inter frame period
+    vTaskDelay(1 / portTICK_PERIOD_MS); //wait an additional inter frame period
     //}
 }
 
