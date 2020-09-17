@@ -217,4 +217,44 @@ namespace LedStrip
         }
     };
 
+class BlinderPattern : public LayeredPattern<RGBA>
+{
+    public:
+    BlinderPattern(FadeShape in=Transition::none, FadeShape out=Transition::none, uint8_t intensity=255, int fadein=200, int fadeout=600)
+    {
+        transition = Transition(
+            fadein,in,200,
+            fadeout,out,500
+        );
+        this->intensity=intensity;
+    } 
+     
+protected:
+    Transition transition;
+    uint8_t intensity;
+
+    inline void Calculate(RGBA *pixels, int width, bool active) override
+    {
+        if (!transition.Calculate(active))
+            return; //the fade out is done. we can skip calculating pattern data
+
+        for (int index = 0; index < width; index++)
+            pixels[index] += Params::getPrimaryColour() * transition.getValue(index,width);
+    }
+};
+
+class SlowStrobePattern : public LayeredPattern<RGBA>
+{
+    inline void Calculate(RGBA *pixels, int width, bool active) override
+    {
+        if (!active)
+            return;
+
+        RGBA col = millis() % 100 < 25 ? Params::getPrimaryColour() :RGBA();
+
+        for (int index = 0; index < width; index++)
+            pixels[index] = col;
+    }
+};
+
 } // namespace LedStrip

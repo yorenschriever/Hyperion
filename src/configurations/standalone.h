@@ -31,260 +31,12 @@
 //LUT *NeopixelLut = new ColourCorrectionLUT(1.5, 255, 176, 255, 240);
 
 LUT *NeopixelLut = new ColourCorrectionLUT(1.2, 255, 176, 200, 255);
-LUT *IncandescentLut = new IncandescentLUT(2.5, 4096, 400);
+LUT *IncandescentLut = new IncandescentLUT(2.5, 4096, 200);
 LUT *IncandescentLut8 = new IncandescentLUT(2.5, 255, 24);
 LUT *GammaLut12 = new GammaLUT(2.5, 4096);
 
-void LoadConfiguration()
+void updateParams()
 {
-
-    Configuration.hostname = "HyperionMaster";
-    Configuration.pwmFrequency = 100;
-
-    Configuration.tapMidiNote = 98;
-    Configuration.tapStopMidiNote = 89;
-    Configuration.tapAlignMidiNote = 88;
-    Configuration.tapBarAlignMidiNote = 87;
-
-    Configuration.pipes = {
-        // Pipe(
-        //     //create an apcmini input that creates monochrome patterns
-        //     new LayeredApcminiInput<Monochrome>(
-        //         30,
-        //         0,
-        //         new LayeredPattern<Monochrome> *[8] {
-        //             new Layered::SinPattern(),
-        //             new Layered::SinPattern(1),
-        //             new Layered::SinPattern(-1),
-        //             new Layered::BeatShakePattern(),
-        //             new Layered::GlitchPattern(),
-        //             new Layered::SinPattern(),
-        //             new Layered::SlowStrobePattern(),
-        //             new Layered::BlinderPattern()
-        //         }),
-        //     new DMXOutput(1)
-        //     //new NullOutput()
-        //     ),
-
-        // // Pipe(
-        // //     //create an apcmini input that creates monochrome patterns
-        // //     new ApcminiInput<Monochrome>(
-        // //         30,
-        // //         1,
-        // //         new Pattern<Monochrome> *[8] {
-        // //             new SinPattern(),
-        // //                 new SawPattern(),
-        // //                 new RandomPattern(),
-        // //                 new RandomPattern2(),
-        // //                 new MeteorPattern(),
-        // //                 new RandomFadePattern(),
-        // //                 new SlowStrobePattern(),
-        // //                 new FastStrobePattern()
-        // //         }),
-        // //     new DMXOutput(31)),
-
-        ///////////////////////
-        // PAR
-        ///////////////////////
-        Pipe(
-            new LayeredApcminiInput<Monochrome>(
-                1,
-                1,
-                new LayeredPattern<Monochrome> *[8] {
-                    new Layered::BlinderPattern(Transition::none, Transition::none,255,100,1500),
-                    new Layered::SinPattern(),
-                    new Layered::SinPattern(4,3.1415),
-                    new Layered::SinPattern(),
-                    new Layered::BeatAllFadePattern(1000),
-
-                    new Layered::BlinderPattern(Transition::none, Transition::none,255,100,1500),
-                    new Layered::BeatAllFadePattern(600),
-                    new Layered::BeatAllFadePattern(150)
-                }),
-            new PWMOutput(12),
-            Pipe::transfer<Monochrome, Monochrome12>,
-            IncandescentLut),
-
-        ///////////////////////
-        // VERGIET
-        ///////////////////////
-        Pipe(
-            new LayeredApcminiInput<Monochrome>(
-                10,
-                2,
-                new LayeredPattern<Monochrome> *[8] {
-                    new Layered::BlinderPattern(Transition::fromCenter, Transition::fromSides,150,1000,1500),
-                    new Layered::BeatMultiFadePattern(500),
-                    new Layered::SinPattern(),
-                    new Layered::GlowPattern(),
-                    new Layered::BeatShakePattern(),
-
-                    new Layered::BlinderPattern(Transition::fromLeft,Transition::fromRight),
-                    new Layered::BeatAllFadePattern(600),
-                    new Layered::GlitchPattern()
-                }),
-            //new PWMOutput(),
-            //Pipe::transfer<Monochrome, Monochrome12>,
-            //IncandescentLut
-            new DMXOutput(128),
-            Pipe::transfer<Monochrome, Monochrome>,
-            IncandescentLut8),
-
-        ///////////////////////
-        // NEOPIXEL LEDSTRIPS
-        ///////////////////////
-
-
-        Pipe( 
-            new LayeredApcminiInput<RGBA>(
-                60, //width of the pattern, in pixels
-                3,   //button column on the apc to listen to (0-7)
-                new LayeredPattern<RGBA> *[8] {
-                //the patterns to attach to the buttons
-                    new LedStrip::TripleFadePattern(),
-                    new LedStrip::HueGlowPattern(),
-                    new LedStrip::MeteorPattern(),
-                    new LedStrip::ClivePattern(),
-                    new LedStrip::GlitchPattern(),
-                    new LedStrip::SinStripPattern(1,2),
-                    new LedStrip::GradientPattern(),
-                    new LedStrip::HueGlowPattern()
-                }),
-            new NeopixelOutput<Kpbs800>(2),
-            Pipe::transfer<RGBA, GRB>,
-            NeopixelLut),
-
-        Pipe(
-            new LayeredApcminiInput<RGBA>(
-                60, //width of the pattern, in pixels
-                3,   //button column on the apc to listen to (0-7)
-                //the patterns to attach to the buttons
-                new LayeredPattern<RGBA> *[8] {
-                    new LedStrip::TripleFadePattern(),
-                    new LedStrip::HueGlowPattern(),
-                    new LedStrip::MeteorPattern(),
-                    new LedStrip::ClivePattern(),
-                    new LedStrip::GlitchPattern(),
-                    new LedStrip::SinStripPattern(0,2),
-                    new LedStrip::GradientPattern(),
-                    new LedStrip::HueGlowPattern()
-                }),
-            new NeopixelOutput<Kpbs800>(1),
-            Pipe::transfer<RGBA, GRB>,
-            NeopixelLut),
-
-        ///////////////////////
-        // MOVING HEAD
-        ///////////////////////
-
-        Pipe(
-            new LayeredApcminiInput<MovingHead>(
-                3,
-                4,
-                new LayeredPattern<MovingHead> *[8] {
-                    //new MovingheadPatterns::Flash360Pattern(),
-                    new MovingheadPatterns::TestPattern(),
-                    new MovingheadPatterns::WallPattern(),
-                    new MovingheadPatterns::WallDJPattern(),
-                    new MovingheadPatterns::FrontPattern(),
-                    new MovingheadPatterns::SidesPattern(),
-                    new MovingheadPatterns::FrontPattern(),
-                    new MovingheadPatterns::GlitchPattern(),
-                    new MovingheadPatterns::UVPattern(),
-                }),
-            new DMXOutput(30),
-            Pipe::transfer<MovingHead,Miniwash7>
-        ),
-
-        ///////////////////////
-        // FAIRYLIGHTS
-        ///////////////////////
-        Pipe(
-            new LayeredApcminiInput<Monochrome>(
-                1,
-                5,
-                new LayeredPattern<Monochrome> *[8] {
-                    new Layered::BlinderPattern(Transition::none, Transition::none,255,100,1500),
-                    new Layered::SinPattern(),
-                    new Layered::SinPattern(4,3.1415),
-                    new Layered::SlowStrobePattern(),
-                    new Layered::BeatAllFadePattern(1000),
-
-                    new Layered::BlinderPattern(Transition::none, Transition::none,255,100,1500),
-                    new Layered::BeatAllFadePattern(150),
-                    new Layered::FastStrobePattern(),
-                }),
-            new PWMOutput(11),
-            Pipe::transfer<Monochrome, Monochrome12>,
-            GammaLut12),
-
-        ///////////////////////
-        // LASERS
-        ///////////////////////
-        Pipe(
-            new LayeredApcminiInput<Monochrome>(
-                10, //width of the pattern, in pixels
-                6,  //button column on the apc to listen to (0-7)
-                //the patterns to attach to the buttons
-                new LayeredPattern<Monochrome> *[8] {
-                new Layered::BlinderPattern(Transition::fromLeft,Transition::fromLeft,255),
-                new Layered::SinPattern(),
-                new Layered::BeatSingleFadePattern(),
-                new Layered::BeatMultiFadePattern(),
-                new Layered::BeatShakePattern(),
-                new Layered::BlinderPattern(Transition::fromLeft,Transition::fromLeft,255),
-                new Layered::GlitchPattern(),
-                new Layered::SlowStrobePattern()
-                }),
-            new UDPOutput("lasers.local", 9619, 100),
-            Pipe::transfer<Monochrome, Monochrome12>),
-
-        ///////////////////////
-        // STROBES
-        ///////////////////////
-        Pipe(
-            new LayeredApcminiInput<Monochrome>(
-                10, //width of the pattern, in pixels
-                7,  //button column on the apc to listen to (0-7)
-                //the patterns to attach to the buttons
-                new LayeredPattern<Monochrome> *[8] {
-                new Layered::BeatAllFadePattern(),
-                new Layered::BeatSingleFadePattern(),
-                new Layered::GlitchPattern(),
-                new Layered::BeatShakePattern(),
-                new Layered::SlowStrobePattern(),
-                new Layered::BlinderPattern(Transition::fromCenter,Transition::fromCenter),
-                new Layered::GlitchPattern(),
-                new Layered::FastStrobePattern()
-                }),
-            new UDPOutput("strobes.local", 9619, 100),
-            Pipe::transfer<Monochrome, Monochrome12>),
-
-        ///////////////////////
-        // BPM FILL LEDS
-        ///////////////////////
-        // Pipe(
-        //     new PatternInput<RGB>(32,new BPMFillPattern()),
-        //     new NeopixelOutput<Kpbs800>(2),
-        //     Pipe::transfer<RGB, GRB>,
-        //     NeopixelLut),
-
-        ///////////////////////
-        // BPM INDICATOR
-        ///////////////////////
-        Pipe(
-            new PatternInput<RGB>(1, new BPMIndicatorPattern()),
-            new RotaryOutput()),
-
-        // Pipe(
-        //     new PatternInput<RGB>(16, new WatcherPattern2()),
-        //     new NeopixelOutput<Kpbs800>(1),
-        //     Pipe::transfer<RGB, GRB>,
-        //     NeopixelLut)
-
-    };
-
-    Configuration.paramCalculator = []() {
         const int apcColumn = 0;
         if (APCMini::getStatus(apcColumn,0)){
             //Pink
@@ -336,11 +88,319 @@ void LoadConfiguration()
         }
 
         if (APCMini::getStatus(apcColumn,7)){
-            //green purple
-            Params::primaryColour = RGB(0,255,0);
-            Params::secondaryColour = RGB(0,255,0);
-            Params::highlightColour = RGB(255,0,255);
+            //blue red
+            Params::primaryColour = RGB(0,0,255);
+            Params::secondaryColour = RGB(255,0,255);
+            Params::highlightColour = RGB(255,0,0);
         }
+}
+
+void LoadConfiguration()
+{
+
+    Configuration.hostname = "HyperionMaster";
+    Configuration.pwmFrequency = 100;
+
+    Configuration.tapMidiNote = 98;
+    Configuration.tapStopMidiNote = 89;
+    Configuration.tapAlignMidiNote = 88;
+    Configuration.tapBarAlignMidiNote = 87;
+    
+    Configuration.paramCalculator = updateParams;
+
+
+    Configuration.pipes = {
+        // Pipe(
+        //     //create an apcmini input that creates monochrome patterns
+        //     new LayeredApcminiInput<Monochrome>(
+        //         30,
+        //         0,
+        //         new LayeredPattern<Monochrome> *[8] {
+        //             new Layered::SinPattern(),
+        //             new Layered::SinPattern(1),
+        //             new Layered::SinPattern(-1),
+        //             new Layered::BeatShakePattern(),
+        //             new Layered::GlitchPattern(),
+        //             new Layered::SinPattern(),
+        //             new Layered::SlowStrobePattern(),
+        //             new Layered::BlinderPattern()
+        //         }),
+        //     new DMXOutput(1)
+        //     //new NullOutput()
+        //     ),
+
+        // // Pipe(
+        // //     //create an apcmini input that creates monochrome patterns
+        // //     new ApcminiInput<Monochrome>(
+        // //         30,
+        // //         1,
+        // //         new Pattern<Monochrome> *[8] {
+        // //             new SinPattern(),
+        // //                 new SawPattern(),
+        // //                 new RandomPattern(),
+        // //                 new RandomPattern2(),
+        // //                 new MeteorPattern(),
+        // //                 new RandomFadePattern(),
+        // //                 new SlowStrobePattern(),
+        // //                 new FastStrobePattern()
+        // //         }),
+        // //     new DMXOutput(31)),
+
+
+        ///////////////////////
+        // BPM PULSE INDICATOR
+        ///////////////////////
+        new Pipe(
+            new PatternInput<RGB>(1, new BPMIndicatorPattern()),
+            new RotaryOutput()),
+
+            
+
+        ///////////////////////
+        // PAR & FAIRYLIGHTS
+        ///////////////////////
+
+        //PAR
+        new Pipe(
+            new LayeredApcminiInput<Monochrome>(
+                1,
+                1,
+                new LayeredPattern<Monochrome> *[8] {
+                    new Layered::BlinderPattern(Transition::none, Transition::none,255,100,1500),
+                    new Layered::SinPattern(),
+                    new Layered::EmptyPattern(),
+                    new Layered::EmptyPattern(),
+                    new Layered::EmptyPattern(),
+
+                    new Layered::BlinderPattern(Transition::none, Transition::none,255,100,1500),
+                    new Layered::EmptyPattern(),
+                    new Layered::EmptyPattern()
+                }),
+            new PWMOutput(12),
+            Pipe::transfer<Monochrome, Monochrome12>,
+            IncandescentLut),
+
+        //FAIRY
+        new Pipe(
+            new LayeredApcminiInput<Monochrome>(
+                1,
+                1,
+                new LayeredPattern<Monochrome> *[8] {
+                    new Layered::BlinderPattern(Transition::none, Transition::none,255,100,1500),
+                    new Layered::SinPattern(4,3.1415),
+                    new Layered::BeatAllFadePattern(1000),
+                    new Layered::BeatAllFadePattern(150),
+                    new Layered::SlowStrobePattern(),
+
+                    new Layered::BlinderPattern(Transition::none, Transition::none,255,100,1500),
+                    new Layered::SlowStrobePattern(),
+                    new Layered::FastStrobePattern(),
+                }),
+            new PWMOutput(11),
+            Pipe::transfer<Monochrome, Monochrome12>,
+            GammaLut12),
+
+        ///////////////////////
+        // VERGIET
+        ///////////////////////
+
+        //on dmx for testing at home
+        new Pipe(
+            new LayeredApcminiInput<Monochrome>(
+                10,
+                2,
+                new LayeredPattern<Monochrome> *[8] {
+                    new Layered::BlinderPattern(Transition::fromCenter, Transition::fromSides,150,1000,1500),
+                    new Layered::GlowPattern(),
+                    new Layered::SinPattern(),
+                    new Layered::BeatMultiFadePattern(500),
+                    new Layered::GlitchPattern(),
+                    
+                    new Layered::BlinderPattern(Transition::fromLeft,Transition::fromRight),
+                    new Layered::GlitchPattern(),
+                    new Layered::BeatAllFadePattern(600),
+                }),
+            //new PWMOutput(),
+            //Pipe::transfer<Monochrome, Monochrome12>,
+            //IncandescentLut
+            new DMXOutput(128),
+            Pipe::transfer<Monochrome, Monochrome>,
+            IncandescentLut8),
+
+        //on pwm output for on location
+        new Pipe(
+            new LayeredApcminiInput<Monochrome>(
+                10,
+                2,
+                new LayeredPattern<Monochrome> *[8] {
+                    new Layered::BlinderPattern(Transition::fromCenter, Transition::fromSides,150,1000,1500),
+                    new Layered::GlowPattern(),
+                    new Layered::SinPattern(),
+                    new Layered::BeatMultiFadePattern(500),
+                    new Layered::GlitchPattern(),
+                    
+                    new Layered::BlinderPattern(Transition::fromLeft,Transition::fromRight),
+                    new Layered::GlitchPattern(),
+                    new Layered::BeatAllFadePattern(600),
+                }),
+            new PWMOutput(),
+            Pipe::transfer<Monochrome, Monochrome12>,
+            IncandescentLut),
+            
+        ///////////////////////
+        // NEOPIXEL LEDSTRIPS
+        ///////////////////////
+
+
+        new Pipe( 
+            new LayeredApcminiInput<RGBA>(
+                60, //width of the pattern, in pixels
+                3,   //button column on the apc to listen to (0-7)
+                new LayeredPattern<RGBA> *[8] {
+                //the patterns to attach to the buttons
+                    new LedStrip::GradientPattern(),
+                    new LedStrip::ClivePattern(),
+                    new LedStrip::TripleFadePattern(),
+                    new LedStrip::MeteorPattern(),
+                    new LedStrip::GlitchPattern(),
+
+                    new LedStrip::BlinderPattern(Transition::fromCenter, Transition::fromSides,150,1000,1500),
+                    new LedStrip::GlitchPattern(),
+                    new LedStrip::SlowStrobePattern()
+                }),
+            new NeopixelOutput<Kpbs800>(2),
+            Pipe::transfer<RGBA, GRB>,
+            NeopixelLut),
+
+        new Pipe(
+            new LayeredApcminiInput<RGBA>(
+                60, //width of the pattern, in pixels
+                3,   //button column on the apc to listen to (0-7)
+                //the patterns to attach to the buttons
+                new LayeredPattern<RGBA> *[8] {
+                    new LedStrip::GradientPattern(),
+                    new LedStrip::ClivePattern(),
+                    new LedStrip::TripleFadePattern(),
+                    new LedStrip::MeteorPattern(),
+                    new LedStrip::GlitchPattern(),
+
+                    new LedStrip::BlinderPattern(Transition::fromCenter, Transition::fromSides,150,1000,1500),
+                    new LedStrip::GlitchPattern(),
+                    new LedStrip::SlowStrobePattern()
+                }),
+            new NeopixelOutput<Kpbs800>(1),
+            Pipe::transfer<RGBA, GRB>,
+            NeopixelLut),
+
+        ///////////////////////
+        // MOVING HEAD
+        ///////////////////////
+
+        new Pipe(
+            new LayeredApcminiInput<MovingHead>(
+                3,
+                4,
+                new LayeredPattern<MovingHead> *[8] {
+                    //
+                    //new MovingheadPatterns::TestPattern(),
+                    new MovingheadPatterns::WallPattern(),
+                    new MovingheadPatterns::WallDJPattern(),
+                    new MovingheadPatterns::SidesPattern(),
+                    new MovingheadPatterns::Flash360Pattern(),
+                    new MovingheadPatterns::GlitchPattern(),
+
+
+                    new MovingheadPatterns::FrontPattern(),
+                    new MovingheadPatterns::UVPattern(),
+                    new MovingheadPatterns::GlitchPattern(),
+                }),
+            new DMXOutput(30),
+            Pipe::transfer<MovingHead,Miniwash7>
+        ),
+
+        ///////////////////////
+        // FAIRYLIGHTS
+        ///////////////////////
+        // Pipe(
+        //     new LayeredApcminiInput<Monochrome>(
+        //         1,
+        //         5,
+        //         new LayeredPattern<Monochrome> *[8] {
+        //             new Layered::BlinderPattern(Transition::none, Transition::none,255,100,1500),
+        //             new Layered::SinPattern(),
+        //             new Layered::SinPattern(4,3.1415),
+        //             new Layered::SlowStrobePattern(),
+        //             new Layered::BeatAllFadePattern(1000),
+
+        //             new Layered::BlinderPattern(Transition::none, Transition::none,255,100,1500),
+        //             new Layered::BeatAllFadePattern(150),
+        //             new Layered::FastStrobePattern(),
+        //         }),
+        //     new PWMOutput(11),
+        //     Pipe::transfer<Monochrome, Monochrome12>,
+        //     GammaLut12),
+
+        ///////////////////////
+        // LASERS
+        ///////////////////////
+        new Pipe(
+            new LayeredApcminiInput<Monochrome>(
+                10, //width of the pattern, in pixels
+                6,  //button column on the apc to listen to (0-7)
+                //the patterns to attach to the buttons
+                new LayeredPattern<Monochrome> *[8] {
+                new Layered::BlinderPattern(Transition::fromLeft,Transition::fromLeft,255),
+                new Layered::SinPattern(),
+                new Layered::BeatSingleFadePattern(),
+                new Layered::BeatMultiFadePattern(),
+                new Layered::BeatShakePattern(),
+                new Layered::BlinderPattern(Transition::fromLeft,Transition::fromLeft,255),
+                new Layered::GlitchPattern(),
+                new Layered::SlowStrobePattern()
+                }),
+            new UDPOutput("lasers.local", 9619, 100),
+            Pipe::transfer<Monochrome, Monochrome12>),
+
+        ///////////////////////
+        // STROBES
+        ///////////////////////
+        new Pipe(
+            new LayeredApcminiInput<Monochrome>(
+                10, //width of the pattern, in pixels
+                7,  //button column on the apc to listen to (0-7)
+                //the patterns to attach to the buttons
+                new LayeredPattern<Monochrome> *[8] {
+                new Layered::BlinderPattern(Transition::fromCenter,Transition::fromCenter,80),
+                //new Layered::BeatSingleFadePattern(),
+                new Layered::BeatSingleFadePattern(),
+                new Layered::BeatShakePattern(),
+                new Layered::BeatAllFadePattern(),
+                new Layered::SlowStrobePattern(),
+
+                new Layered::BlinderPattern(Transition::fromCenter,Transition::fromCenter),
+                new Layered::GlitchPattern(),
+                new Layered::FastStrobePattern()
+                }),
+            new UDPOutput("strobes.local", 9619, 100),
+            Pipe::transfer<Monochrome, Monochrome12>
+        ),
+
+        ///////////////////////
+        // BPM FILL LEDS
+        ///////////////////////
+        // Pipe(
+        //     new PatternInput<RGB>(32,new BPMFillPattern()),
+        //     new NeopixelOutput<Kpbs800>(2),
+        //     Pipe::transfer<RGB, GRB>,
+        //     NeopixelLut),
+
+
+        // Pipe(
+        //     new PatternInput<RGB>(16, new WatcherPattern2()),
+        //     new NeopixelOutput<Kpbs800>(1),
+        //     Pipe::transfer<RGB, GRB>,
+        //     NeopixelLut)
+
     };
 }
 

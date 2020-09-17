@@ -22,7 +22,6 @@ void Rotary::Initialize(bool createQueueTask)
     hasQueueTask = createQueueTask;
 
     PCA9685::Initialize();
-    PCA9685::SetFrequency(1500);
 
     pinMode(CLKPIN, INPUT_PULLUP);
     pinMode(DATAPIN, INPUT_PULLUP);

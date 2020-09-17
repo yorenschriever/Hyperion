@@ -157,7 +157,11 @@ namespace MovingheadPatterns
             for (int index = 0; index < width; index++)
             {
                 RGBA col = index%2==0? Params::getPrimaryColour() : Params::getHighlightColour();
-                pixels[index] += MovingHead((index-width/2)*90-40+40*lfotilt.getValue(0.25),20+40*lfotilt.getValue(),col * (0.1+0.9*lfo.getValue((float)index/width)) * trans.getValue());
+                pixels[index] += MovingHead(
+                    (index-width/2)*40-40+40*lfotilt.getValue(0.25),
+                    20+40*lfotilt.getValue(),
+                    col * (0.1+0.9*lfo.getValue((float)index/width)) * trans.getValue()
+                );
             }
         }
     };

@@ -4,6 +4,16 @@
 namespace Layered
 {
 
+class EmptyPattern : public LayeredPattern<Monochrome>
+{
+public:
+
+    inline void Calculate(Monochrome *pixels, int width, bool active) override
+    {
+    }
+
+};
+
 //for debugging
 class SimplePattern : public LayeredPattern<Monochrome>
 {

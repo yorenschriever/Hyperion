@@ -10,7 +10,6 @@
 #include "sdkconfig.h"
 #include <Arduino.h>
 
-
 #include "debug.h"
 #include "pipe.h"
 #include "colours.h"
@@ -78,6 +77,16 @@ void setup()
     Debug.println("Loading configuration");
     LoadConfiguration();
 
+    //PWM frequency in Hz, choose 100 for incandescent and 1500 for led
+    //A higher frequency looks better, because it produces less flicker.
+    //This works great for leds, but if currents are high (indandescent)
+    //The mosfets will heat up quickly. Also the produced noise will be
+    //more audible. Incandescent lamps have a slow response, so you wont
+    //see the flicker as much. Setting the pwm frequency lower is better
+    //in that case.
+    PCA9685::Initialize();
+    PCA9685::SetFrequency(Configuration.pwmFrequency);
+
     Display::Initialize(); //initialize display before outputs
 
     Rotary::Initialize();
@@ -91,20 +100,12 @@ void setup()
     DMX::SetUniverseSize(37,37); //handle some quirks of the the midi device i use for testing
 
     Debug.println("Starting outputs");
-    for (Pipe pipe : Configuration.pipes)
-        pipe.out->Begin();
+    for (Pipe* pipe : Configuration.pipes)
+        pipe->out->Begin();
 
     clearall();
 
-    //PWM frequency in Hz, choose 100 for incandescent and 1500 for led
-    //A higher frequency looks better, because it produces less flicker.
-    //This works great for leds, but if currents are high (indandescent)
-    //The mosfets will heat up quickly. Also the produced noise will be
-    //more audible. Incandescent lamps have a slow response, so you wont
-    //see the flicker as much. Setting the pwm frequency lower is better
-    //in that case.
-    PCA9685::Initialize();
-    PCA9685::SetFrequency(Configuration.pwmFrequency);
+
 
     Debug.println("Starting network");
     Ethernet::Initialize(Configuration.hostname);
@@ -127,8 +128,8 @@ void setup()
     Rotary::onLongPress([]() { TapTempo::getInstance()->Stop(); });
 
     Debug.println("Starting inputs");
-    for (Pipe pipe:Configuration.pipes)
-        pipe.in->begin();
+    for (Pipe* pipe : Configuration.pipes)
+        pipe->in->begin();
 
     Debug.println("Done");
 
@@ -143,11 +144,11 @@ void setup()
 void loop()
 {
     //The main process loop
-    for (Pipe pipe : Configuration.pipes)
-        pipe.process();
+    for (Pipe* pipe : Configuration.pipes)
+        pipe->process();
 
-    for (Pipe pipe : Configuration.pipes)
-        pipe.out->ShowGroup();
+    for (Pipe* pipe : Configuration.pipes)
+        pipe->out->ShowGroup();
    
     //check for over-the-air firmware updates (also works over ETH)
     FirmwareUpdate::Process();
@@ -168,10 +169,10 @@ void loop()
 
 void clearall()
 {
-    for (Pipe pipe : Configuration.pipes)
+    for (Pipe* pipe : Configuration.pipes)
     {
-        pipe.out->Clear();
-        pipe.out->Show();
+        pipe->out->Clear();
+        pipe->out->Show();
     }
 }
 
@@ -189,18 +190,19 @@ void UpdateDisplay(void *parameter)
         int totalMissedframes = 0;
         int totalTotalframes = 0;
         int totalLength = 0;
-        for (Pipe pipe : Configuration.pipes)
+        for (Pipe* pipe : Configuration.pipes)
         {
-            if (pipe.in->getTotalFrameCount() == 0)
+            if (pipe->in->getTotalFrameCount() == 0)
                 continue;
             
             activeChannels++;
-            totalUsedframes += pipe.in->getUsedFramecount();
-            totalMissedframes += pipe.in->getMissedFrameCount();
-            totalTotalframes += pipe.in->getTotalFrameCount();
-            pipe.in->resetFrameCount();
+            totalUsedframes += pipe->in->getUsedFramecount();
+            totalMissedframes += pipe->in->getMissedFrameCount();
+            totalTotalframes += pipe->in->getTotalFrameCount();
+            pipe->in->resetFrameCount();
 
-            totalLength += pipe.getNumPixels();
+            Debug.printf("pipe len %d\n", pipe->getNumPixels());
+            totalLength += pipe->getNumPixels();
         }
  
         float outfps = activeChannels == 0 ? 0 : (float)1000. * totalUsedframes / (elapsedTime) / activeChannels;
@@ -210,10 +212,9 @@ void UpdateDisplay(void *parameter)
 
         lastFpsUpdate = now;
 
-        Debug.printf("FPS: %d of %d (%d%% miss)\t interval: %dms \t freeHeap: %d \t avg length: %d \t channel: %d \n", (int)outfps, (int)infps, (int)misses, (int)elapsedTime, ESP.getFreeHeap(), avglength, activeChannels);
+        Debug.printf("FPS: %d of %d (%d%% miss)\t interval: %dms \t freeHeap: %d \t avg length: %d \t channels: %d \n", (int)outfps, (int)infps, (int)misses, (int)elapsedTime, ESP.getFreeHeap(), avglength, activeChannels);
         //Debug.printf("IPAddress: %s\n", Ethernet::GetIp().toString().c_str());
         //Debug.printf("Tempo source: %s\n", Tempo::SourceName());
-        Debug.printf("sizeof miniwash %d\n", sizeof(Miniwash7));
 
         Display::setFPS(infps,outfps,misses);
         Display::setLeds(totalLength);

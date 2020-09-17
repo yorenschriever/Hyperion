@@ -14,7 +14,7 @@ struct ConfigurationStruct
     uint8_t tapAlignMidiNote = -1;
     uint8_t tapBarAlignMidiNote = -1;
 
-    std::vector<Pipe> pipes;
+    std::vector<Pipe*> pipes;
 
     paramCalculatorType paramCalculator = NULL;
 } Configuration;

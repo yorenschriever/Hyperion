@@ -101,5 +101,5 @@ public:
     }
 
 private:
-    int numPixels; //keep track of the number of pixels is for stats only.
+    int numPixels=0; //keep track of the number of pixels is for stats only.
 };
