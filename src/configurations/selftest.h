@@ -29,55 +29,55 @@ void LoadConfiguration()
 
     Configuration.pipes = {
 
-    Pipe(
+    new Pipe(
         new PatternInput<RGB>(16, new RainbowPattern()),
         new NeopixelOutput<Kpbs800>(1),
         Pipe::transfer<RGB,GRB>,
         NeopixelLut),
 
-    Pipe(
+    new Pipe(
         new PatternInput<RGB>(16, new RainbowPattern()),
         new NeopixelOutput<Kpbs800>(2),
         Pipe::transfer<RGB,GRB>,
         NeopixelLut),
 
-    Pipe(
+    new Pipe(
         new PatternInput<RGB>(16, new RainbowPattern()),
         new NeopixelOutput<Kpbs800>(3),
         Pipe::transfer<RGB,GRB>,
         NeopixelLut),
 
-    Pipe(
+    new Pipe(
         new PatternInput<RGB>(16, new RainbowPattern()),
-        new NeopixelOutput<Kpbs800>(3),
+        new NeopixelOutput<Kpbs800>(4),
         Pipe::transfer<RGB,GRB>,
         NeopixelLut),
 
-    Pipe(
+    new Pipe(
         new PatternInput<RGB>(16, new RainbowPattern()),
         new NeopixelOutput<Kpbs800>(5),
         Pipe::transfer<RGB,GRB>,
         NeopixelLut),
 
-    Pipe(
+    new Pipe(
         new PatternInput<RGB>(16, new RainbowPattern()),
         new NeopixelOutput<Kpbs800>(6),
         Pipe::transfer<RGB,GRB>,
         NeopixelLut),
 
-     Pipe(
+    new Pipe(
         new PatternInput<RGB>(16, new RainbowPattern()),
         new NeopixelOutput<Kpbs800>(7),
         Pipe::transfer<RGB,GRB>,
         NeopixelLut),
 
-    Pipe(
+    new Pipe(
         new PatternInput<RGB>(16, new RainbowPattern()),
         new NeopixelOutput<Kpbs800>(8),
         Pipe::transfer<RGB,GRB>,
         NeopixelLut),
         
-    Pipe(
+    new Pipe(
         new PatternInput<Monochrome>(12, new SinPattern()),
         new PWMOutput(),
         Pipe::transfer<Monochrome,Monochrome12>,
@@ -85,19 +85,19 @@ void LoadConfiguration()
     ),
 
     //puts output in dmx output
-    Pipe(
+    new Pipe(
         new PatternInput<RGB>(16, new RainbowPattern()),
         new DMXOutput(1)
     ),
 
     //initializes dmx input, so the indicator will light up
-    Pipe(
+    new Pipe(
         new DMXInput(1),
         new DMXOutput(1)
     ),
 
     //initializes midi input, so the indicator will light up
-    Pipe(
+    new Pipe(
         new ApcminiInput<RGB>(
             16, //width of the pattern, in pixels
             2,  //button column on the apc to listen to (0-7)

@@ -25,7 +25,7 @@
 //I picked colour correction values that Fastled uses for neopixels "TypicalLEDStrip"
 //http://fastled.io/docs/3.1/group___color_enums.html
 //note the different order, fastled uses RGB, luts are in ouput order (GRB)
-LUT* NeopixelLut = new ColourCorrectionLUT(1.5,255, 176, 255, 240); 
+LUT* NeopixelLut = new ColourCorrectionLUT(1.5, 255,176, 255, 240); 
 LUT* LedLut = new GammaLUT(2,4096); 
 
 void LoadConfiguration()
@@ -35,11 +35,16 @@ void LoadConfiguration()
     Configuration.pwmFrequency = 1500;
 
     Configuration.pipes = {
-        Pipe(
-            new LayeredPatternInput<MovingHead>(3,new MovingheadPatterns::TestPattern()),
-            new DMXOutput(30),
-            Pipe::transfer<MovingHead,Miniwash7>
-        )
+        // new Pipe(
+        //     new LayeredPatternInput<MovingHead>(3,new MovingheadPatterns::TestPattern()),
+        //     new DMXOutput(30),
+        //     Pipe::transfer<MovingHead,Miniwash7>
+        // )
+
+                
+        new Pipe(
+            new PatternInput<RGB>(1, new BPMIndicatorPattern()),
+            new RotaryOutput()),
     };
 
 }

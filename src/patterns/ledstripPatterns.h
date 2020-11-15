@@ -70,6 +70,27 @@ namespace LedStrip
         }
     };
 
+
+    class GlowPattern : public LayeredPattern<RGBA>
+    {
+        Permute perm; 
+        LFO<SinFast> lfo =LFO<SinFast>(10000);
+
+    public:
+        inline void Calculate(RGBA *pixels, int width, bool active) override
+        {
+            if (!active)
+                return;
+
+            lfo.period = 500 + 10000* (1.0f - Params::getVelocity());
+            perm.setSize(width);
+
+            for (int index = 0; index < width; index++)
+                pixels[perm.at[index]] += Params::getPrimaryColour() * lfo.getValue(float(Transition::fromCenter(index,width,1000))/-1000);
+
+        }
+    };
+
     class MeteorPattern : public LayeredPattern<RGBA>
     {
         FadeDown fade1 = FadeDown(400, WaitAtEnd);
