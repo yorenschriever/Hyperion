@@ -7,6 +7,12 @@ struct ConfigurationStruct
     using paramCalculatorType = void(*)();
 
     const char* hostname = "hyperion";
+
+    boolean wifiEnabled = false;
+    boolean wifiAccesspoint = false;
+    const char* wifissid;
+    const char* wifipsk;
+
     int pwmFrequency = 1500;
 
     uint8_t tapMidiNote = -1;

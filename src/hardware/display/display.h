@@ -11,6 +11,7 @@ public:
     static void Initialize();
     static void setFPS(int fpsin, int fpsout, int framemiss);
     static void setEthernet(bool connected, bool connecting);
+    static void setWifi(bool enabled, bool connected, bool connecting);
     static void setDMX(bool connected);
     static void setMidi(bool connected);
     static void setLeds(int numleds);
@@ -27,6 +28,9 @@ private:
     static int fpsin, fpsout, framemiss;
     static bool ethconnected;
     static bool ethconnecting;
+    static bool wificonnected;
+    static bool wificonnecting;
+    static bool wifienabled;
     static bool dmxconnected;
     static bool midiconnected;
     static int numleds;

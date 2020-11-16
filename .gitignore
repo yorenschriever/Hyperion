@@ -8,3 +8,4 @@ poc
 .travis.yml
 src/configurations/configuration.h
 src/debug.h
+wifipassword.h

@@ -21,6 +21,9 @@ int Display::fpsout = 1;
 int Display::framemiss = 0;
 bool Display::ethconnected = false;
 bool Display::ethconnecting = false;
+bool Display::wifienabled = false;
+bool Display::wificonnected = false;
+bool Display::wificonnecting = false;
 bool Display::dmxconnected = false;
 bool Display::midiconnected = false;
 int Display::numleds = 0;
@@ -77,6 +80,16 @@ void Display::setEthernet(bool connected, bool connecting)
     //    return;
     ethconnected = connected;
     ethconnecting = connecting;
+    //xSemaphoreGive(dirtySemaphore);
+}
+
+void Display::setWifi(bool enabled, bool connected, bool connecting)
+{
+    //if (ethconnected == connected)
+    //    return;
+    wifienabled = enabled;
+    wificonnected = connected;
+    wificonnecting = connecting;
     //xSemaphoreGive(dirtySemaphore);
 }
 
@@ -158,10 +171,15 @@ void Display::updateFrame()
 
         int pos = 0;
         pos = renderConnectionStatus(pos, ethconnecting? millis()%1000<500 : ethconnected, "ETH");
+        if (wifienabled) pos = renderConnectionStatus(pos, wificonnecting? millis()%1000<500 : wificonnected, "WIFI");
         pos = renderConnectionStatus(pos, dmxconnected, "DMX");
+        
         #ifndef DEBUGOVERSERIAL
         pos = renderConnectionStatus(pos, midiconnected, "MIDI");
+        #else
+        pos = renderConnectionStatus(pos, false, "DBG");//remind the user that debug is enabled and midi is not working
         #endif
+        
     }
 
     if (xSemaphoreTake(i2cMutex, (TickType_t)100) == pdTRUE)

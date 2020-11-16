@@ -24,6 +24,7 @@
 
 #include "hardware/midi/midi.h"
 #include "hardware/ethernet/ethernet.h"
+#include "hardware/wifi/wifi.h"
 #include "hardware/firmwareUpdate/firmwareUpdate.h"
 #include "hardware/display/display.h"
 #include "hardware/rotary/rotary.h"
@@ -109,6 +110,7 @@ void setup()
 
     Debug.println("Starting network");
     Ethernet::Initialize(Configuration.hostname);
+    if (Configuration.wifiEnabled) Wifi::Initialize(Configuration.wifissid, Configuration.wifipsk, Configuration.wifiAccesspoint);
 
     //add tempo sources in order of importance. first has highest priority
     Tempo::AddSource(ProDJLinkTempo::getInstance());
@@ -220,6 +222,7 @@ void UpdateDisplay(void *parameter)
         Display::setDMX(DMX::IsHealthy());
         Display::setMidi(Midi::isConnected());
         Display::setEthernet(Ethernet::isConnected(),Ethernet::isConnecting());
+        Display::setWifi(Configuration.wifiEnabled, Wifi::isConnected(),Wifi::isConnecting());
         Display::show();
 
         delay(500);

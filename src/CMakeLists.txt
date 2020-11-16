@@ -9,6 +9,7 @@ set(app_sources
 	"hardware/uart_iram/uart_iram.c"
 
 	"hardware/ethernet/ethernet.cpp"
+	"hardware/wifi/wifi.cpp"
 	"hardware/firmwareUpdate/firmwareUpdate.cpp"
 	"hardware/UDPFast/UDPFast.cpp"
 	"hardware/display/display.cpp"
