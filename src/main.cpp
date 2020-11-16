@@ -61,7 +61,7 @@ void setup()
     //update over usb
     pinMode(39,INPUT);
     if (digitalRead(39)){
-        Debug.println("Starting safemode");
+        Debug.println("\n\n================\n\nStarting safemode\n\n=======================\n\n");
         Display::Initialize(); 
         Display::setDFU(true,0);
         Ethernet::Initialize("Hyperion");
@@ -201,7 +201,6 @@ void UpdateDisplay(void *parameter)
             totalTotalframes += pipe->in->getTotalFrameCount();
             pipe->in->resetFrameCount();
 
-            Debug.printf("pipe len %d\n", pipe->getNumPixels());
             totalLength += pipe->getNumPixels();
         }
  

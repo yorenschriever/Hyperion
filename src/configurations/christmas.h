@@ -10,6 +10,7 @@
 #include "inputs/udpInput.h"
 #include "inputs/apcminiInput.h"
 #include "inputs/dmxInput.h"
+#include "inputs/fallbackInput.h"
 #include "inputs/patternInput.h"
 #include "patterns/rgbPatterns.h"
 #include "patterns/monochromePatterns.h"
@@ -29,55 +30,78 @@ void LoadConfiguration()
     Params::primaryColour = RGBA(255,100,0,255);
     Params::velocity = 0.3;
 
-    //Configuration.paramCalculator = updateParams;
-    Configuration.hostname = "christmas";
+    Configuration.hostname = "hyperion";
 
     Configuration.pipes = {
 
     new Pipe(
-        new LayeredPatternInput<RGBA>(150, new LedStrip::GlowPattern()),
+        new FallbackInput(
+            new UDPInput(9611),
+            new LayeredPatternInput<RGBA>(150, new LedStrip::GlowPattern())
+        ),
         new NeopixelOutput<Kpbs800>(1),
         Pipe::transfer<RGBA,GRB>,
         NeopixelLut),
 
     new Pipe(
-        new LayeredPatternInput<RGBA>(150, new LedStrip::GlowPattern()),
+        new FallbackInput(
+            new UDPInput(9612),
+            new LayeredPatternInput<RGBA>(150, new LedStrip::GlowPattern())
+        ),
         new NeopixelOutput<Kpbs800>(2),
         Pipe::transfer<RGBA,GRB>,
         NeopixelLut),
 
     new Pipe(
-        new LayeredPatternInput<RGBA>(150, new LedStrip::GlowPattern()),
+        new FallbackInput(
+            new UDPInput(9613),
+            new LayeredPatternInput<RGBA>(150, new LedStrip::GlowPattern())
+        ),
         new NeopixelOutput<Kpbs800>(3),
         Pipe::transfer<RGBA,GRB>,
         NeopixelLut),
 
     new Pipe(
-        new LayeredPatternInput<RGBA>(150, new LedStrip::GlowPattern()),
+        new FallbackInput(
+            new UDPInput(9614),
+            new LayeredPatternInput<RGBA>(150, new LedStrip::GlowPattern())
+        ),
         new NeopixelOutput<Kpbs800>(4),
         Pipe::transfer<RGBA,GRB>,
         NeopixelLut),
 
     new Pipe(
-        new LayeredPatternInput<RGBA>(150, new LedStrip::GlowPattern()),
+        new FallbackInput(
+            new UDPInput(9615),
+            new LayeredPatternInput<RGBA>(150, new LedStrip::GlowPattern())
+        ),
         new NeopixelOutput<Kpbs800>(5),
         Pipe::transfer<RGBA,GRB>,
         NeopixelLut),
 
     new Pipe(
-        new LayeredPatternInput<RGBA>(150, new LedStrip::GlowPattern()),
+        new FallbackInput(
+            new UDPInput(9616),
+            new LayeredPatternInput<RGBA>(150, new LedStrip::GlowPattern())
+        ),
         new NeopixelOutput<Kpbs800>(6),
         Pipe::transfer<RGBA,GRB>,
         NeopixelLut),
 
     new Pipe(
-        new LayeredPatternInput<RGBA>(150, new LedStrip::GlowPattern()),
+        new FallbackInput(
+            new UDPInput(9617),
+            new LayeredPatternInput<RGBA>(150, new LedStrip::GlowPattern())
+        ),
         new NeopixelOutput<Kpbs800>(7),
         Pipe::transfer<RGBA,GRB>,
         NeopixelLut),
 
     new Pipe(
-        new LayeredPatternInput<RGBA>(150, new LedStrip::GlowPattern()),
+        new FallbackInput(
+            new UDPInput(9618),
+            new LayeredPatternInput<RGBA>(150, new LedStrip::GlowPattern())
+        ),
         new NeopixelOutput<Kpbs800>(8),
         Pipe::transfer<RGBA,GRB>,
         NeopixelLut),
