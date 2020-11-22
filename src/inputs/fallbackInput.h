@@ -33,13 +33,25 @@ public:
         if (result > 0)
         {
             aLastValid = millis();
+
+            this->missedframecount = inputA->getMissedFrameCount();
+            this->usedframecount = inputA->getUsedFramecount();
             return result;
         }
 
-        if (millis() - aLastValid > timeout)
+        if (millis() - aLastValid > timeout){
+            this->missedframecount = inputB->getMissedFrameCount();
+            this->usedframecount = inputB->getUsedFramecount();
+
             return inputB->loadData(dataPtr);
+        }
 
         return 0;
+    }
+
+    virtual void resetFrameCount(){
+        this->inputA->resetFrameCount();
+        this->inputB->resetFrameCount();
     }
 
 private:

@@ -112,6 +112,13 @@ void Ethernet::EthEvent(WiFiEvent_t event)
         }
 
         break;
+    case SYSTEM_EVENT_STA_GOT_IP:
+    case SYSTEM_EVENT_AP_START:
+        Debug.printf("Wifi connected.\n");
+        if (Ethernet::hostname){
+            StartMdnsService(Ethernet::hostname);
+        }
+        break;
     case SYSTEM_EVENT_ETH_DISCONNECTED:
         Debug.println("ETH Disconnected");
         eth_connected = false;

@@ -21,6 +21,8 @@
 #include "inputs/layeredPatternInput.h"
 #include "wifipassword.h"
 
+//#include "christmasMapping.h"
+
 //I picked colour correction values that Fastled uses for neopixels "TypicalLEDStrip"
 //http://fastled.io/docs/3.1/group___color_enums.html
 //note the different order, fastled uses RGB, luts are in ouput order (GRB)
@@ -42,73 +44,73 @@ void LoadConfiguration()
     new Pipe(
         new FallbackInput(
             new UDPInput(9611),
-            new LayeredPatternInput<RGBA>(150, new LedStrip::GlowPattern())
+            new PatternInput<RGB>(150, new GlowPattern())
         ),
         new NeopixelOutput<Kpbs800>(1),
-        Pipe::transfer<RGBA,GRB>,
+        Pipe::transfer<RGB,GRB>,
         NeopixelLut),
 
     new Pipe(
         new FallbackInput(
             new UDPInput(9612),
-            new LayeredPatternInput<RGBA>(150, new LedStrip::GlowPattern())
+            new PatternInput<RGB>(150, new GlowPattern())
         ),
         new NeopixelOutput<Kpbs800>(2),
-        Pipe::transfer<RGBA,GRB>,
+        Pipe::transfer<RGB,GRB>,
         NeopixelLut),
 
     new Pipe(
         new FallbackInput(
             new UDPInput(9613),
-            new LayeredPatternInput<RGBA>(150, new LedStrip::GlowPattern())
+            new PatternInput<RGB>(150, new GlowPattern())
         ),
         new NeopixelOutput<Kpbs800>(3),
-        Pipe::transfer<RGBA,GRB>,
+        Pipe::transfer<RGB,GRB>,
         NeopixelLut),
 
     new Pipe(
         new FallbackInput(
             new UDPInput(9614),
-            new LayeredPatternInput<RGBA>(150, new LedStrip::GlowPattern())
+            new PatternInput<RGB>(150, new GlowPattern())
         ),
         new NeopixelOutput<Kpbs800>(4),
-        Pipe::transfer<RGBA,GRB>,
+        Pipe::transfer<RGB,GRB>,
         NeopixelLut),
 
-    new Pipe(
-        new FallbackInput(
-            new UDPInput(9615),
-            new LayeredPatternInput<RGBA>(150, new LedStrip::GlowPattern())
-        ),
-        new NeopixelOutput<Kpbs800>(5),
-        Pipe::transfer<RGBA,GRB>,
-        NeopixelLut),
+    // new Pipe(
+    //     new FallbackInput(
+    //         new UDPInput(9615),
+    //         new LayeredPatternInput<RGBA>(150, new LedStrip::GlowPattern())
+    //     ),
+    //     new NeopixelOutput<Kpbs800>(5),
+    //     Pipe::transfer<RGBA,GRB>,
+    //     NeopixelLut),
 
     new Pipe(
         new FallbackInput(
             new UDPInput(9616),
-            new LayeredPatternInput<RGBA>(150, new LedStrip::GlowPattern())
+            new PatternInput<RGB>(150, new GlowPattern())
         ),
         new NeopixelOutput<Kpbs800>(6),
-        Pipe::transfer<RGBA,GRB>,
+        Pipe::transfer<RGB,GRB>,
         NeopixelLut),
 
-    new Pipe(
-        new FallbackInput(
-            new UDPInput(9617),
-            new LayeredPatternInput<RGBA>(150, new LedStrip::GlowPattern())
-        ),
-        new NeopixelOutput<Kpbs800>(7),
-        Pipe::transfer<RGBA,GRB>,
-        NeopixelLut),
+    // new Pipe(
+    //     new FallbackInput(
+    //         new UDPInput(9617),
+    //         new LayeredPatternInput<RGBA>(150, new LedStrip::GlowPattern())
+    //     ),
+    //     new NeopixelOutput<Kpbs800>(7),
+    //     Pipe::transfer<RGBA,GRB>,
+    //     NeopixelLut),
 
     new Pipe(
         new FallbackInput(
             new UDPInput(9618),
-            new LayeredPatternInput<RGBA>(150, new LedStrip::GlowPattern())
+            new PatternInput<RGB>(150, new GlowPattern())
         ),
         new NeopixelOutput<Kpbs800>(8),
-        Pipe::transfer<RGBA,GRB>,
+        Pipe::transfer<RGB,GRB>,
         NeopixelLut),
         
     };

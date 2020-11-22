@@ -203,6 +203,7 @@ void UpdateDisplay(void *parameter)
             totalTotalframes += pipe->in->getTotalFrameCount();
             pipe->in->resetFrameCount();
 
+            //Debug.printf("pipe len %d\n",pipe->getNumPixels());
             totalLength += pipe->getNumPixels();
         }
  
