@@ -31,6 +31,7 @@ LUT* NeopixelLut = new ColourCorrectionLUT(1.5,255,255, 255, 255);
 void LoadConfiguration()
 {
     Params::primaryColour = RGBA(255,100,0,255);
+    Params::secondaryColour = RGBA(100,100,75,255);
     Params::velocity = 0.3;
 
     Configuration.hostname = "hyperion";
@@ -44,7 +45,7 @@ void LoadConfiguration()
     new Pipe(
         new FallbackInput(
             new UDPInput(9611),
-            new PatternInput<RGB>(150, new GlowPattern())
+            new PatternInput<RGB>(150, new GlowPulsePattern())
         ),
         new NeopixelOutput<Kpbs800>(1),
         Pipe::transfer<RGB,GRB>,
@@ -53,7 +54,7 @@ void LoadConfiguration()
     new Pipe(
         new FallbackInput(
             new UDPInput(9612),
-            new PatternInput<RGB>(150, new GlowPattern())
+            new PatternInput<RGB>(150, new GlowPulsePattern())
         ),
         new NeopixelOutput<Kpbs800>(2),
         Pipe::transfer<RGB,GRB>,
@@ -62,7 +63,7 @@ void LoadConfiguration()
     new Pipe(
         new FallbackInput(
             new UDPInput(9613),
-            new PatternInput<RGB>(150, new GlowPattern())
+            new PatternInput<RGB>(150, new GlowPulsePattern())
         ),
         new NeopixelOutput<Kpbs800>(3),
         Pipe::transfer<RGB,GRB>,
@@ -71,7 +72,7 @@ void LoadConfiguration()
     new Pipe(
         new FallbackInput(
             new UDPInput(9614),
-            new PatternInput<RGB>(150, new GlowPattern())
+            new PatternInput<RGB>(150, new GlowPulsePattern())
         ),
         new NeopixelOutput<Kpbs800>(4),
         Pipe::transfer<RGB,GRB>,
@@ -89,7 +90,7 @@ void LoadConfiguration()
     new Pipe(
         new FallbackInput(
             new UDPInput(9616),
-            new PatternInput<RGB>(150, new GlowPattern())
+            new PatternInput<RGB>(150, new GlowPulsePattern())
         ),
         new NeopixelOutput<Kpbs800>(6),
         Pipe::transfer<RGB,GRB>,
@@ -107,7 +108,7 @@ void LoadConfiguration()
     new Pipe(
         new FallbackInput(
             new UDPInput(9618),
-            new PatternInput<RGB>(150, new GlowPattern())
+            new PatternInput<RGB>(150, new GlowPulsePattern())
         ),
         new NeopixelOutput<Kpbs800>(8),
         Pipe::transfer<RGB,GRB>,

@@ -263,3 +263,25 @@ public:
             pixels[perm.at[index]] = Params::getPrimaryColour() * lfo.getValue(float(Transition::fromCenter(index,width,1000))/-1000);
     }
 };
+
+class GlowPulsePattern : public Pattern<RGB>
+{
+    Permute perm; 
+    LFO<SinFast> lfo =LFO<SinFast>(10000);
+
+public:
+    inline void Calculate(RGB *pixels, int width, bool firstFrame) override
+    {
+        lfo.period = 500 + 10000* (1.0f - Params::getVelocity());
+        perm.setSize(width);
+
+        for (int index = 0; index < width; index++)
+        {
+            float val = 1.025 * lfo.getValue(float(Transition::fromCenter(index,width,1000))/-1000);
+            if (val < 1.0)
+                pixels[perm.at[index]] = Params::getPrimaryColour() * lfo.getValue(float(Transition::fromCenter(index,width,1000))/-1000);
+            else
+                pixels[perm.at[index]] = Params::getPrimaryColour() + (Params::getSecondaryColour() * (val-1)/0.025);
+        }
+    }
+};
