@@ -13,7 +13,7 @@
 //debugging midi, because it doesnt interfere with midi functions. it also prints
 //system messages like stack traces, which udpdebug cannot do.
 
-#define DEBUGOVERSERIAL
+//#define DEBUGOVERSERIAL
 //#define DEBUGOVERUDP
 //#define DEBUGOVERSERIALFRONT
 
