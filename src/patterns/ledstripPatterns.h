@@ -278,4 +278,31 @@ class SlowStrobePattern : public LayeredPattern<RGBA>
     }
 };
 
+class GlowPulsePattern : public LayeredPattern<RGBA>
+{
+    Permute perm; 
+    LFO<SinFast> lfo = LFO<SinFast>(10000);
+    Transition transition;
+
+public:
+    inline void Calculate(RGBA *pixels, int width, bool active) override
+    {
+        if (!transition.Calculate(active))
+            return; //the fade out is done. we can skip calculating pattern data
+
+        lfo.period = 500 + 10000* (1.0f - Params::getVelocity());
+        perm.setSize(width);
+
+        for (int index = 0; index < width; index++)
+        {
+            float val = 1.025 * lfo.getValue(float(Transition::fromCenter(index,width,1000))/-1000);
+            if (val < 1.0)
+                pixels[perm.at[index]] = Params::getPrimaryColour() * lfo.getValue(float(Transition::fromCenter(index,width,1000))/-1000) * transition.getValue(index,width);
+            else
+                pixels[perm.at[index]] = (Params::getPrimaryColour() + (Params::getHighlightColour() * (val-1)/0.025)) * transition.getValue(index,width);
+        }
+    }
+};
+
+
 } // namespace LedStrip
