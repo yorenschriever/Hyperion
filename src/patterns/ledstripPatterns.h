@@ -233,7 +233,7 @@ namespace LedStrip
                 return;
 
             for (int index = 0; index < width; index++){
-                pixels[index] += (Params::getPrimaryColour() + Params::getHighlightColour() *((float)index/(width-1)) ) * transition.getValue();
+                pixels[index] += (Params::getPrimaryColour() + Params::getSecondaryColour() *((float)index/(width-1)) ) * transition.getValue();
             }
         }
     };

@@ -30,7 +30,7 @@
 //note the different order, fastled uses RGB, luts are in ouput order (GRB)
 //LUT *NeopixelLut = new ColourCorrectionLUT(1.5, 255, 176, 255, 240);
 
-LUT *NeopixelLut = new ColourCorrectionLUT(1.2, 255, 176, 200, 255);
+LUT *NeopixelLut =  new ColourCorrectionLUT(1.2, 255, 140, 200, 255); // new ColourCorrectionLUT(1.2, 255, 176, 200, 255);
 LUT *IncandescentLut = new IncandescentLUT(2.5, 4096, 200);
 LUT *IncandescentLut8 = new IncandescentLUT(2.5, 255, 24);
 LUT *GammaLut12 = new GammaLUT(2.5, 4096);
