@@ -28,6 +28,7 @@ public:
     static bool isConnecting();
 
     static IPAddress GetIp();
+    static uint8_t* GetMac(uint8_t* mac);
 
     //in case of a .local address it resolves using mdns, and caches the result
     //otherwise it will do a regular hostname lookup
@@ -35,6 +36,7 @@ public:
     static IPAddress* Resolve(const char* hostname);
 
 protected:
+    static esp_eth_handle_t eth_handle;
     static void EthEvent(WiFiEvent_t event);
     static void StartMdnsService(const char *name);
     static bool eth_connected;

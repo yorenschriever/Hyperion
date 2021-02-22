@@ -15,17 +15,26 @@
 #include <ESPmDNS.h>
 #include <lwip/netdb.h>
 
+#include "esp_system.h"
+#include "esp_event.h"
+#include "esp_eth.h"
+#include "esp_eth_phy.h"
+#include "esp_eth_mac.h"
+#include "esp_eth_com.h"
+#include "lwip/err.h"
+#include "lwip/dns.h"
+
+esp_eth_handle_t Ethernet::eth_handle = NULL;
 bool Ethernet::eth_connected = false;
 bool Ethernet::eth_connecting = false;
 const char* Ethernet::hostname;
 std::map<std::string, Ethernet::hostnameCacheItem> Ethernet::hostnameCache;
 
+extern void tcpipInit();
+
 void Ethernet::Initialize(const char* hostname)
 {
     Ethernet::hostname = hostname;
-
-    //this delay makes sure the network hardware is property started up, it is unstable without it
-    delay(500);
 
     //This delay makes sure that not all nodes will startup at exactly the same time when you flip the master power switch
     //Routers were having trouble when a large amount of nodes started communicating at exactly the same time.
@@ -33,7 +42,47 @@ void Ethernet::Initialize(const char* hostname)
 
     WiFi.onEvent(EthEvent);
 
-    ETH.begin();
+    tcpipInit();
+
+    tcpip_adapter_set_default_eth_handlers();
+    eth_mac_config_t mac_config = ETH_MAC_DEFAULT_CONFIG();
+    mac_config.smi_mdc_gpio_num = 23;
+    mac_config.smi_mdio_gpio_num = 18;
+    mac_config.sw_reset_timeout_ms = 1000; //this timoeut is increased for stability
+    esp_eth_mac_t *eth_mac = NULL;
+
+    eth_mac = esp_eth_mac_new_esp32(&mac_config);
+
+    if(eth_mac == NULL){
+        log_e("esp_eth_mac_new_esp32 failed");
+        return;
+    }
+
+    eth_phy_config_t phy_config = ETH_PHY_DEFAULT_CONFIG();
+    phy_config.phy_addr = 0; 
+    phy_config.reset_gpio_num = 12;
+    esp_eth_phy_t *eth_phy = NULL;
+
+    eth_phy = esp_eth_phy_new_lan8720(&phy_config);
+
+    if(eth_phy == NULL){
+        log_e("esp_eth_phy_new failed");
+        return ;
+    }
+
+    eth_handle = NULL;
+    esp_eth_config_t eth_config = ETH_DEFAULT_CONFIG(eth_mac, eth_phy);
+
+    if(esp_eth_driver_install(&eth_config, &eth_handle) != ESP_OK || eth_handle == NULL){
+        log_e("esp_eth_driver_install failed");
+        return ;
+    }
+
+    if(esp_eth_start(eth_handle) != ESP_OK){
+        log_e("esp_eth_start failed");
+        return ;
+    }
+
 }
 
 //for maximum compatibility with other hardware (routers, pioneer gear, (hyper)linked operation), 
@@ -74,7 +123,20 @@ bool Ethernet::isConnecting()
 
 IPAddress Ethernet::GetIp()
 {
-    return ETH.localIP();
+    tcpip_adapter_ip_info_t ip;
+    if(tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_ETH, &ip)){
+        return IPAddress();
+    }
+    return IPAddress(ip.ip.addr);
+}
+
+uint8_t* Ethernet::GetMac(uint8_t* mac)
+{
+    if(!mac){
+        return NULL;
+    }
+    esp_eth_ioctl(eth_handle, ETH_CMD_G_MAC_ADDR, mac);
+    return mac;
 }
 
 void Ethernet::EthEvent(WiFiEvent_t event)
@@ -93,17 +155,8 @@ void Ethernet::EthEvent(WiFiEvent_t event)
         eth_connecting = true;
         break;
     case SYSTEM_EVENT_ETH_GOT_IP:
-        Debug.print("ETH MAC: ");
-        Debug.print(ETH.macAddress());
-        Debug.print(", IPv4: ");
-        Debug.print(ETH.localIP());
-        if (ETH.fullDuplex())
-        {
-            Debug.print(", FULL_DUPLEX");
-        }
-        Debug.print(", ");
-        Debug.print(ETH.linkSpeed());
-        Debug.println("Mbps");
+        Debug.print("Ethernet IPv4: ");
+        Debug.print(GetIp());
         eth_connected = true;
         eth_connecting = false;
 

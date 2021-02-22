@@ -4,7 +4,6 @@
 #include "debug.h"
 
 #include "hardware/ethernet/ethernet.h"
-#include <ETH.h>
 
 #define PRODJLINKPORTKEEPALIVE 50000
 #define PRODJLINKPORTSYNC 50001
@@ -124,9 +123,9 @@ private:
             1, 0, 0, 0, 1, 0};
 
         uint8_t mac[6];
-        uint32_t ip = ETH.localIP();
+        uint32_t ip = Ethernet::GetIp();
 
-        memcpy(buffer + 0x26, ETH.macAddress(mac), 6);
+        memcpy(buffer + 0x26, Ethernet::GetMac(mac), 6);
         memcpy(buffer + 0x2c, &ip, 4);
 
         this2->statusSocket.sendPacketFast(

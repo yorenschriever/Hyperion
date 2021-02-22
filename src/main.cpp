@@ -29,6 +29,7 @@
 #include "hardware/display/display.h"
 #include "hardware/rotary/rotary.h"
 #include "hardware/apcmini/apcmini.h"
+//#include "hardware/websocket/websocket.h"
 
 #include "configurations/configuration.h"
 
@@ -141,6 +142,14 @@ void setup()
     Rotary::setColour(RGB(0,0,0));
 
     Debug.printf("max udp connections: %d\n", MEMP_NUM_NETCONN);
+
+    // WebsocketServer* sock = new WebsocketServer("/test");
+    // sock->onMessage([](RemoteWebsocketClient *client, WebsocketServer* server, std::string msg) {
+    //     server->sendAll("pong:" + msg);
+    // });
+    //also add     WebsocketContainer::Run();
+
+
 }
 
 void loop()
@@ -156,6 +165,7 @@ void loop()
     FirmwareUpdate::Process();
 
     Rotary::handleQueue();
+
 
     if (Configuration.paramCalculator)
         Configuration.paramCalculator();

@@ -9,3 +9,6 @@ poc
 src/configurations/configuration.h
 src/debug.h
 wifipassword.h
+src/cert.h
+src/private_key.h
+certificate/**
