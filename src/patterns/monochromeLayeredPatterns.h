@@ -317,4 +317,32 @@ public:
     }
 };
 
+class ChaseFromCenterPattern : public LayeredPattern<Monochrome>
+{
+    public:
+    ChaseFromCenterPattern (int duration=200){
+        fader.duration = duration;
+    }
+
+    FadeDown fader = FadeDown(400, WaitAtEnd);
+    Watcher<int> watcher = Watcher<int> (
+        [] () { return Tempo::GetBeatNumber() / 4; } ,
+        Changing
+    );
+
+    inline void Calculate(Monochrome *pixels, int width, bool active) override
+    {
+        if (!active && fader.getValue()==0){
+            watcher.Triggered();
+            return;
+        }
+
+        if (active && watcher.Triggered())
+            fader.reset();
+
+        for (int index = 0; index < width; index++)
+            pixels[index] += 255 * fader.getValue(Transition::fromCenter(index, width, 300));
+    }
+};
+
 }
