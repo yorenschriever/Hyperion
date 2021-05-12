@@ -85,7 +85,7 @@ public:
         {
             float period1 = float(perm1.at[index])/float(width)*(2*3.1415)*14.7+5.5;
             float period2 = float(perm2.at[index])/float(width)*(2*3.1415)*15.3+3.5;
-            float combined = std::max(cos(period1*float(millis())/20000.f), cos(period2*float(millis())/20000.f));
+            float combined = std::max(cos(period1*float(millis())/(20000.f*direction)), cos(period2*float(millis())/(20000.f*direction)));
 
             pixels[index] += Monochrome((uint8_t)(150.f + 105.f * combined)) * transition.getValue(index,width);
         }
@@ -326,7 +326,7 @@ class ChaseFromCenterPattern : public LayeredPattern<Monochrome>
 
     FadeDown fader = FadeDown(400, WaitAtEnd);
     Watcher<int> watcher = Watcher<int> (
-        [] () { return Tempo::GetBeatNumber() / 4; } ,
+        [] () { return Tempo::GetBeatNumber() / 2; } ,
         Changing
     );
 
@@ -341,7 +341,7 @@ class ChaseFromCenterPattern : public LayeredPattern<Monochrome>
             fader.reset();
 
         for (int index = 0; index < width; index++)
-            pixels[index] += 255 * fader.getValue(Transition::fromCenter(index, width, 300));
+            pixels[index] += 255 * fader.getValue(Transition::fromCenter(index, width, 400));
     }
 };
 
