@@ -185,7 +185,7 @@ protected:
 class BeatShakePattern : public LayeredPattern<Monochrome>
 {
     TempoWatcher watcher = TempoWatcher();
-    FadeDown fader = FadeDown(150, WaitAtEnd);
+    FadeDown fader = FadeDown(300, WaitAtEnd);
     Permute perm = Permute(0);
     
     inline void Calculate(Monochrome *pixels, int width, bool active) override
