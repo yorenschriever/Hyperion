@@ -22,7 +22,7 @@ void LoadConfiguration()
     Configuration.pwmFrequency = 1500;
 
     Configuration.pipes = {
-        Pipe(
+        new Pipe(
             new UDPInput(9619),
             new TemperatureControlledOutput<Monochrome12>(
                 new PWMOutput(),
@@ -32,7 +32,7 @@ void LoadConfiguration()
             Pipe::transfer<Monochrome12, Monochrome12>,
             LedLut),
 
-        Pipe(
+        new Pipe(
             new PatternInput<RGB>(1, new BPMIndicatorPattern()),
             new RotaryOutput())};
 }
