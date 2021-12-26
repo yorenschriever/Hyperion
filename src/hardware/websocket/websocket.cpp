@@ -65,7 +65,7 @@ void WebsocketContainer::Run(){
 
 WebsocketHandler* WebsocketServer::createhandler(const void* arg) {
     WebsocketServer* server = (WebsocketServer*) arg;
-    Serial.println("Creating new websocket connection");
+    //Debug.println("Creating new websocket connection");
     RemoteWebsocketClient * handler = new RemoteWebsocketClient(server);
     server->registerClient(handler);
     return handler;
