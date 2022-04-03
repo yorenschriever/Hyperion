@@ -54,6 +54,7 @@ void Ethernet::Initialize(const char* hostname)
     eth_mac = esp_eth_mac_new_esp32(&mac_config);
 
     if(eth_mac == NULL){
+        Debug.println("Eth error: new mac failed");
         log_e("esp_eth_mac_new_esp32 failed");
         return;
     }
@@ -66,6 +67,7 @@ void Ethernet::Initialize(const char* hostname)
     eth_phy = esp_eth_phy_new_lan8720(&phy_config);
 
     if(eth_phy == NULL){
+        Debug.println("Eth error: new phy failed");
         log_e("esp_eth_phy_new failed");
         return ;
     }
@@ -74,15 +76,18 @@ void Ethernet::Initialize(const char* hostname)
     esp_eth_config_t eth_config = ETH_DEFAULT_CONFIG(eth_mac, eth_phy);
 
     if(esp_eth_driver_install(&eth_config, &eth_handle) != ESP_OK || eth_handle == NULL){
+        Debug.println("Eth error: driver install failed");
         log_e("esp_eth_driver_install failed");
         return ;
     }
 
     if(esp_eth_start(eth_handle) != ESP_OK){
+        Debug.println("Eth error: eth start failed");
         log_e("esp_eth_start failed");
         return ;
     }
 
+    Debug.println("Eth initialized");
 }
 
 //for maximum compatibility with other hardware (routers, pioneer gear, (hyper)linked operation), 
@@ -147,7 +152,7 @@ void Ethernet::EthEvent(WiFiEvent_t event)
         Debug.println("ETH Started");
         //set eth hostname here
         if (Ethernet::hostname)
-                ETH.setHostname(Ethernet::hostname);
+            ETH.setHostname(Ethernet::hostname);
         hostnameCache.clear();
         break;
     case SYSTEM_EVENT_ETH_CONNECTED:

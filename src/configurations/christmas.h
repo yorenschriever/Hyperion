@@ -21,8 +21,6 @@
 #include "luts/incandescentLut.h"
 #include "configurationStruct.h"
 #include "inputs/layeredPatternInput.h"
-#include "wifipassword.h"
-
 
 //I picked colour correction values that Fastled uses for neopixels "TypicalLEDStrip"
 //http://fastled.io/docs/3.1/group___color_enums.html
