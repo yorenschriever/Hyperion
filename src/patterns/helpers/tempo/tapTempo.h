@@ -4,13 +4,13 @@
 #include "debug.h"
 
 //#define DEFAULTPERIOD 480000 //default at 125BPM
-#define DEFAULTPERIOD 0 //default off
+#define DEFAULTPERIOD 0 // default off
 
 class TapTempo : public AbstractTempo
 {
 
 public:
-    static TapTempo* getInstance()
+    static TapTempo *getInstance()
     {
         static TapTempo instance;
         return &instance;
@@ -18,27 +18,30 @@ public:
 
     TempoTaskType Initialize() override
     {
-        sourceName="Tap";
+        sourceName = "Tap";
         return TapTempoTask;
     }
 
     void Stop()
     {
-        validSignal=false;
-        beatNumber=-1;
-        period=0;
+        validSignal = false;
+        beatNumber = -1;
+        period = 0;
     }
 
-    //this aligns the tempo to your tap without resetting the beat count or interval
+    // this aligns the tempo to your tap without resetting the beat count or interval
     void Align()
     {
-        long offset = (micros()-startingpoint) % period;
-        if (offset > period/2)
-            offset -= period; //syning to the other side is closer
+        if (period == 0)
+            return;
+
+        long offset = (micros() - startingpoint) % period;
+        if (offset > period / 2)
+            offset -= period; // syncing to the other side is closer
         startingpoint += offset;
     }
 
-    // 
+    //
     // void BarAlign()
     // {
     //     unsigned long timepassed = micros()-startingpoint;
@@ -52,12 +55,12 @@ public:
 
         if (!isTapping())
         {
-            //start a new tap session
+            // start a new tap session
             firstTap = now;
-            startingpoint = now; //for now the Tempo counter starting point is linked to the first tap
+            startingpoint = now; // for now the Tempo counter starting point is linked to the first tap
             tapCount = 0;
-            validSignal=true;
-            beat(0,period/1000);//this wont be visible, because if there is no signal, the beatnumber will be 0, so setting it to 0 again doesnt trigger the watcher
+            validSignal = true;
+            beat(0, period / 1000); // this wont be visible, because if there is no signal, the beatnumber will be 0, so setting it to 0 again doesnt trigger the watcher
         }
 
         tapCount++;
@@ -68,23 +71,23 @@ public:
             period = (lastTap - firstTap) / (tapCount - 1);
             if (period < 1)
                 period = DEFAULTPERIOD;
-            validSignal=true;
+            validSignal = true;
         }
 
-        timeBetweenBeats = period/1000;
+        timeBetweenBeats = period / 1000;
     }
 
 private:
-    const int tapTimeout = 1000000; //if no tap is detected for tapTimeout us, the next tap will be interpreted as a new tap session
-    int period = DEFAULTPERIOD;     //default at 125BPM
+    const int tapTimeout = 1000000; // if no tap is detected for tapTimeout us, the next tap will be interpreted as a new tap session
+    int period = DEFAULTPERIOD;     // default at 125BPM
     unsigned long startingpoint;
     unsigned long lastTap;
     unsigned long firstTap;
     int tapCount;
 
-    //private constructors, singleton
+    // private constructors, singleton
     TapTempo() : AbstractTempo() {}
-    TapTempo(TapTempo const &);         // Don't Implement
+    TapTempo(TapTempo const &);       // Don't Implement
     void operator=(TapTempo const &); // Don't implement
 
     bool isTapping()
@@ -94,13 +97,12 @@ private:
 
     static void TapTempoTask()
     {
-        TapTempo* instance = TapTempo::getInstance();
-        if (!instance->validSignal || instance->period==0)
+        TapTempo *instance = TapTempo::getInstance();
+        if (!instance->validSignal || instance->period == 0)
             return;
 
         int newBeatNr = (micros() - instance->startingpoint) / instance->period;
         if (newBeatNr != instance->beatNumber)
-            instance->beat(newBeatNr,instance->period/1000);
+            instance->beat(newBeatNr, instance->period / 1000);
     }
-
 };
