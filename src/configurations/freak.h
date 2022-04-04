@@ -35,6 +35,7 @@ LUT* PixelLut = new ColourCorrectionLUT(1.5, 255,176, 255, 240);
 LUT *IncandescentLut = new IncandescentLUT(2.5, 4096, 200);
 LUT *IncandescentLut8 = new IncandescentLUT(2.5, 255, 24);
 LUT *GammaLut12 = new GammaLUT(2.5, 4096);
+LUT *GammaLut8 = new GammaLUT(2.5,255);
 
 void updateParams()
 {
@@ -242,6 +243,50 @@ void LoadConfiguration()
         ),
 
         ///////////////////////
+        // KIMONOS
+        ///////////////////////
+
+        new Pipe(
+            new LayeredApcminiInput<Monochrome>(
+                10, //width of the pattern, in pixels
+                5,  //button column on the apc to listen to (0-7)
+                //the patterns to attach to the buttons
+                new LayeredPattern<Monochrome> *[8] {
+                new Layered::BlinderPattern(Transition::fromLeft,Transition::fromLeft,255),
+                new Layered::SinPattern(),
+                new Layered::BeatSingleFadePattern(),
+                new Layered::BeatMultiFadePattern(),
+                new Layered::BeatShakePattern(),
+                new Layered::BlinderPattern(Transition::fromLeft,Transition::fromLeft,255),
+                new Layered::GlitchPattern(),
+                new Layered::SlowStrobePattern()
+                }),
+            new UDPOutput("192.168.1.183", 9601, 100),
+            Pipe::transfer<Monochrome, RGB>,
+            GammaLut8
+        ),
+
+        new Pipe(
+            new LayeredApcminiInput<Monochrome>(
+                10, //width of the pattern, in pixels
+                5,  //button column on the apc to listen to (0-7)
+                //the patterns to attach to the buttons
+                new LayeredPattern<Monochrome> *[8] {
+                new Layered::BlinderPattern(Transition::fromLeft,Transition::fromLeft,255),
+                new Layered::SinPattern(),
+                new Layered::BeatSingleFadePattern(),
+                new Layered::BeatMultiFadePattern(),
+                new Layered::BeatShakePattern(),
+                new Layered::BlinderPattern(Transition::fromLeft,Transition::fromLeft,255),
+                new Layered::GlitchPattern(),
+                new Layered::SlowStrobePattern()
+                }),
+            new UDPOutput("192.168.1.184", 9601, 100),
+            Pipe::transfer<Monochrome, RGB>,
+            GammaLut8
+        ),
+
+        ///////////////////////
         // LASERS
         ///////////////////////
         new Pipe(
@@ -261,6 +306,86 @@ void LoadConfiguration()
                 }),
             new UDPOutput("lasers.local", 9619, 100),
             Pipe::transfer<Monochrome, Monochrome12>
+        ),
+
+        new Pipe(
+            new LayeredApcminiInput<Monochrome>(
+                10, //width of the pattern, in pixels
+                6,  //button column on the apc to listen to (0-7)
+                //the patterns to attach to the buttons
+                new LayeredPattern<Monochrome> *[8] {
+                new Layered::BlinderPattern(Transition::fromLeft,Transition::fromLeft,255),
+                new Layered::SinPattern(),
+                new Layered::BeatSingleFadePattern(),
+                new Layered::BeatMultiFadePattern(),
+                new Layered::BeatShakePattern(),
+                new Layered::BlinderPattern(Transition::fromLeft,Transition::fromLeft,255),
+                new Layered::GlitchPattern(),
+                new Layered::SlowStrobePattern()
+                }),
+            new UDPOutput("192.168.1.175", 9601, 100),
+            Pipe::transfer<Monochrome, RGB>,
+            GammaLut8
+        ),
+
+        new Pipe(
+            new LayeredApcminiInput<Monochrome>(
+                10, //width of the pattern, in pixels
+                6,  //button column on the apc to listen to (0-7)
+                //the patterns to attach to the buttons
+                new LayeredPattern<Monochrome> *[8] {
+                new Layered::BlinderPattern(Transition::fromLeft,Transition::fromLeft,255),
+                new Layered::SinPattern(),
+                new Layered::BeatSingleFadePattern(),
+                new Layered::BeatMultiFadePattern(),
+                new Layered::BeatShakePattern(),
+                new Layered::BlinderPattern(Transition::fromLeft,Transition::fromLeft,255),
+                new Layered::GlitchPattern(),
+                new Layered::SlowStrobePattern()
+                }),
+            new UDPOutput("192.168.1.176", 9601, 100),
+            Pipe::transfer<Monochrome, RGB>,
+            GammaLut8
+        ),
+
+                new Pipe(
+            new LayeredApcminiInput<Monochrome>(
+                10, //width of the pattern, in pixels
+                6,  //button column on the apc to listen to (0-7)
+                //the patterns to attach to the buttons
+                new LayeredPattern<Monochrome> *[8] {
+                new Layered::BlinderPattern(Transition::fromLeft,Transition::fromLeft,255),
+                new Layered::SinPattern(),
+                new Layered::BeatSingleFadePattern(),
+                new Layered::BeatMultiFadePattern(),
+                new Layered::BeatShakePattern(),
+                new Layered::BlinderPattern(Transition::fromLeft,Transition::fromLeft,255),
+                new Layered::GlitchPattern(),
+                new Layered::SlowStrobePattern()
+                }),
+            new UDPOutput("192.168.1.177", 9601, 100),
+            Pipe::transfer<Monochrome, RGB>,
+            GammaLut8
+        ),
+
+        new Pipe(
+            new LayeredApcminiInput<Monochrome>(
+                10, //width of the pattern, in pixels
+                6,  //button column on the apc to listen to (0-7)
+                //the patterns to attach to the buttons
+                new LayeredPattern<Monochrome> *[8] {
+                new Layered::BlinderPattern(Transition::fromLeft,Transition::fromLeft,255),
+                new Layered::SinPattern(),
+                new Layered::BeatSingleFadePattern(),
+                new Layered::BeatMultiFadePattern(),
+                new Layered::BeatShakePattern(),
+                new Layered::BlinderPattern(Transition::fromLeft,Transition::fromLeft,255),
+                new Layered::GlitchPattern(),
+                new Layered::SlowStrobePattern()
+                }),
+            new UDPOutput("192.168.1.178", 9601, 100),
+            Pipe::transfer<Monochrome, RGB>,
+            GammaLut8
         ),
 
         ///////////////////////
