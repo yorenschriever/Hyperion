@@ -171,7 +171,7 @@ namespace LedStrip
             {
                 int permutedQuantized = perm.at[index * numSegments / width] * width / numSegments;
                 int interval = averagePeriod + permutedQuantized * (averagePeriod * precision) / width;
-                pixels[index] += Params::getPrimaryColour() * lfo.getValue(0, interval);
+                pixels[index] += Params::getSecondaryColour() * lfo.getValue(0, interval);
             }
         }
     };
@@ -237,6 +237,7 @@ namespace LedStrip
     {
         int numWaves;
         LFO<T> lfo;
+        LFO<Square> lfoColour;
         Transition transition = Transition(
             200, Transition::none, 0,
             1000, Transition::none, 0);
@@ -246,6 +247,7 @@ namespace LedStrip
         {
             this->numWaves = numWaves;
             this->lfo = LFO<T>(period);
+            this->lfoColour = LFO<Square>(period/2);
         }
 
         inline void Calculate(RGBA *pixels, int width, bool active) override
@@ -255,8 +257,10 @@ namespace LedStrip
 
             for (int index = 0; index < width; index++)
             {
-                RGBA col = Params::getPrimaryColour() * transition.getValue() * lfo.getValue((float)numWaves * index / width);
-                pixels[index] += col;
+                float phase = (float)numWaves * index / width;
+                RGBA colour = lfoColour.getValue(phase) ? Params::getSecondaryColour() : Params::getPrimaryColour();
+                RGBA dimmedColour = colour * transition.getValue() * lfo.getValue(phase);
+                pixels[index] += dimmedColour;
             }
         }
     };
@@ -338,9 +342,9 @@ namespace LedStrip
             {
                 float val = 1.025 * lfo.getValue(float(Transition::fromCenter(index, width, 1000)) / -1000);
                 if (val < 1.0)
-                    pixels[perm.at[index]] = Params::getPrimaryColour() * lfo.getValue(float(Transition::fromCenter(index, width, 1000)) / -1000) * transition.getValue(index, width);
+                    pixels[perm.at[index]] = Params::getSecondaryColour() * lfo.getValue(float(Transition::fromCenter(index, width, 1000)) / -1000) * transition.getValue(index, width);
                 else
-                    pixels[perm.at[index]] = (Params::getPrimaryColour() + (Params::getHighlightColour() * (val - 1) / 0.025)) * transition.getValue(index, width);
+                    pixels[perm.at[index]] = (Params::getSecondaryColour() + (Params::getHighlightColour() * (val - 1) / 0.025)) * transition.getValue(index, width);
             }
         }
     };
@@ -376,7 +380,7 @@ namespace LedStrip
             for (int index = 0; index < segmentWidth; index++)
             {
                 int permutedQuantized = current * segmentWidth + index;
-                pixels[permutedQuantized] += Params::getPrimaryColour() * fader.getValue();
+                pixels[permutedQuantized] += Params::getSecondaryColour() * fader.getValue();
             }
         }
     };

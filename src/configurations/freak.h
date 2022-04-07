@@ -31,7 +31,7 @@
 //I picked colour correction values that Fastled uses for neopixels "TypicalLEDStrip"
 //http://fastled.io/docs/3.1/group___color_enums.html
 //note the different order, fastled uses RGB, luts are in ouput order (GRB)
-LUT* PixelLut = new ColourCorrectionLUT(1.5, 255,176, 255, 240); 
+LUT* PixelLut = new ColourCorrectionLUT(1.5, 255,255, 255, 240); 
 LUT *IncandescentLut = new IncandescentLUT(2.5, 4096, 200);
 LUT *IncandescentLut8 = new IncandescentLUT(2.5, 255, 24);
 LUT *GammaLut12 = new GammaLUT(2.5, 4096);
@@ -41,31 +41,31 @@ void updateParams()
 {
     const int apcColumn = 0;
     if (APCMini::getStatus(apcColumn,0)){
-        //Pink
-        Params::primaryColour = RGBA(255,0,200,255);
-        Params::secondaryColour = RGBA(170,0,255,255);
-        Params::highlightColour = RGBA(0,255,0,255);
+        //Orange
+        Params::primaryColour = RGBA(255, 100, 0, 255);
+        Params::secondaryColour = RGBA(255, 100, 0, 255);
+        Params::highlightColour = RGBA(255, 0, 0, 255);
     }
 
     if (APCMini::getStatus(apcColumn,1)){
         //Red
         Params::primaryColour = RGB(255,0,0);
-        Params::secondaryColour = RGB(255,75,0);
-        Params::highlightColour = RGB(255,255,0);
+        Params::secondaryColour = RGB(255,0,0);
+        Params::highlightColour = RGB(255,75,0);
     }
 
     if (APCMini::getStatus(apcColumn,2)){
         //Yellow
         Params::primaryColour = RGB(255,255,0);
         Params::secondaryColour = RGB(255,100,0);
-        Params::highlightColour = RGB(255,175,10);
+        Params::highlightColour = RGB(255,0,10);
     }
 
     if (APCMini::getStatus(apcColumn,3)){
         //Hot
         Params::primaryColour = RGB(255,0,0);
         Params::secondaryColour = RGB(255,150,0);
-        Params::highlightColour = RGB(255,200,0);
+        Params::highlightColour = RGB(255,0,200);
     }
 
     if (APCMini::getStatus(apcColumn,4)){
@@ -90,9 +90,9 @@ void updateParams()
     }
 
     if (APCMini::getStatus(apcColumn,7)){
-        //blue red
-        Params::primaryColour = RGB(0,0,255);
-        Params::secondaryColour = RGB(255,0,255);
+        //green red
+        Params::primaryColour = RGB(255,0,255);
+        Params::secondaryColour = RGB(0,0,255);
         Params::highlightColour = RGB(255,0,0);
     }
 }
@@ -101,6 +101,7 @@ void LoadConfiguration()
 {
     Params::primaryColour = RGBA(255, 100, 0, 255);
     Params::secondaryColour = RGBA(100, 100, 75, 255);
+    Params::highlightColour = RGBA(255, 0, 0, 255);
     Params::velocity = 0.3;
 
     Configuration.hostname = "hyperion";
@@ -228,7 +229,7 @@ void LoadConfiguration()
                     //
                     //new MovingheadPatterns::TestPattern(),
                     new MovingheadPatterns::WallPattern(),
-                    new MovingheadPatterns::WallDJPattern(),
+                    new MovingheadPatterns::DJPattern(),
                     new MovingheadPatterns::SidesPattern(),
                     new MovingheadPatterns::Flash360Pattern(),
                     new MovingheadPatterns::GlitchPattern(),
