@@ -21,6 +21,7 @@ set(app_sources
 	"hardware/dmx/dmx.cpp"
 	"hardware/apcmini/apcmini.cpp"
 	"hardware/pca9685/pca9685.cpp"
+	"hardware/spi/spi.cpp"
 	"hardware/sharedResources.cpp"
 	"patterns/helpers/tempo/tempo.cpp"
 

@@ -34,6 +34,7 @@ class Monochrome12;
 class RGB12;
 class RGBA;
 class RGBWAmber;
+class RGBWAmberUV;
 class Miniwash7;
 
 class Monochrome : Colour
@@ -410,6 +411,7 @@ public:
     operator RGB();
     operator GRB();
     operator RGBWAmber();
+    operator RGBWAmberUV();
 
     //overload some operators to quickly apply some blend modes
     //https://en.wikipedia.org/wiki/Blend_modes#Normal_blend_mode
@@ -528,6 +530,61 @@ class RGBWAmber : Colour{
     uint8_t R=0, G=0, B=0, W=0, A=0; //, U;
 };
 
+class RGBWAmberUV : Colour{
+    public:
+    RGBWAmberUV()
+    {
+        this->R = 0;
+        this->G = 0;
+        this->B = 0;
+        this->W = 0;
+        this->A = 0;
+        this->U = 0;
+    }
+
+    RGBWAmberUV(uint8_t R, uint8_t G, uint8_t B, uint8_t W, uint8_t A, uint8_t U)
+    {
+        this->R = R;
+        this->G = G;
+        this->B = B;
+        this->W = W;
+        this->A = A;
+        this->U = U;
+    }
+
+    RGBWAmberUV(RGBWAmber col, uint8_t U)
+    {
+        this->R = col.R;
+        this->G = col.G;
+        this->B = col.B;
+        this->W = col.W;
+        this->A = col.A;
+        this->U = U;
+    }
+
+    inline void ApplyLut(LUT *lut)
+    {
+        R = lut->luts[0 % lut->Dimension][R];
+        G = lut->luts[1 % lut->Dimension][G];
+        B = lut->luts[2 % lut->Dimension][B];
+        W = lut->luts[3 % lut->Dimension][W];
+        A = lut->luts[4 % lut->Dimension][A];
+        U = lut->luts[5 % lut->Dimension][U];
+    }
+
+    inline void dim(uint8_t value)
+    {
+        R = (R * value) >> 8;
+        G = (G * value) >> 8;
+        B = (B * value) >> 8;
+        W = (W * value) >> 8;
+        A = (A * value) >> 8;
+        U = (U * value) >> 8;
+    }
+
+    uint8_t R=0, G=0, B=0, W=0, A=0, U=0;
+};
+
 class MovingHead : Colour {
 public:
     MovingHead()
@@ -630,6 +687,8 @@ class Miniwash7 : Colour {
     uint8_t dontuse3=0;
 };
 
+
+
 inline MovingHead::operator Miniwash7() 
 { 
     return Miniwash7(
@@ -658,6 +717,7 @@ inline RGBA::operator RGBWAmber() {
 
     return RGBWAmber(Rnew*A/255, Gnew*A/255, Bnew*A/255, Wnew*A/255, Anew*A/255); 
 }
+inline RGBA::operator RGBWAmberUV() {  return RGBWAmberUV((RGBWAmber) *(this), 0); }
 
 inline Monochrome::operator RGB() { return RGB(L, L, L); }
 inline Monochrome::operator RGB12() { return RGB12(L * CONV8TO12, L * CONV8TO12, L * CONV8TO12); }

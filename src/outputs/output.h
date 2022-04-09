@@ -2,6 +2,10 @@
 
 #include <Arduino.h>
 
+
+//mapping of esps gpio pins to channel 1-8 on the front panel
+const int pins[] = {5, 4, 14, 2, 15, 32, 0, 33};
+
 //You should derive from this class when writing your own output
 class Output
 {

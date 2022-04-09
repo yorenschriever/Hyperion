@@ -24,8 +24,6 @@ extern "C"
 }
 #endif
 
-//mapping of esps gpio pins to channel 1-8 on the front panel
-const int pins[] = {5, 4, 14, 2, 15, 32, 0, 33};
 
 #define RMT_MAX_CHANNELS 8
 #define MAX_PULSES 64      /* A channel has a 64 "pulse" buffer */

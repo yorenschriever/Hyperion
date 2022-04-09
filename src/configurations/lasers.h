@@ -7,9 +7,10 @@
 #include "outputs/dmxOutput.h"
 #include "luts/colourCorrectionLut.h"
 #include "luts/incandescentLut.h"
+#include "luts/laserLut.h"
 #include "configurationStruct.h"
 
-LUT* LasersLut = new IncandescentLUT(2.5, 4096, 400);
+LUT *LaserLut = new LaserLUT();
 
 void LoadConfiguration()
 {
@@ -18,11 +19,11 @@ void LoadConfiguration()
     Configuration.pwmFrequency = 1500;
 
     Configuration.pipes = {
-        Pipe(
+        new Pipe(
             new UDPInput(9619),
             new PWMOutput(),
             Pipe::transfer<Monochrome12,Monochrome12>,
-            LasersLut),
+            LaserLut),
     };
 
 }
