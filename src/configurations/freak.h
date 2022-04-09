@@ -604,7 +604,7 @@ void LoadConfiguration()
             GammaLut8
         ),
 
-                new Pipe(
+        new Pipe(
             new LayeredApcminiInput<Monochrome>(
                 10, //width of the pattern, in pixels
                 6,  //button column on the apc to listen to (0-7)
@@ -666,6 +666,28 @@ void LoadConfiguration()
                 }),
             new UDPOutput("strobes.local", 9619, 100),
             Pipe::transfer<Monochrome, Monochrome12>
+        ),
+
+        ///////////////////////
+        // LEDPAR JONA
+        ///////////////////////
+        new Pipe(
+            new LayeredApcminiInput<RGBA>(
+                3,
+                7,
+                new LayeredPattern<RGBA> *[8] {
+                    new LedStrip::PalettePattern(),
+                    new LedStrip::PalettePattern(),
+                    new LedStrip::PalettePattern(),
+                    new LedStrip::PalettePattern(),
+                    new LedStrip::PalettePattern(),
+
+                    new LedStrip::PalettePattern(),
+                    new LedStrip::PalettePattern(),
+                    new LedStrip::PalettePattern(),
+                }),
+            new DMXOutput(80),
+            Pipe::transfer<RGBA,RGBWAmberUV>
         ),
 
     };

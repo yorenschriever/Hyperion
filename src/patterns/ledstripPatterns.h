@@ -385,4 +385,22 @@ namespace LedStrip
         }
     };
 
+    class PalettePattern : public LayeredPattern<RGBA>
+    {
+        inline void Calculate(RGBA *pixels, int width, bool active) override
+        {
+            if (!active)
+                return;
+
+            RGBA cols[3] = {
+                Params::getPrimaryColour(),
+                Params::getSecondaryColour(),
+                Params::getHighlightColour(),
+            };
+
+            for (int index = 0; index < width; index++)
+                pixels[index] = cols[index % 3];
+        }
+    };
+
 } // namespace LedStrip
