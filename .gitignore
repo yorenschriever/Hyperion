@@ -12,3 +12,5 @@ wifipassword.h
 src/cert.h
 src/private_key.h
 certificate/**
+sdkconfig.usb
+sdkconfig.ota

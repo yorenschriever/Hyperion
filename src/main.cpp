@@ -29,6 +29,7 @@
 #include "hardware/display/display.h"
 #include "hardware/rotary/rotary.h"
 #include "hardware/apcmini/apcmini.h"
+#include "hardware/dmx/dmx.h"
 //#include "hardware/websocket/websocket.h"
 
 #include "configurations/configuration.h"
