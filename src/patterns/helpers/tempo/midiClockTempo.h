@@ -2,7 +2,6 @@
 #include "abstractTempo.h"
 #include "debug.h"
 #include "hardware/midi/midi.h"
-#include "configurations/configuration.h"
 
 #define MIDICLOCKSTART 0xFA
 #define MIDICLOCKSTOP 0xFC

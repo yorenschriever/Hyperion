@@ -2,6 +2,8 @@
 #include "pattern.h"
 #include "helpers/pixelMap.h"
 #include "helpers/fade.h"
+#include <vector>
+#include <math.h> 
 
 namespace Mapped
 {
@@ -117,6 +119,39 @@ namespace Mapped
                 if (l>1) l=1;
 
                 pixels[index] += Params::getHighlightColour() * l;
+            }
+        }
+    };
+
+    class RadarPattern : public LayeredPattern<RGBA>
+    {
+        PixelMap map;
+        LFO<SawDown> lfo;
+        Transition transition = Transition(
+            200, Transition::none, 0,
+            1000, Transition::none, 0);
+        std::vector<float> scaledAngles;
+
+    public:
+        RadarPattern(PixelMap map, int period = 5000)
+        {
+            this->map = map;
+            this->lfo = LFO<SawDown>(period);
+            this->lfo.setSkew(0.25);
+            std::transform(map.begin(), map.end(), std::back_inserter(scaledAngles), [](PixelPosition pos) -> float { return (atan2(pos.y,pos.x)+PI) / (2*PI); });
+        }
+
+        inline void Calculate(RGBA *pixels, int width, bool active) override
+        {
+            if (!transition.Calculate(active))
+                return;
+
+            for (int index = 0; index < std::min(width, (int)map.size()); index++)
+            {
+                RGBA colour = Params::getSecondaryColour(); 
+                float lfoVal = lfo.getValue(scaledAngles[index]);
+                RGBA dimmedColour = colour * transition.getValue() * lfoVal;
+                pixels[index] += dimmedColour;
             }
         }
     };
