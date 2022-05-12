@@ -2,7 +2,7 @@
 
 #include "outputs/spiOutput.h"
 #include "outputs/udpOutput.h"
-#include "inputs/layeredPatternInput.h"
+#include "inputs/patternCycleInput.h"
 #include "patterns/ledsterPatterns.h"
 #include "luts/colourCorrectionLut.h"
 #include "colours.h"
@@ -25,10 +25,24 @@ void LoadConfiguration()
     Configuration.pipes = {
 
         new Pipe( 
-            new LayeredPatternInput<RGBA>(
+            new PatternCycleInput<RGBA>(
                 481, //number of leds
-                //new Ledster::PetalChasePattern(ledsterMap,2500)
-                new Ledster::PetalChasePattern()
+                std::vector<LayeredPattern<RGBA>*> {
+                    new Ledster::RadarPattern(ledsterMap),
+                    new Ledster::PetalChasePattern(),
+                    new Ledster::ConcentricChaserPattern(),
+                    new Ledster::SnakePattern(),
+                    new Ledster::RadialFadePattern(ledsterMap),
+                    new Ledster::RibbenClivePattern<SoftSquare>(),
+                    new Ledster::RibbenClivePattern<SawDown>(500),
+                    new Ledster::RibbenClivePattern<SinFast>(3000),
+                    new Ledster::AdidasPattern(),
+                    new Ledster::ChevronsPattern(ledsterMap),
+                    new Ledster::SnowflakePattern(),
+                    new Ledster::PetalRotatePattern(),
+                    new Ledster::MandalaPattern()
+                },
+                5000 //duration
             ),
             new UDPOutput("192.168.0.76",9601,60),
             //new SpiOutput(0,1,500000)

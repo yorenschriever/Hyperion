@@ -80,6 +80,17 @@ public:
     }
 };
 
+class SawDownShort
+{
+public:
+    static float getValue(float phase, float pulsewidth)
+    {
+        if (phase > pulsewidth)
+            return 0;
+        return 1. - phase/pulsewidth;
+    }
+};
+
 class Tri
 {
 public:
@@ -146,5 +157,20 @@ public:
     static float getValue(float phase, float pulsewidth)
     {
         return phase < 0.5 ? 1 : 0;
+    }
+};
+
+class SoftSquare
+{
+public:
+    static float getValue(float phase, float pulsewidth)
+    {
+        if (phase < pulsewidth)
+            return phase / pulsewidth;
+        if (phase < 0.5)
+            return 1;
+        if (phase < 0.5 + pulsewidth)
+            return 1 - (phase-0.5) / pulsewidth;
+        return 0;
     }
 };

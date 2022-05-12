@@ -10,8 +10,7 @@ class PatternInput : public Input
 
 public:
     //length = the length in pixels
-    //column = the colunm on the apc to listen to
-    //patterns = a list of 8 patterns to attach to each button
+    //patterns = the pattern to display
     PatternInput(int length, Pattern<T_COLOUR> *pattern)
     {
         this->length = length;

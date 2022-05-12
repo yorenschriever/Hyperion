@@ -3,15 +3,14 @@
 #include "input.h"
 #include "../patterns/pattern.h"
 
-//PatternInput displays 1 pattern continuously.
+//LayeredPatternInput displays 1 pattern continuously.
 template <class T_COLOUR>
 class LayeredPatternInput : public Input
 {
 
 public:
     //length = the length in pixels
-    //column = the colunm on the apc to listen to
-    //patterns = a list of 8 patterns to attach to each button
+    //pattern = the pattern to display
     LayeredPatternInput(int length, LayeredPattern<T_COLOUR> *pattern)
     {
         this->length = length;
