@@ -1,6 +1,7 @@
 #pragma once
 #include "colours.h"
 #include "pipe.h"
+#include "hardware/midi/midi.h"
 #include "inputs/udpInput.h"
 #include "outputs/neopixelOutput.h"
 #include "outputs/pwmOutput.h"
@@ -14,6 +15,8 @@ LUT *LaserLut = new LaserLUT();
 
 void LoadConfiguration()
 {
+
+    Midi::setRoute(Midi::Din);
 
     Configuration.hostname = "lasers";
     Configuration.pwmFrequency = 1500;

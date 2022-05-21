@@ -15,8 +15,11 @@
 
 #define CONFIG_UART_ISR_IN_IRAM 1
 
-#define MIDI_SERIAL_OUTPUT_PIN 1
-#define MIDI_SERIAL_INPUT_PIN 3
+#define MIDI_SERIAL_OUTPUT_PIN_USB 1
+#define MIDI_SERIAL_INPUT_PIN_USB 3
+
+#define MIDI_SERIAL_OUTPUT_PIN_DIN 5
+#define MIDI_SERIAL_INPUT_PIN_DIN 35
 
 //This class will read midi messages coming from the atmega328, which in turn gets them from 
 //the usb port on the front panel. 
@@ -46,11 +49,17 @@ public:
     static uint8_t controllerValue(uint8_t channelnumber);
 
     static bool isConnected();
+    static bool isStarted();
+
+    enum Route { Usb, Din };
+    static void setRoute(Route route);
+    static Route getRoute();
 
 private:
     static QueueHandle_t midi_rx_queue;
     static void uart_event_task(void *pvParameters); // Event task
     static bool started;
+    static Route route;
 
     static std::set<MidiEvent3> noteOnHandler;
     static std::set<MidiEvent3> noteOffHandler;

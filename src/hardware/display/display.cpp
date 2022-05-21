@@ -26,6 +26,7 @@ bool Display::wificonnected = false;
 bool Display::wificonnecting = false;
 bool Display::dmxconnected = false;
 bool Display::midiconnected = false;
+bool Display::midistarted = false;
 int Display::numleds = 0;
 bool Display::dfu = false;
 int Display::dfupercentage = 0;
@@ -66,64 +67,44 @@ void Display::Initialize()
 
 void Display::setFPS(int newfpsin, int newfpsout, int misses)
 {
-    if (fpsin == newfpsin && fpsout == newfpsout && misses == framemiss)
-        return;
     fpsin = newfpsin;
     fpsout = newfpsout;
     framemiss = misses;
-    //xSemaphoreGive(dirtySemaphore);
 }
 
 void Display::setEthernet(bool connected, bool connecting)
 {
-    //if (ethconnected == connected)
-    //    return;
     ethconnected = connected;
     ethconnecting = connecting;
-    //xSemaphoreGive(dirtySemaphore);
 }
 
 void Display::setWifi(bool enabled, bool connected, bool connecting)
 {
-    //if (ethconnected == connected)
-    //    return;
     wifienabled = enabled;
     wificonnected = connected;
     wificonnecting = connecting;
-    //xSemaphoreGive(dirtySemaphore);
 }
 
 void Display::setDMX(bool connected)
 {
-    if (dmxconnected == connected)
-        return;
     dmxconnected = connected;
-    //xSemaphoreGive(dirtySemaphore);
 }
 
-void Display::setMidi(bool connected)
+void Display::setMidi(bool connected, bool started)
 {
-    if (midiconnected == connected)
-        return;
     midiconnected = connected;
-    //xSemaphoreGive(dirtySemaphore);
+    midistarted = started;
 }
 
 void Display::setLeds(int leds)
 {
-    if (numleds == leds)
-        return;
     numleds = leds;
-    //xSemaphoreGive(dirtySemaphore);
 }
 
 void Display::setDFU(bool dfu, int percentage)
 {
-    if (Display::dfu == dfu && Display::dfupercentage == percentage)
-        return;
     Display::dfu = dfu;
     Display::dfupercentage = percentage;
-    //xSemaphoreGive(dirtySemaphore);
 }
 
 void Display::show(){
@@ -171,12 +152,14 @@ void Display::updateFrame()
 
         int pos = 0;
         pos = renderConnectionStatus(pos, ethconnecting? millis()%1000<500 : ethconnected, "ETH");
-        if (wifienabled) pos = renderConnectionStatus(pos, wificonnecting? millis()%1000<500 : wificonnected, "WIFI");
+        if (wifienabled) 
+            pos = renderConnectionStatus(pos, wificonnecting? millis()%1000<500 : wificonnected, "WIFI");
         pos = renderConnectionStatus(pos, dmxconnected, "DMX");
         
-        #ifndef DEBUGOVERSERIAL
-        pos = renderConnectionStatus(pos, midiconnected, "MIDI");
-        #else
+        if (midistarted)
+            pos = renderConnectionStatus(pos, midiconnected, "MIDI");
+
+        #ifdef DEBUGOVERSERIAL
         pos = renderConnectionStatus(pos, false, "DBG");//remind the user that debug is enabled and midi is not working
         #endif
         

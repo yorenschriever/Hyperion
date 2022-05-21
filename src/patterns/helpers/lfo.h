@@ -174,3 +174,15 @@ public:
         return 0;
     }
 };
+
+template <class INNER>
+class LFOPause
+{
+public:
+    static float getValue(float phase, float pulsewidth)
+    {
+        if (phase > pulsewidth)
+            return 0;
+        return INNER::getValue(phase/pulsewidth,pulsewidth);
+    }
+};

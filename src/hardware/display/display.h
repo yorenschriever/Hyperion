@@ -13,7 +13,7 @@ public:
     static void setEthernet(bool connected, bool connecting);
     static void setWifi(bool enabled, bool connected, bool connecting);
     static void setDMX(bool connected);
-    static void setMidi(bool connected);
+    static void setMidi(bool connected, bool started);
     static void setLeds(int numleds);
     static void show();
 
@@ -33,6 +33,7 @@ private:
     static bool wifienabled;
     static bool dmxconnected;
     static bool midiconnected;
+    static bool midistarted;
     static int numleds;
 
     static bool dfu;

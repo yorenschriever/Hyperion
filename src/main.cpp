@@ -232,7 +232,7 @@ void UpdateDisplay(void *parameter)
         Display::setFPS(infps,outfps,misses);
         Display::setLeds(totalLength);
         Display::setDMX(DMX::IsHealthy());
-        Display::setMidi(Midi::isConnected());
+        Display::setMidi(Midi::isConnected(),Midi::isStarted());
         Display::setEthernet(Ethernet::isConnected(),Ethernet::isConnecting());
         Display::setWifi(Configuration.wifiEnabled, Wifi::isConnected(),Wifi::isConnecting());
         Display::show();

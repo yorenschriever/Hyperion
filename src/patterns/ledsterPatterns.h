@@ -261,11 +261,11 @@ namespace Ledster
         Permute perm = Permute(36);
 
     public:
-        RibbenClivePattern(int averagePeriod = 10000, float precision = 1)
+        RibbenClivePattern(int averagePeriod = 10000, float precision = 1, float pulsewidth = 0.025)
         {
             this->averagePeriod = averagePeriod;
             this->precision = precision;
-            this->lfo.setPulseWidth(0.025);
+            this->lfo.setPulseWidth(pulsewidth);
         }
 
         inline void Calculate(RGBA *pixels, int width, bool active) override
@@ -434,9 +434,12 @@ namespace Ledster
             int notfilledIndex = 0;
             for (int i = 0; i < 271; i++)
             {
-                if (notfilled[notfilledIndex] == i){
+                if (notfilled[notfilledIndex] == i)
+                {
                     notfilledIndex++;
-                } else {
+                }
+                else
+                {
                     pixels[i] += Params::getPrimaryColour() * transition.getValue();
                 }
             }
@@ -446,6 +449,227 @@ namespace Ledster
             // {
             //     pixels[hex[j]] += Params::getHighlightColour() * transition.getValue();
             // }
+        }
+    };
+
+    class RadialGlitterFadePattern : public LayeredPattern<RGBA>
+    {
+        Transition transition = Transition(
+            200, Transition::none, 0,
+            1000, Transition::none, 0);
+        PixelMap map;
+        FadeDown fade = FadeDown(200, WaitAtEnd);
+        std::vector<float> normalizedRadii;
+        Timeline timeline = Timeline(1000);
+        Permute perm;
+
+    public:
+        RadialGlitterFadePattern(PixelMap map)
+        {
+            this->map = map;
+            std::transform(map.begin(), map.end(), std::back_inserter(normalizedRadii), [](PixelPosition pos) -> float
+                           { return sqrt(pos.y * pos.y + pos.x * pos.x); });
+            this->perm = Permute(map.size());
+        }
+
+        inline void Calculate(RGBA *pixels, int width, bool active) override
+        {
+            if (!transition.Calculate(active))
+                return;
+
+            timeline.FrameStart();
+            if (timeline.Happened(0))
+            {
+                fade.reset();
+                perm.permute();
+            }
+
+            for (int i = 0; i < normalizedRadii.size(); i++)
+            {
+                fade.duration = perm.at[i] * 2; // + 100;
+                pixels[i] += Params::getSecondaryColour() * fade.getValue(normalizedRadii[i] * 300);
+            }
+        }
+    };
+
+    class PixelGlitchPattern : public LayeredPattern<RGBA>
+    {
+        Timeline timeline = Timeline(50);
+        Permute perm = Permute(0);
+        Transition transition = Transition(
+            200, Transition::none, 0,
+            1000, Transition::none, 0);
+
+        inline void Calculate(RGBA *pixels, int width, bool active) override
+        {
+            if (!transition.Calculate(active))
+                return;
+
+            timeline.FrameStart();
+            perm.setSize(width);
+
+            if (timeline.Happened(0))
+                perm.permute();
+
+            uint8_t val = timeline.GetTimelinePosition() < 25 ? 255 * transition.getValue() : 0;
+
+            for (int index = 0; index < width / 2; index++)
+                pixels[perm.at[index]] += Params::getSecondaryColour() * val;
+        }
+    };
+
+    class SquareGlitchPattern : public LayeredPattern<RGBA>
+    {
+        Timeline timeline = Timeline(50);
+        Permute perm = Permute(100);
+        Transition transition = Transition(
+            200, Transition::none, 0,
+            1000, Transition::none, 0);
+
+        PixelMap map;
+
+    public:
+        SquareGlitchPattern(PixelMap map)
+        {
+            this->map = map;
+        }
+
+        inline void Calculate(RGBA *pixels, int width, bool active) override
+        {
+            if (!transition.Calculate(active))
+                return;
+
+            timeline.FrameStart();
+
+            if (timeline.Happened(0))
+                perm.permute();
+
+            for (int index = 0; index < width; index++)
+            {
+                int xquantized = (map[index].x + 1) * 5;
+                int yquantized = (map[index].y + 1) * 5;
+                int square = xquantized + yquantized * 5;
+                if (perm.at[square] > 25)
+                    continue;
+                pixels[index] += Params::getPrimaryColour() * transition.getValue();
+            }
+        }
+    };
+
+    template <class T>
+    class ClivePattern : public LayeredPattern<RGBA>
+    {
+        int numSegments;
+        int averagePeriod;
+        float precision;
+        LFO<T> lfo;
+        Permute perm;
+
+    public:
+        ClivePattern(int numSegments = 10, int averagePeriod = 1000, float precision = 1, float pulsewidth = 1)
+        {
+            this->numSegments = std::max(numSegments, 1);
+            this->averagePeriod = averagePeriod;
+            this->precision = precision;
+            this->perm = Permute(numSegments);
+            this->lfo.setPulseWidth(pulsewidth);
+        }
+
+        inline void Calculate(RGBA *pixels, int width, bool active) override
+        {
+            if (!active)
+                return;
+
+            for (int index = 0; index < width; index++)
+            {
+                int permutedQuantized = perm.at[index * numSegments / width] * width / numSegments;
+                int interval = averagePeriod + permutedQuantized * (averagePeriod * precision) / width;
+                pixels[index] += Params::getSecondaryColour() * lfo.getValue(0, interval);
+            }
+        }
+    };
+
+    class KonamiFadePattern : public LayeredPattern<RGBA>
+    {
+        Transition transition = Transition(
+            200, Transition::none, 0,
+            1000, Transition::none, 0);
+        PixelMap map;
+        FadeDown fade[8] = {
+            FadeDown(200, WaitAtEnd),
+            FadeDown(200, WaitAtEnd),
+            FadeDown(200, WaitAtEnd),
+            FadeDown(200, WaitAtEnd),
+            FadeDown(200, WaitAtEnd),
+            FadeDown(200, WaitAtEnd),
+            FadeDown(200, WaitAtEnd),
+            FadeDown(200, WaitAtEnd)
+        };
+        const int interval = 500;
+        Timeline timeline = Timeline(8 * interval);
+        int8_t directionsx[8] = { -1, -1, 1, 1, 0,  0, 0,  0 };
+        int8_t directionsy[8] = { 0, 0,  0,  0, 1, -1, 1, -1 };
+
+    public:
+        KonamiFadePattern(PixelMap map)
+        {
+            this->map = map;
+        }
+
+        inline void Calculate(RGBA *pixels, int width, bool active) override
+        {
+            if (!transition.Calculate(active))
+                return;
+
+            timeline.FrameStart();
+            for (int i = 0; i < 8; i++)
+            {
+                if (timeline.Happened(i * interval))
+                {
+                    fade[i].reset();
+                }
+            }
+
+            for (int i = 0; i < std::min(width, (int)map.size()); i++)
+            {
+                float cumulativeFadeValue = 0;
+                for (int j = 0; j < 8; j++)
+                {
+                    cumulativeFadeValue += fade[j].getValue((((float)map[i].x * directionsy[j] + map[i].y * directionsx[j]) + 1.0) * 300);
+                }
+
+                pixels[i] += Params::getSecondaryColour() * cumulativeFadeValue * transition.getValue();
+            }
+        }
+    };
+
+
+    class RadialRainbowPattern : public LayeredPattern<RGBA>
+    {
+        Transition transition = Transition(
+            200, Transition::none, 0,
+            1000, Transition::none, 0);
+        PixelMap map;
+        std::vector<float> normalizedRadii;
+        LFO<SawUp> lfo = LFO<SawUp>(1000);
+        
+    public:
+        RadialRainbowPattern(PixelMap map)
+        {
+            this->map = map;
+            std::transform(map.begin(), map.end(), std::back_inserter(normalizedRadii), [](PixelPosition pos) -> float
+                           { return sqrt(pos.y * pos.y + pos.x * pos.x); });
+        }
+
+        inline void Calculate(RGBA *pixels, int width, bool active) override
+        {
+            if (!transition.Calculate(active))
+                return;
+
+            for (int i = 0; i < normalizedRadii.size(); i++)
+            {
+                pixels[i] += ((RGBA)Hue((normalizedRadii[i]+lfo.getValue())*255)) * transition.getValue();
+            }
         }
     };
 

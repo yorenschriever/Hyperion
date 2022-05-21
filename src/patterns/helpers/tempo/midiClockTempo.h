@@ -60,10 +60,6 @@ public:
                 if (instance->tickCount == 0)
                 {
                     instance->beat();
-                    // instance->lastBeatNr++;
-                    // //Debug.printf("Midi clock %d\n",instance->lastBeatNr);
-                    // instance->secondlastBeatReceived = instance->lastBeatReceived;
-                    // instance->lastBeatReceived = millis();
                 }
             }
         });
