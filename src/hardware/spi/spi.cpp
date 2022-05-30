@@ -30,6 +30,8 @@ void SPI::Initialize(uint8_t dataPin, uint8_t clkPin, int frq)
 
     ESP_ERROR_CHECK(spi_bus_initialize(HSPI_HOST, &buscfg, 2));
     ESP_ERROR_CHECK(spi_bus_add_device(HSPI_HOST, &devcfg, &spi));
+
+    initialized = true;
 }
 
 void SPI::Send(uint8_t *data, int length)
@@ -37,13 +39,14 @@ void SPI::Send(uint8_t *data, int length)
     if (!IsReady())
         return;
 
+    sendFinished = false;
+
     memset(&trans, 0, sizeof(spi_transaction_t));
     trans.length = length * 8;
     trans.user = 0;
     trans.flags = 0;
     trans.tx_buffer = data;
 
-    sendFinished = false;
     ESP_ERROR_CHECK_WITHOUT_ABORT(spi_device_queue_trans(spi, &trans, portMAX_DELAY));
 }
 

@@ -14,17 +14,16 @@ private:
     unsigned long startingpoint;
     float pulseWidth = 0.5;
     float skew = 1;
+    int period;
 
 public:
-    LFO(int period=0)
+    LFO(int period = 1000)
     {
         this->period = period;
         reset();
     }
 
-    int period;
-
-    //LFO value between 0-1
+    // LFO value between 0-1
     float getValue() { return getValue(0, this->period); }
     float getValue(float deltaPhase) { return getValue(deltaPhase, period); }
     float getValue(float deltaPhase, int periodArg)
@@ -37,12 +36,12 @@ public:
         return T::getValue(phase, pulseWidth);
     }
 
-    //value between 0-1
+    // value between 0-1
     float getPhase() { return getPhase(0, period); }
     float getPhase(float deltaPhase, int periodArg)
     {
         int deltaPhaseMs = periodArg * deltaPhase;
-        unsigned long phase = (millis() - startingpoint - deltaPhaseMs) % periodArg;
+        unsigned long phase = (millis() - startingpoint - deltaPhaseMs + periodArg) % periodArg;
         return ((float)phase / (float)periodArg);
     }
 
@@ -59,6 +58,18 @@ public:
     void setPulseWidth(float pulsewidth)
     {
         this->pulseWidth = pulsewidth;
+    }
+
+    int getPeriod() {
+        return period;
+    }
+
+    void setPeriod(int newPeriod)
+    {
+        //correct the phase so the period change doesn't result in a phase change
+        float phase = getPhase();
+        this->startingpoint = millis() - phase * newPeriod;
+        this->period = newPeriod;
     }
 };
 
@@ -87,7 +98,7 @@ public:
     {
         if (phase > pulsewidth)
             return 0;
-        return 1. - phase/pulsewidth;
+        return 1. - phase / pulsewidth;
     }
 };
 
@@ -170,7 +181,7 @@ public:
         if (phase < 0.5)
             return 1;
         if (phase < 0.5 + pulsewidth)
-            return 1 - (phase-0.5) / pulsewidth;
+            return 1 - (phase - 0.5) / pulsewidth;
         return 0;
     }
 };
@@ -183,6 +194,6 @@ public:
     {
         if (phase > pulsewidth)
             return 0;
-        return INNER::getValue(phase/pulsewidth,pulsewidth);
+        return INNER::getValue(phase / pulsewidth, pulsewidth);
     }
 };

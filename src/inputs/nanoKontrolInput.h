@@ -33,6 +33,15 @@ public:
 
     virtual int loadData(uint8_t *dataPtr)
     {
+        Params::velocity = (float )Midi::controllerValue(firstRotary + 0) / 0x7f;
+        Params::intensity = (float )Midi::controllerValue(firstRotary + 1) / 0x7f;
+        Params::variant  = (float )Midi::controllerValue(firstRotary + 2) / 0x7f;
+
+        Params::primaryColour   = Hue(Midi::controllerValue(firstRotary + 3) * 2);
+        Params::secondaryColour = Hue(Midi::controllerValue(firstRotary + 4) * 2);
+        Params::highlightColour = Hue(Midi::controllerValue(firstRotary + 5) * 2);
+
+
         for (int i = 0; i < length; i++)
             ((T_COLOUR *)dataPtr)[i] = T_COLOUR();
 
@@ -63,4 +72,5 @@ private:
     const int buttonMapping[24] = {32,48,64, 33,49,65, 34,50,66, 35,51,67, 36,52,68, 37,53,69, 38,54,70, 39,55,71};
     const int firstFader = 0;
     const int masterDimController = 23;
+    const int firstRotary = 16;
 };

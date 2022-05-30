@@ -77,13 +77,13 @@ namespace Ledster
             200, Transition::none, 0,
             1000, Transition::none, 0);
         std::vector<float> scaledAngles;
-        FadeDown fade1 = FadeDown(2400, WaitAtEnd);
+        FadeDown fade = FadeDown(2400, WaitAtEnd);
 
     public:
-        RadarPattern(PixelMap map, int period = 5000)
+        RadarPattern(PixelMap map)
         {
             this->map = map;
-            this->lfo = LFO<SawDown>(period);
+            this->lfo = LFO<SawDown>(5000);
             this->lfo.setSkew(0.25);
             this->lfo.setPulseWidth(0.7);
             std::transform(map.begin(), map.end(), std::back_inserter(scaledAngles), [](PixelPosition pos) -> float
@@ -92,6 +92,9 @@ namespace Ledster
 
         inline void Calculate(RGBA *pixels, int width, bool active) override
         {
+            lfo.setPeriod(Params::getVelocity(10000, 1000));
+            lfo.setSkew(Params::getintensity(0.33, 1));
+
             if (!transition.Calculate(active))
                 return;
 
@@ -104,11 +107,11 @@ namespace Ledster
 
                 if (index == 200 && lfoVal > 0.5) // TODO timeline.happened
                 {
-                    fade1.reset();
+                    fade.reset();
                 }
             }
 
-            RGBA dot = RGBA(255, 255, 255, 255) * transition.getValue() * fade1.getValue();
+            RGBA dot = RGBA(255, 255, 255, 255) * transition.getValue() * fade.getValue();
             pixels[200] += dot;
             pixels[199] += dot;
             pixels[201] += dot;
@@ -133,17 +136,19 @@ namespace Ledster
             FadeDown(1400, WaitAtEnd),
             FadeDown(1400, WaitAtEnd),
             FadeDown(1400, WaitAtEnd)};
-        Timeline timeline = Timeline(500);
+        TempoWatcher watcher = TempoWatcher();
         int pos = 0;
 
     public:
         inline void Calculate(RGBA *pixels, int width, bool active) override
         {
+            for(int i=0;i<6;i++) 
+                fade[i].duration = Params::getintensity(3000, 100);
+
             if (!transition.Calculate(active))
                 return;
 
-            timeline.FrameStart();
-            if (timeline.Happened(0))
+            if (watcher.Triggered())
             {
                 pos = (pos + 1) % 6;
                 fade[pos].reset();
@@ -168,6 +173,8 @@ namespace Ledster
     public:
         inline void Calculate(RGBA *pixels, int width, bool active) override
         {
+            lfo.setPeriod(Params::getVelocity(10000, 1000));
+
             if (!transition.Calculate(active))
                 return;
 
@@ -185,7 +192,7 @@ namespace Ledster
                     if (hex % 2 == 0)
                         phase = 1.0 - phase;
 
-                    pixels[hexagons[hex][i]] += Params::getSecondaryColour() * lfo.getValue(phase);
+                    pixels[hexagons[hex][i]] += Params::getSecondaryColour() * lfo.getValue(phase, 1500 + hex*250) * transition.getValue();
                 }
             }
         }
@@ -201,15 +208,21 @@ namespace Ledster
     public:
         inline void Calculate(RGBA *pixels, int width, bool active) override
         {
-            if (!transition.Calculate(active))
-                return;
+            // lfo.setPeriod(Params::getVelocity(10000, 500));
+            // lfo.setSkew(Params::getintensity());
+            // lfo.setPulseWidth(1);
+            // int variant = Params::getVariant() * 7 + 1;
 
             lfo.setSkew(0.5);
             lfo.setPulseWidth(1);
+            int variant = 5;
+
+            if (!transition.Calculate(active))
+                return;
 
             for (int i = 0; i < snake.size(); i++)
             {
-                pixels[snake[i]] += Params::getSecondaryColour() * lfo.getValue((float)i / snake.size() * 5);
+                pixels[snake[i]] += Params::getSecondaryColour() * lfo.getValue((float)i / snake.size() * variant);
             }
         }
     };
@@ -222,7 +235,7 @@ namespace Ledster
         PixelMap map;
         FadeDown fade = FadeDown(200, WaitAtEnd);
         std::vector<float> normalizedRadii;
-        Timeline timeline = Timeline(500);
+        TempoWatcher watcher = TempoWatcher();
 
     public:
         RadialFadePattern(PixelMap map)
@@ -234,18 +247,20 @@ namespace Ledster
 
         inline void Calculate(RGBA *pixels, int width, bool active) override
         {
+            fade.duration = Params::getintensity(500,120);
+            int velocity = Params::getVelocity(500,50);
+
             if (!transition.Calculate(active))
                 return;
 
-            timeline.FrameStart();
-            if (timeline.Happened(0))
+            if (watcher.Triggered())
             {
                 fade.reset();
             }
 
             for (int i = 0; i < normalizedRadii.size(); i++)
             {
-                pixels[i] += Params::getSecondaryColour() * fade.getValue(normalizedRadii[i] * 300);
+                pixels[i] += Params::getSecondaryColour() * fade.getValue(normalizedRadii[i] * velocity) * transition.getValue();
             }
         }
     };
@@ -520,7 +535,7 @@ namespace Ledster
 
     class SquareGlitchPattern : public LayeredPattern<RGBA>
     {
-        Timeline timeline = Timeline(50);
+        //Timeline timeline = Timeline(50);
         Permute perm = Permute(100);
         Transition transition = Transition(
             200, Transition::none, 0,
@@ -539,9 +554,9 @@ namespace Ledster
             if (!transition.Calculate(active))
                 return;
 
-            timeline.FrameStart();
+            //timeline.FrameStart();
 
-            if (timeline.Happened(0))
+            //if (timeline.Happened(0))
                 perm.permute();
 
             for (int index = 0; index < width; index++)
@@ -551,7 +566,7 @@ namespace Ledster
                 int square = xquantized + yquantized * 5;
                 if (perm.at[square] > 25)
                     continue;
-                pixels[index] += Params::getPrimaryColour() * transition.getValue();
+                pixels[index] += Params::getHighlightColour() * transition.getValue();
             }
         }
     };
@@ -603,12 +618,11 @@ namespace Ledster
             FadeDown(200, WaitAtEnd),
             FadeDown(200, WaitAtEnd),
             FadeDown(200, WaitAtEnd),
-            FadeDown(200, WaitAtEnd)
-        };
+            FadeDown(200, WaitAtEnd)};
         const int interval = 500;
         Timeline timeline = Timeline(8 * interval);
-        int8_t directionsx[8] = { -1, -1, 1, 1, 0,  0, 0,  0 };
-        int8_t directionsy[8] = { 0, 0,  0,  0, 1, -1, 1, -1 };
+        int8_t directionsx[8] = {-1, -1, 1, 1, 0, 0, 0, 0};
+        int8_t directionsy[8] = {0, 0, 0, 0, 1, -1, 1, -1};
 
     public:
         KonamiFadePattern(PixelMap map)
@@ -643,7 +657,6 @@ namespace Ledster
         }
     };
 
-
     class RadialRainbowPattern : public LayeredPattern<RGBA>
     {
         Transition transition = Transition(
@@ -652,7 +665,7 @@ namespace Ledster
         PixelMap map;
         std::vector<float> normalizedRadii;
         LFO<SawUp> lfo = LFO<SawUp>(1000);
-        
+
     public:
         RadialRainbowPattern(PixelMap map)
         {
@@ -668,7 +681,7 @@ namespace Ledster
 
             for (int i = 0; i < normalizedRadii.size(); i++)
             {
-                pixels[i] += ((RGBA)Hue((normalizedRadii[i]+lfo.getValue())*255)) * transition.getValue();
+                pixels[i] += ((RGBA)Hue((normalizedRadii[i] + lfo.getValue()) * 255)) * transition.getValue();
             }
         }
     };

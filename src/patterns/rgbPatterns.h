@@ -256,7 +256,7 @@ class GlowPattern : public Pattern<RGB>
 public:
     inline void Calculate(RGB *pixels, int width, bool firstFrame) override
     {
-        lfo.period = 500 + 10000* (1.0f - Params::getVelocity());
+        lfo.setPeriod(500 + 10000* (1.0f - Params::getVelocity()));
         perm.setSize(width);
 
         for (int index = 0; index < width; index++)
@@ -272,7 +272,7 @@ class GlowPulsePattern : public Pattern<RGB>
 public:
     inline void Calculate(RGB *pixels, int width, bool firstFrame) override
     {
-        lfo.period = 500 + 10000* (1.0f - Params::getVelocity());
+        lfo.setPeriod(500 + 10000* (1.0f - Params::getVelocity()));
         perm.setSize(width);
 
         for (int index = 0; index < width; index++)

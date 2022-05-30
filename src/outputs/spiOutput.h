@@ -30,7 +30,9 @@ public:
 
     boolean Ready()
     {
-        return SPI::IsReadyForUs(500);
+        //even though the datasheet states less, 1000us seems to be neccesary for 
+        //stable operation (tested on ledster)
+        return SPI::IsReadyForUs(1000); 
     }
 
     void Show()

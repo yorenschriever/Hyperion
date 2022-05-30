@@ -91,7 +91,8 @@ void Midi::Initialize()
 
 void Midi::setRoute(Route route)
 {
-    if (started){
+    if (started)
+    {
         Debug.println("You cannot call Midi::setRoute after initialization.");
         return;
     }
@@ -149,6 +150,7 @@ void Midi::uart_event_task(void *pvParameters)
 
         if (messagetype == NOTEON && messageposition == 3 && message[1] < NUMBER_OF_NOTES)
         {
+            // Debug.printf("note on %d %d\n", message[1],message[2]);
             noteValues[message[1]] = message[2];
             for (auto &&handler : noteOnHandler)
                 handler(channel, message[1], message[2]);
@@ -163,7 +165,7 @@ void Midi::uart_event_task(void *pvParameters)
 
         if (messagetype == CONTROLLERCHANGE && messageposition == 3 && message[1] < NUMBER_OF_CONTROLLERS)
         {
-            //Debug.printf("controller %d %d\n", message[1],message[2]);
+            // Debug.printf("controller %d %d\n", message[1],message[2]);
             controllerValues[message[1]] = message[2];
             for (auto &&handler : controllerChangeHandler)
                 handler(channel, message[1], message[2]);
