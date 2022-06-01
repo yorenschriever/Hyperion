@@ -20,7 +20,16 @@
 #include "inputs/switchableInput.h"
 #include "inputs/nullInput.h"
 
-LUT* PixelLut = new ColourCorrectionLUT(1.5, 255,255, 255, 240); 
+LUT *PixelLut = new ColourCorrectionLUT(1.5, 255, 255, 255, 240);
+const int numLeds = 481;
+
+int dynamicColorConversionTransfer(uint8_t *data, int length, Output *out, LUT *lut)
+{
+    if (length == numLeds * sizeof(RGBA))
+        return Pipe::transfer<RGBA, RGB>(data, length, out, lut);
+    else
+        return Pipe::transfer(data, length, out, lut);
+}
 
 void LoadConfiguration()
 {
@@ -31,23 +40,19 @@ void LoadConfiguration()
     Params::intensity = 0.7;
     Params::variant = 0.7;
 
-    Tempo::AddSource(ConstantTempo::getInstance()); 
-    ConstantTempo::getInstance()->setBpm(120); 
+    Tempo::AddSource(ConstantTempo::getInstance());
+    ConstantTempo::getInstance()->setBpm(120);
 
     Configuration.hostname = "ledsterstandalone";
 
-    auto sharedOutput = new SpiOutput(0,1,500000); //new UDPOutput("192.168.0.76",9601,60),
-
     Configuration.pipes = {
 
-        //I cannot use FallbackInput here, because PatternCycleInput works with RGBA and
-        //UDPInput works with RGB. This workaround with switchableInput also does the trick. 
         new Pipe(
-            new SwitchableInput(
-                new NullInput(),
+            new FallbackInput(
+                new UDPInput(9601),
                 new PatternCycleInput<RGBA>(
-                    481, //number of leds
-                    std::vector<LayeredPattern<RGBA>*> {
+                    numLeds,
+                    std::vector<LayeredPattern<RGBA> *>{
                         new Ledster::RadarPattern(ledsterMap),
                         new Ledster::PetalChasePattern(),
                         new Ledster::ConcentricChaserPattern(),
@@ -56,24 +61,13 @@ void LoadConfiguration()
                         new Ledster::RibbenClivePattern<SoftSquare>(),
                         new Ledster::SnowflakePattern(),
                         new Ledster::PetalRotatePattern(),
-                        new Ledster::ClivePattern<LFOPause<SinFast>>(481,10000,5,0.25)
-                    },
-                    30000 //duration
+                        new Ledster::ClivePattern<LFOPause<SinFast>>(numLeds, 10000, 5, 0.25)},
+                    30000 // duration
+                    )
                 ),
-                Ethernet::isConnected
-            ),
-            sharedOutput,
-            Pipe::transfer<RGBA, RGB>,
-            PixelLut
-        ),
-
-        new Pipe( 
-            new UDPInput(9601),
-            sharedOutput,
-            Pipe::transfer<RGB, RGB>,
+            new SpiOutput(0, 1, 500000),
+            dynamicColorConversionTransfer,
             PixelLut
         )
     };
-
 }
-

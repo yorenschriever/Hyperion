@@ -60,5 +60,7 @@
         "thread": "cpp",
         "cinttypes": "cpp",
         "typeinfo": "cpp"
-    }
+    },
+    "idf.adapterTargetName": "esp32",
+    "cmake.configureOnOpen": false
 }
