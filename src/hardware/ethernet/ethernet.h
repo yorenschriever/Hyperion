@@ -37,7 +37,7 @@ public:
 
 protected:
     static esp_eth_handle_t eth_handle;
-    static void EthEvent(WiFiEvent_t event);
+    static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
     static void StartMdnsService(const char *name);
     static bool eth_connected;
     static bool eth_connecting;
