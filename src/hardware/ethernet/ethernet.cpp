@@ -3,7 +3,6 @@
 #endif
 #define CONFIG_ETH_ENABLED
 
-#include "WiFi.h"
 #include <functional>
 #include "esp_wifi.h"
 
@@ -11,7 +10,6 @@
 #include "ethernet.h"
 #include "debug.h"
 #include "mdns.h"
-#include "WiFi.h"
 #include <ESPmDNS.h>
 #include <lwip/netdb.h>
 
@@ -39,8 +37,6 @@ void Ethernet::Initialize(const char *hostname)
     // This delay makes sure that not all nodes will startup at exactly the same time when you flip the master power switch
     // Routers were having trouble when a large amount of nodes started communicating at exactly the same time.
     delay(100 + (esp_random() & 0xFF) * 5);
-
-    //WiFi.onEvent(EthEvent);
 
     tcpipInit();
 
