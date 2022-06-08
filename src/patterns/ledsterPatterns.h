@@ -93,7 +93,7 @@ namespace Ledster
         inline void Calculate(RGBA *pixels, int width, bool active) override
         {
             lfo.setPeriod(Params::getVelocity(10000, 1000));
-            lfo.setSkew(Params::getintensity(0.33, 1));
+            lfo.setSkew(Params::getIntensity(0.33, 1));
 
             if (!transition.Calculate(active))
                 return;
@@ -143,7 +143,7 @@ namespace Ledster
         inline void Calculate(RGBA *pixels, int width, bool active) override
         {
             for(int i=0;i<6;i++) 
-                fade[i].duration = Params::getintensity(3000, 100);
+                fade[i].duration = Params::getIntensity(3000, 100);
 
             if (!transition.Calculate(active))
                 return;
@@ -173,7 +173,7 @@ namespace Ledster
     public:
         inline void Calculate(RGBA *pixels, int width, bool active) override
         {
-            lfo.setPeriod(Params::getVelocity(10000, 1000));
+            //lfo.setPeriod(Params::getVelocity(10000, 1000));
 
             if (!transition.Calculate(active))
                 return;
@@ -208,14 +208,14 @@ namespace Ledster
     public:
         inline void Calculate(RGBA *pixels, int width, bool active) override
         {
-            // lfo.setPeriod(Params::getVelocity(10000, 500));
-            // lfo.setSkew(Params::getintensity());
-            // lfo.setPulseWidth(1);
-            // int variant = Params::getVariant() * 7 + 1;
-
-            lfo.setSkew(0.5);
+            lfo.setPeriod(Params::getVelocity(10000, 500));
+            lfo.setSkew(Params::getIntensity());
             lfo.setPulseWidth(1);
-            int variant = 5;
+            int variant = Params::getVariant() * 7 + 1;
+
+            // lfo.setSkew(0.5);
+            // lfo.setPulseWidth(1);
+            // int variant = 5;
 
             if (!transition.Calculate(active))
                 return;
@@ -247,7 +247,7 @@ namespace Ledster
 
         inline void Calculate(RGBA *pixels, int width, bool active) override
         {
-            fade.duration = Params::getintensity(500,120);
+            fade.duration = Params::getIntensity(500,120);
             int velocity = Params::getVelocity(500,50);
 
             if (!transition.Calculate(active))
@@ -319,6 +319,8 @@ namespace Ledster
                 return;
 
             lfo.setPulseWidth(0.05);
+            lfo.setPeriod(Params::getVelocity(4000,500));
+            int amount = Params::getIntensity(1,6);
 
             for (int trailnr = 0; trailnr < 4; trailnr++)
             {
@@ -331,7 +333,7 @@ namespace Ledster
                         phase = 1.0 - phase;
                     pixels[trail[i]] +=
                         col *
-                        lfo.getValue(phase * 3) *
+                        lfo.getValue(phase * amount) *
                         transition.getValue();
                 }
             }
@@ -349,11 +351,11 @@ namespace Ledster
         FadeDown fade1 = FadeDown(1400, WaitAtEnd);
 
     public:
-        ChevronsPattern(PixelMap map, int period = 1000)
+        ChevronsPattern(PixelMap map)
         {
             this->map = map;
-            this->lfo = LFO<SawDown>(period);
-            this->lfoColour = LFO<Square>(period / 2);
+            this->lfo = LFO<SawDown>(1000);
+            this->lfoColour = LFO<Square>(1000);
         }
 
         inline void Calculate(RGBA *pixels, int width, bool active) override
@@ -361,11 +363,14 @@ namespace Ledster
             if (!transition.Calculate(active))
                 return;
 
+            float amount = Params::getIntensity(0.25,4);
+            lfo.setPeriod(Params::getVelocity(2000,500));
+            lfoColour.setPeriod(Params::getVariant(2000,500));
+
             for (int index = 0; index < std::min(width, (int)map.size()); index++)
             {
-                float phase = (0.5 * abs(map[index].y) + map[index].x);
+                float phase = (0.5 * abs(map[index].y) + map[index].x) * amount;
                 auto col = lfoColour.getValue(phase) ? Params::getSecondaryColour() : Params::getPrimaryColour();
-                // auto col = lfoColour.getValue(phase) ? RGBA(255,0,0,255):  RGBA(255,255,255,255);
                 pixels[index] += col * lfo.getValue(phase) * transition.getValue();
             }
         }
@@ -422,12 +427,15 @@ namespace Ledster
             if (!transition.Calculate(active))
                 return;
 
+            lfo.setPeriod(Params::getVelocity(1000,400));
+            float phase = Params::getVariant(45,45*2);
+
             auto col = Params::getSecondaryColour() * transition.getValue();
             for (auto petal : petals)
             {
                 for (int j = 0; j < 45; j++)
                 {
-                    pixels[petal[j]] += col * lfo.getValue((float)j / 45);
+                    pixels[petal[j]] += col * lfo.getValue((float)j / phase);
                 }
             }
         }
@@ -450,13 +458,9 @@ namespace Ledster
             for (int i = 0; i < 271; i++)
             {
                 if (notfilled[notfilledIndex] == i)
-                {
                     notfilledIndex++;
-                }
                 else
-                {
                     pixels[i] += Params::getPrimaryColour() * transition.getValue();
-                }
             }
 
             // auto hex = hexagons[9];
@@ -475,7 +479,8 @@ namespace Ledster
         PixelMap map;
         FadeDown fade = FadeDown(200, WaitAtEnd);
         std::vector<float> normalizedRadii;
-        Timeline timeline = Timeline(1000);
+        //Timeline timeline = Timeline(1000);
+        TempoWatcher watcher = TempoWatcher();
         Permute perm;
 
     public:
@@ -492,17 +497,23 @@ namespace Ledster
             if (!transition.Calculate(active))
                 return;
 
-            timeline.FrameStart();
-            if (timeline.Happened(0))
+            fade.duration = Params::getIntensity(500,100);
+
+            //timeline.FrameStart();
+            //if (timeline.Happened(0))
+            if (watcher.Triggered())
             {
                 fade.reset();
                 perm.permute();
             }
 
+            float velocity = Params::getVelocity(600,100);
+            float trail = Params::getIntensity(1,3);
+
             for (int i = 0; i < normalizedRadii.size(); i++)
             {
-                fade.duration = perm.at[i] * 2; // + 100;
-                pixels[i] += Params::getSecondaryColour() * fade.getValue(normalizedRadii[i] * 300);
+                fade.duration = perm.at[i] * trail; // + 100;
+                pixels[i] += Params::getSecondaryColour() * fade.getValue(normalizedRadii[i] * velocity);
             }
         }
     };
@@ -536,7 +547,7 @@ namespace Ledster
     class SquareGlitchPattern : public LayeredPattern<RGBA>
     {
         //Timeline timeline = Timeline(50);
-        Permute perm = Permute(100);
+        Permute perm = Permute(256);
         Transition transition = Transition(
             200, Transition::none, 0,
             1000, Transition::none, 0);
@@ -559,12 +570,15 @@ namespace Ledster
             //if (timeline.Happened(0))
                 perm.permute();
 
+            int threshold = Params::getIntensity(width * 0.1, width * 0.5);
+            int numSquares = Params::getVariant(2,9);
+
             for (int index = 0; index < width; index++)
             {
-                int xquantized = (map[index].x + 1) * 5;
-                int yquantized = (map[index].y + 1) * 5;
-                int square = xquantized + yquantized * 5;
-                if (perm.at[square] > 25)
+                int xquantized = (map[index].x + 1) * numSquares;
+                int yquantized = (map[index].y + 1) * numSquares;
+                int square = xquantized + yquantized * numSquares;
+                if (perm.at[square] > threshold / numSquares )
                     continue;
                 pixels[index] += Params::getHighlightColour() * transition.getValue();
             }
@@ -642,6 +656,7 @@ namespace Ledster
                 {
                     fade[i].reset();
                 }
+                fade[i].duration = Params::getIntensity(500,100);
             }
 
             for (int i = 0; i < std::min(width, (int)map.size()); i++)
@@ -679,10 +694,58 @@ namespace Ledster
             if (!transition.Calculate(active))
                 return;
 
+            lfo.setPeriod(Params::getVelocity(4000,500));
+            float scale = Params::getIntensity(0.5,3);
+            if (Params::getVariant() < 0.5)
+              scale *= -1;
+
             for (int i = 0; i < normalizedRadii.size(); i++)
             {
-                pixels[i] += ((RGBA)Hue((normalizedRadii[i] + lfo.getValue()) * 255)) * transition.getValue();
+                pixels[i] += ((RGBA)Hue((normalizedRadii[i]*scale + lfo.getValue()) * 255)) * transition.getValue();
             }
+        }
+    };
+
+
+    class StrobePattern : public LayeredPattern<RGBA>
+    {
+        Timeline timeline = Timeline(100);
+
+        inline void Calculate(RGBA *pixels, int width, bool active) override
+        {
+            if (!active) return;
+            timeline.SetDuration(Params::getVelocity(400,100));
+
+            timeline.FrameStart();
+            RGBA color = timeline.GetTimelinePosition() < 40 ? Params::getHighlightColour() : RGBA(0,0,0,255);
+
+            for (int index = 0; index < width; index++)
+                pixels[index] = color;
+        }
+    };
+
+    class FlashesPattern : public LayeredPattern<RGBA>
+    {
+        FadeDown fade = FadeDown(2400, WaitAtEnd);
+        TempoWatcher watcher = TempoWatcher();
+
+        inline void Calculate(RGBA *pixels, int width, bool active) override
+        {
+            if (!active) return;
+            fade.duration = Params::getVelocity(1500,40);
+
+            if (watcher.Triggered())
+                fade.reset();
+
+            RGBA color;
+            float val = fade.getValue();
+            if (val >= 0.5)
+                color = Params::getHighlightColour() + RGBA(255,255,255,255) * ((val - 0.5)*2);
+            else 
+                color = Params::getHighlightColour() * ((val - 0.5)*2); 
+
+            for (int index = 0; index < width; index++)
+                pixels[index] = color;
         }
     };
 

@@ -8,11 +8,11 @@ public:
     static RGBA getSecondaryColour() { return secondaryColour; }
     static RGBA getHighlightColour() { return highlightColour; }
     static float getVelocity(float start = 0, float end = 1) { return convert(start, end, velocity); }
-    static float getintensity(float start = 0, float end = 1) { return convert(start, end, intensity); }
+    static float getIntensity(float start = 0, float end = 1) { return convert(start, end, intensity); }
     static float getVariant(float start = 0, float end = 1) { return convert(start, end, variant); }
 
     // static float getVelocityInv(float start = 0, float end = 1) { return convert(start, end, velocity); }
-    // static float getintensityInv(float start = 0, float end = 1) { return convert(start, end, intensity); }
+    // static float getIntensityInv(float start = 0, float end = 1) { return convert(start, end, intensity); }
     // static float getVariantInv(float start = 0, float end = 1) { return convert(start, end, variant); }
 
     static RGBA primaryColour;

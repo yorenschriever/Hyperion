@@ -26,10 +26,10 @@ void LoadConfiguration()
     Params::intensity = 0.7;
     Params::variant = 0.7;
 
-    Configuration.tapMidiNote = 41;
-    Configuration.tapStopMidiNote = 42;
-    Configuration.tapAlignMidiNote = 43;
-    Configuration.tapBarAlignMidiNote = 44;
+    Configuration.tapMidiNote = 41; //play
+    Configuration.tapStopMidiNote = 42; //stop
+    Configuration.tapAlignMidiNote = 43; //back
+    Configuration.tapBarAlignMidiNote = 44; //forward
 
     Configuration.hostname = "ledster";
     
@@ -40,41 +40,51 @@ void LoadConfiguration()
             new NanoKontrolInput<RGBA>(
                 481, //number of leds
                 new LayeredPattern<RGBA> *[24]{
+                    //full
                     new Ledster::RadarPattern(ledsterMap),
-                    new Ledster::PetalChasePattern(),
+                    new Ledster::ChevronsPattern(ledsterMap),
+                    new Ledster::RadialRainbowPattern(ledsterMap),
+
+                    //inner
+                    new Ledster::AdidasPattern(),
                     new Ledster::ConcentricChaserPattern(),
+                    new Ledster::MandalaPattern(),
 
+                    //outer
+                    new Ledster::PetalChasePattern(),
+                    new Ledster::PetalRotatePattern(),
+                    new Ledster::RadialRainbowPattern(ledsterMap), //TODO
+
+                    //sparse
+                    new Ledster::SnowflakePattern(),
                     new Ledster::SnakePattern(),
-                    new Ledster::RadialFadePattern(ledsterMap),
-                    new Ledster::RibbenClivePattern<SoftSquare>(),
+                    new Ledster::RadialRainbowPattern(ledsterMap), //TODO
 
+                    //clive
+                    new Ledster::RibbenClivePattern<SoftSquare>(),
                     new Ledster::RibbenClivePattern<SawDown>(500),
                     new Ledster::RibbenClivePattern<SinFast>(3000),
-                    new Ledster::AdidasPattern(),
+                    //new Ledster::ClivePattern<LFOPause<SinFast>>(481,10000,5,0.25),
 
-                    new Ledster::ChevronsPattern(ledsterMap),
-                    new Ledster::SnowflakePattern(),
-                    new Ledster::PetalRotatePattern(),
-
-                    new Ledster::MandalaPattern(),
+                    //map
+                    new Ledster::RadialFadePattern(ledsterMap),
                     new Ledster::RadialGlitterFadePattern(ledsterMap),
-                    new Ledster::PixelGlitchPattern(),
-
-                    new Ledster::SquareGlitchPattern(ledsterMap),
-                    new Ledster::RibbenClivePattern<LFOPause<SinFast>>(10000,1,0.25),
-                    new Ledster::ClivePattern<LFOPause<SinFast>>(481,10000,5,0.25),
-
                     new Ledster::KonamiFadePattern(ledsterMap),
-                    new Ledster::RadialRainbowPattern(ledsterMap),
 
-                    new Ledster::RadialRainbowPattern(ledsterMap),
-                    new Ledster::RadialRainbowPattern(ledsterMap),
-                    new Ledster::RadialRainbowPattern(ledsterMap),
-                    new Ledster::ClivePattern<LFOPause<SinFast>>(481,10000,5,0.25),
+                    //flashes
+                    new Ledster::RibbenClivePattern<LFOPause<SinFast>>(10000,1,0.25),
+                    new Ledster::FlashesPattern(),
+                    new Ledster::RadialRainbowPattern(ledsterMap),//TODO
+
+                    //strobes
+                    new Ledster::StrobePattern(),
+                    new Ledster::PixelGlitchPattern(),
+                    new Ledster::SquareGlitchPattern(ledsterMap),
+
                 }
             ),
-            //new UDPOutput("192.168.0.76",9601,60),
-            new UDPOutput("ledsterstandalone.local",9601,60),
+            new UDPOutput("192.168.0.76",9601,60),
+            //new UDPOutput("ledsterstandalone.local",9601,60),
             //new SpiOutput(0,1,500000),
             Pipe::transfer<RGBA, RGB>
             //PixelLut
