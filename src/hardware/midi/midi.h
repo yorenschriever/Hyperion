@@ -2,6 +2,7 @@
 
 #include <inttypes.h>
 #include <Arduino.h>
+#include "hysteresis.h"
 #include <set>
 
 #define MIDI_UART_NUM UART_NUM_2
@@ -70,5 +71,6 @@ private:
     static unsigned long lastMessageTime;
 
     static uint8_t noteValues[NUMBER_OF_NOTES];
-    static uint8_t controllerValues[NUMBER_OF_CONTROLLERS];
+    //static uint8_t controllerValues[NUMBER_OF_CONTROLLERS];
+    static Hysteresis controllerValues[NUMBER_OF_CONTROLLERS];
 };

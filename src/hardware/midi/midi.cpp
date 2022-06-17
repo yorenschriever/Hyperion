@@ -27,7 +27,8 @@ std::set<Midi::MidiEvent1> Midi::systemRealTimeHandler;
 bool Midi::started = false;
 unsigned long Midi::lastMessageTime = 0;
 uint8_t Midi::noteValues[NUMBER_OF_NOTES];
-uint8_t Midi::controllerValues[NUMBER_OF_CONTROLLERS];
+//uint8_t Midi::controllerValues[NUMBER_OF_CONTROLLERS];
+Hysteresis Midi::controllerValues[NUMBER_OF_CONTROLLERS];
 Midi::Route Midi::route = Usb;
 
 void Midi::Initialize()
@@ -46,7 +47,7 @@ void Midi::Initialize()
 #endif
 
     memset(noteValues, 0, NUMBER_OF_NOTES);
-    memset(controllerValues, 0, NUMBER_OF_CONTROLLERS);
+    memset(controllerValues, 0, NUMBER_OF_CONTROLLERS * sizeof(Hysteresis));
 
     // configure UART for DMX
     uart_config_t uart_config =
@@ -166,9 +167,12 @@ void Midi::uart_event_task(void *pvParameters)
         if (messagetype == CONTROLLERCHANGE && messageposition == 3 && message[1] < NUMBER_OF_CONTROLLERS)
         {
             // Debug.printf("controller %d %d\n", message[1],message[2]);
-            controllerValues[message[1]] = message[2];
-            for (auto &&handler : controllerChangeHandler)
-                handler(channel, message[1], message[2]);
+            // controllerValues[message[1]] = message[2];
+            if (controllerValues[message[1]].setValue(message[2]))
+            {
+                for (auto &&handler : controllerChangeHandler)
+                    handler(channel, message[1], message[2]);
+            }
         }
     }
 }
@@ -262,5 +266,5 @@ uint8_t Midi::controllerValue(uint8_t controllernumber)
 {
     if (controllernumber >= NUMBER_OF_CONTROLLERS)
         return 0;
-    return controllerValues[controllernumber];
+    return controllerValues[controllernumber].getValue();
 }

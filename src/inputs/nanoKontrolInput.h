@@ -37,9 +37,9 @@ public:
         Params::intensity = (float )Midi::controllerValue(firstRotary + 1) / 0x7f;
         Params::variant  = (float )Midi::controllerValue(firstRotary + 2) / 0x7f;
 
-        Params::primaryColour   = Hue(Midi::controllerValue(firstRotary + 3) * 2);
-        Params::secondaryColour = Hue(Midi::controllerValue(firstRotary + 4) * 2);
-        Params::highlightColour = Hue(Midi::controllerValue(firstRotary + 5) * 2);
+        Params::primaryColour   = controllerToColour(Midi::controllerValue(firstRotary + 3));
+        Params::secondaryColour = controllerToColour(Midi::controllerValue(firstRotary + 4));
+        Params::highlightColour = controllerToColour(Midi::controllerValue(firstRotary + 5));
 
 
         for (int i = 0; i < length; i++)
@@ -73,4 +73,11 @@ private:
     const int firstFader = 0;
     const int masterDimController = 23;
     const int firstRotary = 16;
+
+    RGBA controllerToColour (uint8_t value){
+        if (value < 110)
+            return Hue(value * 255 / 110);
+        else
+            return RGBA(255,0,0,255) + (RGBA(255,255,255,255) * (float(value-110) / 17));
+    }
 };
