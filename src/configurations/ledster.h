@@ -83,8 +83,8 @@ void LoadConfiguration()
 
                 }
             ),
-            new UDPOutput("192.168.0.76",9601,60),
-            //new UDPOutput("ledsterstandalone.local",9601,60),
+            //new UDPOutput("192.168.0.76",9601,60),
+            new UDPOutput("ledsterstandalone.local",9601,60),
             //new SpiOutput(0,1,500000),
             Pipe::transfer<RGBA, RGB>
             //PixelLut

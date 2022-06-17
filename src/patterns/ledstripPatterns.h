@@ -84,7 +84,7 @@ namespace LedStrip
             if (!active)
                 return;
 
-            lfo.period = 500 + 10000 * (1.0f - Params::getVelocity());
+            lfo.setPeriod ( 500 + 10000 * (1.0f - Params::getVelocity()));
             perm.setSize(width);
 
             for (int index = 0; index < width; index++)
@@ -335,7 +335,7 @@ namespace LedStrip
             if (!transition.Calculate(active))
                 return; // the fade out is done. we can skip calculating pattern data
 
-            lfo.period = 500 + 10000 * (1.0f - Params::getVelocity());
+            lfo.setPeriod( 500 + 10000 * (1.0f - Params::getVelocity()));
             perm.setSize(width);
 
             for (int index = 0; index < width; index++)
