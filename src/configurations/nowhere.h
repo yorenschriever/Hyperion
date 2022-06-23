@@ -21,6 +21,8 @@
 #include "patterns/monochromeLayeredPatterns.h"
 #include "patterns/staticPattern.h"
 #include "patterns/mappedPatterns.h"
+#include "patterns/derbyPatterns.h"
+#include "patterns/singleLampPattern.h"
 #include "patterns/helpers/params.h"
 #include "patterns/helpers/pixelMap.h"
 #include "luts/colourCorrectionLut.h"
@@ -40,9 +42,31 @@ LUT *IncandescentLut8 = new IncandescentLUT(2.5, 255, 24);
 LUT *GammaLut12 = new GammaLUT(2.5, 4096);
 LUT *GammaLut8 = new GammaLUT(2.5, 255);
 
+LFO<Sin> colourlfo = LFO<Sin>(5000);
+
 void updateParams()
 {
     const int apcColumn = 0;
+
+    if (APCMini::getStatus(apcColumn, 0))
+      Params::primaryColour = RGBA(255, 0, 0, 255);
+    if (APCMini::getStatus(apcColumn, 1))
+      Params::primaryColour = RGBA(0, 255, 0, 255);
+    if (APCMini::getStatus(apcColumn, 2))
+      Params::primaryColour = RGBA(0, 0, 255, 255);
+    if (APCMini::getStatus(apcColumn, 3))
+      Params::primaryColour = RGBA(255, 255, 0, 255);
+    if (APCMini::getStatus(apcColumn, 4))
+      Params::primaryColour = RGBA(colourlfo.getValue()*255, colourlfo.getValue(0.5)*255, 0, 255);
+
+    if (APCMini::getStatus(apcColumn, 5))
+      Params::primaryColour = RGBA(255, 100, 0, 255);
+    if (APCMini::getStatus(apcColumn, 6))
+      Params::primaryColour = RGBA(0, 255, 0, 255);
+    if (APCMini::getStatus(apcColumn, 7))
+      Params::primaryColour = RGBA(255, 255, 255, 255);
+
+/*
     if (APCMini::getStatus(apcColumn, 0))
     {
         // Orange
@@ -106,6 +130,7 @@ void updateParams()
         Params::secondaryColour = RGB(0, 0, 255);
         Params::highlightColour = RGB(255, 0, 0);
     }
+    */
 }
 
 void LoadConfiguration()
@@ -182,7 +207,7 @@ void LoadConfiguration()
             GammaLut12),
 
         ///////////////////////
-        // DIMMERPACK 1
+        // SWITCHPACK 1 
         ///////////////////////
 
         new Pipe(
@@ -191,20 +216,20 @@ void LoadConfiguration()
                 2,
                 new LayeredPattern<Monochrome> *[8]
                 {
-                    new Layered::BlinderPattern(Transition::fromCenter, Transition::fromSides, 150, 1000, 1500),
-                        new Layered::GlowPattern(),
-                        new Layered::SinPattern(),
-                        new Layered::BeatMultiFadePattern(500),
-                        new Layered::LFOPattern<SawDown>(2, 1000),
+                    new SingleLampPattern(0),
+                    new SingleLampPattern(1),
+                    new SingleLampPattern(2),
+                    new SingleLampPattern(3),
+                    new SingleLampPattern(-1),
 
-                        new Layered::BlinderPattern(Transition::fromLeft, Transition::fromRight),
-                        new Layered::GlitchPattern(),
-                        new Layered::BeatAllFadePattern(600),
+                    new SingleLampPattern(0),
+                    new SingleLampPattern(1),
+                    new SingleLampPattern(2)
                 }),
-            new DMXOutput(1)),
+            new DMXOutput(11)),
 
         ///////////////////////
-        // DIMMERPACK 2
+        // DIMMERPACK 2 SPIEGELBOLLEN
         ///////////////////////
 
         new Pipe(
@@ -215,18 +240,19 @@ void LoadConfiguration()
                 new LayeredPattern<Monochrome> *[8]
                 {
                     new Layered::BlinderPattern(Transition::fromLeft, Transition::fromLeft, 255),
-                        new Layered::SinPattern(),
-                        new Layered::BeatSingleFadePattern(),
-                        new Layered::BeatMultiFadePattern(),
-                        new Layered::BeatShakePattern(),
-                        new Layered::BlinderPattern(Transition::fromLeft, Transition::fromLeft, 255),
-                        new Layered::GlitchPattern(),
-                        new Layered::SlowStrobePattern()
+                    new Layered::SinPattern(),
+                    new Layered::GlowPattern(),
+                    new Layered::BeatMultiFadePattern(),
+                    new Layered::BeatShakePattern(),
+
+                    new Layered::BlinderPattern(Transition::fromLeft, Transition::fromLeft, 255),
+                    new Layered::BeatAllFadePattern(),
+                    new Layered::BeatSingleFadePattern(),
                 }),
-            new DMXOutput(5)),
+            new DMXOutput(15)),
 
         ///////////////////////
-        // DIMMERPACK 3
+        // DIMMERPACK 3 DANSVLOER
         ///////////////////////
 
         new Pipe(
@@ -237,22 +263,23 @@ void LoadConfiguration()
                 new LayeredPattern<Monochrome> *[8]
                 {
                     new Layered::BlinderPattern(Transition::fromLeft, Transition::fromLeft, 255),
-                        new Layered::SinPattern(),
-                        new Layered::BeatSingleFadePattern(),
-                        new Layered::BeatMultiFadePattern(),
-                        new Layered::BeatShakePattern(),
-                        new Layered::BlinderPattern(Transition::fromLeft, Transition::fromLeft, 255),
-                        new Layered::GlitchPattern(),
-                        new Layered::SlowStrobePattern()
+                    new Layered::SinPattern(),
+                    new Layered::BeatStepPattern(),
+                    new Layered::BeatMultiFadePattern(),
+                    new Layered::BeatShakePattern(),
+
+                    new Layered::BlinderPattern(Transition::fromLeft, Transition::fromLeft, 255),
+                    new Layered::BeatAllFadePattern(),
+                    new Layered::BeatSingleFadePattern(),
                 }),
-            new DMXOutput(9)),
+            new DMXOutput(19)),
 
         ///////////////////////
-        // LEDPAR BALLON
+        // LEDPAR BLIMP
         ///////////////////////
         new Pipe(
             new LayeredApcminiInput<RGBA>(
-                3,
+                5,
                 5,
                 new LayeredPattern<RGBA> *[8]
                 {
@@ -266,7 +293,7 @@ void LoadConfiguration()
                         new LedStrip::PalettePattern(),
                         new LedStrip::PalettePattern(),
                 }),
-            new DMXOutput(80),
+            new DMXOutput(35),
             Pipe::transfer<RGBA, RGB>),
 
         ///////////////////////
@@ -275,20 +302,27 @@ void LoadConfiguration()
 
         new Pipe(
             new LayeredApcminiInput<Derby>(
-                1,
+                2,
                 6,
                 new LayeredPattern<Derby> *[8]
                 {
-                    new StaticPattern<Derby>(Derby(200, RGB(0, 0, 255), 0)),
-                        new StaticPattern<Derby>(Derby(200, RGB(255, 0, 0), 255)),
-                        new StaticPattern<Derby>(Derby(200, RGB(0, 255, 0), 127)),
-                        new StaticPattern<Derby>(Derby(200, RGB(0, 255, 255), 0)),
-                        new StaticPattern<Derby>(Derby(200, RGB(255, 0, 255), 100)),
-                        new StaticPattern<Derby>(Derby(200, RGB(255, 255, 0), 50)),
-                        new StaticPattern<Derby>(Derby(200, RGB(255, 255, 255), 100)),
-                        new StaticPattern<Derby>(Derby(200, RGB(255, 255, 255), 255)),
+                    new DerbyPatterns::OnPattern(),
+                    new DerbyPatterns::MovePattern(),
+                    new StaticPattern<Derby>(Derby(200, RGB(0, 255, 0), 127)),
+                    new StaticPattern<Derby>(Derby(200, RGB(0, 255, 255), 0)),
+                    new StaticPattern<Derby>(Derby(200, RGB(255, 0, 255), 100)),
+
+                    new DerbyPatterns::OnPattern(200),
+                    new DerbyPatterns::StrobePattern(240),
+                    new DerbyPatterns::StrobePattern(255),
+
+
+
+                    // new StaticPattern<Derby>(Derby(200, RGB(255, 255, 0), 50)),
+                    // new StaticPattern<Derby>(Derby(200, RGB(255, 255, 255), 100)),
+                    // new StaticPattern<Derby>(Derby(200, RGB(255, 255, 255), 255)),
                 }),
-            new DMXOutput(15)),
+            new DMXOutput(1)),
 
         ///////////////////////
         // STROBE
@@ -301,15 +335,15 @@ void LoadConfiguration()
                 new LayeredPattern<Strobe> *[8]
                 {
                     new StaticPattern<Strobe>(Strobe(255, 50)),
-                        new StaticPattern<Strobe>(Strobe(255, 100)),
+                        new StaticPattern<Strobe>(Strobe(200, 100)),
                         new StaticPattern<Strobe>(Strobe(255, 175)),
-                        new StaticPattern<Strobe>(Strobe(255, 200)),
-                        new StaticPattern<Strobe>(Strobe(255, 255)),
+                        new StaticPattern<Strobe>(Strobe(125, 200)),
+                        new StaticPattern<Strobe>(Strobe(175, 255)),
                         new StaticPattern<Strobe>(Strobe(255, 50)),
-                        new StaticPattern<Strobe>(Strobe(255, 127)),
+                        new StaticPattern<Strobe>(Strobe(200, 127)),
                         new StaticPattern<Strobe>(Strobe(255, 255)),
                 }),
-            new DMXOutput(20)),
+            new DMXOutput(25)),
 
     };
 }

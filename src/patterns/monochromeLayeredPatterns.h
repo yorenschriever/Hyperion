@@ -350,10 +350,11 @@ namespace Layered
             1000, Transition::none, 0);
 
     public:
-        LFOPattern(int numWaves, int period = 5000)
+        LFOPattern(int numWaves, int period = 5000, float pulsewidth = 0.5)
         {
             this->numWaves = numWaves;
             this->lfo = LFO<T>(period);
+            this->lfo.setPulseWidth(pulsewidth);
         }
 
         inline void Calculate(Monochrome *pixels, int width, bool active) override
@@ -364,6 +365,32 @@ namespace Layered
             for (int index = 0; index < width; index++)
             {
                 pixels[index] += 255 * transition.getValue() * lfo.getValue((float)numWaves * index / width);
+            }
+        }
+    };
+
+    class BeatStepPattern : public LayeredPattern<Monochrome>
+    {
+        int steps;
+        Transition transition = Transition(
+            200, Transition::none, 0,
+            1000, Transition::none, 0);
+
+    public:
+        BeatStepPattern(int steps = 2)
+        {
+            this->steps = steps;
+        }
+
+        inline void Calculate(Monochrome *pixels, int width, bool active) override
+        {
+            if (!transition.Calculate(active))
+                return;
+
+            for (int index = 0; index < width; index++)
+            {
+                if (index * steps == (Tempo::GetBeatNumber()) % (width * steps))
+                    pixels[index] += 255 * transition.getValue();
             }
         }
     };
