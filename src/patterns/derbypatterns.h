@@ -62,4 +62,55 @@ namespace DerbyPatterns
         }
     };
 
+    class BeatMovePattern : public LayeredPattern<Derby>
+    {
+    public:
+        inline void Calculate(Derby *pixels, int width, bool active) override
+        {
+            if (active)
+                for (int index = 0; index < width; index++)
+                    pixels[index] = Derby(200, Params::getPrimaryColour(), Tempo::GetProgress(4)*255);
+        }
+    };
+
+
+    class RandomPositionPattern : public LayeredPattern<Derby>
+    {
+    public:
+        inline void Calculate(Derby *pixels, int width, bool active) override
+        {
+            if (!active)
+                return;
+            for (int index = 0; index < width; index++)
+                pixels[index] = Derby(200, Params::getPrimaryColour(), stableRandom(255));
+        }
+    };
+
+    class BeatFadePattern : public LayeredPattern<Derby>
+    {
+    protected:
+        TempoWatcher watcher = TempoWatcher();
+        FadeDown fader = FadeDown(100);
+
+    public:
+        BeatFadePattern(int fadeout = 100)
+        {
+            fader.duration = fadeout;
+        }
+
+        inline void Calculate(Derby *pixels, int width, bool active) override
+        {
+            if (!active && fader.getValue() == 0)
+            {
+                watcher.Triggered();
+                return;
+            }
+
+            if (active && watcher.Triggered())
+                fader.reset();
+
+            for (int index = 0; index < width; index++)
+                pixels[index] = Derby(200 * fader.getValue(), Params::getPrimaryColour(), 0);
+        }
+    };
 }

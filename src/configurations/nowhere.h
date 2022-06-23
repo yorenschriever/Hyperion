@@ -62,75 +62,9 @@ void updateParams()
     if (APCMini::getStatus(apcColumn, 5))
       Params::primaryColour = RGBA(255, 100, 0, 255);
     if (APCMini::getStatus(apcColumn, 6))
-      Params::primaryColour = RGBA(0, 255, 0, 255);
+      Params::primaryColour = Hue(colourlfo.getValue() * 255);
     if (APCMini::getStatus(apcColumn, 7))
       Params::primaryColour = RGBA(255, 255, 255, 255);
-
-/*
-    if (APCMini::getStatus(apcColumn, 0))
-    {
-        // Orange
-        Params::primaryColour = RGBA(255, 100, 0, 255);
-        Params::secondaryColour = RGBA(255, 100, 0, 255);
-        Params::highlightColour = RGBA(255, 0, 0, 255);
-    }
-
-    if (APCMini::getStatus(apcColumn, 1))
-    {
-        // Red
-        Params::primaryColour = RGB(255, 0, 0);
-        Params::secondaryColour = RGB(255, 0, 0);
-        Params::highlightColour = RGB(255, 75, 0);
-    }
-
-    if (APCMini::getStatus(apcColumn, 2))
-    {
-        // Yellow
-        Params::primaryColour = RGB(255, 255, 0);
-        Params::secondaryColour = RGB(255, 100, 0);
-        Params::highlightColour = RGB(255, 0, 10);
-    }
-
-    if (APCMini::getStatus(apcColumn, 3))
-    {
-        // Hot
-        Params::primaryColour = RGB(255, 0, 0);
-        Params::secondaryColour = RGB(255, 150, 0);
-        Params::highlightColour = RGB(255, 0, 200);
-    }
-
-    if (APCMini::getStatus(apcColumn, 4))
-    {
-        // Cool
-        Params::primaryColour = RGB(0, 100, 255);
-        Params::secondaryColour = RGB(0, 0, 200);
-        Params::highlightColour = RGB(150, 150, 150);
-    }
-
-    if (APCMini::getStatus(apcColumn, 5))
-    {
-        // Green blue
-        Params::primaryColour = RGB(0, 0, 255);
-        Params::secondaryColour = RGB(0, 255, 0);
-        Params::highlightColour = RGB(0, 127, 127);
-    }
-
-    if (APCMini::getStatus(apcColumn, 6))
-    {
-        // blue/orange
-        Params::primaryColour = RGB(255, 0, 0);
-        Params::secondaryColour = RGB(255, 100, 0);
-        Params::highlightColour = RGB(255, 127, 0);
-    }
-
-    if (APCMini::getStatus(apcColumn, 7))
-    {
-        // green red
-        Params::primaryColour = RGB(255, 0, 255);
-        Params::secondaryColour = RGB(0, 0, 255);
-        Params::highlightColour = RGB(255, 0, 0);
-    }
-    */
 }
 
 void LoadConfiguration()
@@ -161,34 +95,12 @@ void LoadConfiguration()
             new RotaryOutput()),
 
         ///////////////////////
-        // PAR & FAIRYLIGHTS
+        // FAIRYLIGHTS
         ///////////////////////
 
-        // PAR
         new Pipe(
             new LayeredApcminiInput<Monochrome>(
-                1,
-                1,
-                new LayeredPattern<Monochrome> *[8]
-                {
-                    new Layered::BlinderPattern(Transition::none, Transition::none, 255, 100, 1500),
-                        new Layered::SinPattern(),
-                        new Layered::EmptyPattern(),
-                        new Layered::EmptyPattern(),
-                        new Layered::EmptyPattern(),
-
-                        new Layered::BlinderPattern(Transition::none, Transition::none, 255, 100, 1500),
-                        new Layered::EmptyPattern(),
-                        new Layered::EmptyPattern()
-                }),
-            new PWMOutput(12),
-            Pipe::transfer<Monochrome, Monochrome12>,
-            IncandescentLut),
-
-        // FAIRY
-        new Pipe(
-            new LayeredApcminiInput<Monochrome>(
-                1,
+                2,
                 1,
                 new LayeredPattern<Monochrome> *[8]
                 {
@@ -239,15 +151,15 @@ void LoadConfiguration()
                 // the patterns to attach to the buttons
                 new LayeredPattern<Monochrome> *[8]
                 {
-                    new Layered::BlinderPattern(Transition::fromLeft, Transition::fromLeft, 255),
+                    new Layered::BlinderPattern(Transition::fromLeft, Transition::fromLeft, 200),
+                    new Layered::LFOPattern<SoftSquare>(1,5000,0.25),
                     new Layered::SinPattern(),
-                    new Layered::GlowPattern(),
+                    new Layered::ChaseFromCenterPattern(100),
                     new Layered::BeatMultiFadePattern(),
-                    new Layered::BeatShakePattern(),
-
-                    new Layered::BlinderPattern(Transition::fromLeft, Transition::fromLeft, 255),
-                    new Layered::BeatAllFadePattern(),
+                    
+                    new Layered::BlinderPattern(Transition::none, Transition::none, 255),
                     new Layered::BeatSingleFadePattern(),
+                    new Layered::BeatAllFadePattern(),
                 }),
             new DMXOutput(15)),
 
@@ -262,39 +174,62 @@ void LoadConfiguration()
                 // the patterns to attach to the buttons
                 new LayeredPattern<Monochrome> *[8]
                 {
-                    new Layered::BlinderPattern(Transition::fromLeft, Transition::fromLeft, 255),
+                    new Layered::BlinderPattern(Transition::fromLeft, Transition::fromLeft, 150),
+                    new Layered::LFOPattern<SoftSquare>(1,5000,0.25),
                     new Layered::SinPattern(),
                     new Layered::BeatStepPattern(),
-                    new Layered::BeatMultiFadePattern(),
-                    new Layered::BeatShakePattern(),
-
-                    new Layered::BlinderPattern(Transition::fromLeft, Transition::fromLeft, 255),
-                    new Layered::BeatAllFadePattern(),
                     new Layered::BeatSingleFadePattern(),
+
+                    new Layered::BlinderPattern(Transition::fromLeft, Transition::fromLeft, 200),
+                    new Layered::BeatMultiFadePattern(),
+                    new Layered::GlitchPattern(),
                 }),
             new DMXOutput(19)),
 
         ///////////////////////
-        // LEDPAR BLIMP
+        // DIMMERPACK 4: PARREN NIELS
         ///////////////////////
-        new Pipe(
-            new LayeredApcminiInput<RGBA>(
-                5,
-                5,
-                new LayeredPattern<RGBA> *[8]
-                {
-                    new LedStrip::PalettePattern(),
-                        new LedStrip::PalettePattern(),
-                        new LedStrip::PalettePattern(),
-                        new LedStrip::PalettePattern(),
-                        new LedStrip::PalettePattern(),
 
-                        new LedStrip::PalettePattern(),
-                        new LedStrip::PalettePattern(),
-                        new LedStrip::PalettePattern(),
+        new Pipe(
+            new LayeredApcminiInput<Monochrome>(
+                4, // width of the pattern, in pixels
+                5, // button column on the apc to listen to (0-7)
+                // the patterns to attach to the buttons
+                new LayeredPattern<Monochrome> *[8]
+                {
+                    new Layered::BlinderPattern(Transition::fromLeft, Transition::fromLeft, 150),
+                    new Layered::SinPattern(),
+                    new Layered::BeatStepPattern(),
+                    new Layered::BeatSingleFadePattern(),
+                    new Layered::BeatMultiFadePattern(),
+
+                    new Layered::BlinderPattern(Transition::fromLeft, Transition::fromLeft, 200, 50,50),
+                    new Layered::BeatSingleFadePattern(),
+                    new Layered::GlitchPattern(),
                 }),
-            new DMXOutput(35),
-            Pipe::transfer<RGBA, RGB>),
+            new DMXOutput(23)),
+
+        // ///////////////////////
+        // // LEDPAR BLIMP
+        // ///////////////////////
+        // new Pipe(
+        //     new LayeredApcminiInput<RGBA>(
+        //         5,
+        //         5,
+        //         new LayeredPattern<RGBA> *[8]
+        //         {
+        //             new LedStrip::PalettePattern(),
+        //                 new LedStrip::PalettePattern(),
+        //                 new LedStrip::PalettePattern(),
+        //                 new LedStrip::PalettePattern(),
+        //                 new LedStrip::PalettePattern(),
+
+        //                 new LedStrip::PalettePattern(),
+        //                 new LedStrip::PalettePattern(),
+        //                 new LedStrip::PalettePattern(),
+        //         }),
+        //     new DMXOutput(35),
+        //     Pipe::transfer<RGBA, RGB>),
 
         ///////////////////////
         // DERBY
@@ -308,42 +243,36 @@ void LoadConfiguration()
                 {
                     new DerbyPatterns::OnPattern(),
                     new DerbyPatterns::MovePattern(),
-                    new StaticPattern<Derby>(Derby(200, RGB(0, 255, 0), 127)),
-                    new StaticPattern<Derby>(Derby(200, RGB(0, 255, 255), 0)),
-                    new StaticPattern<Derby>(Derby(200, RGB(255, 0, 255), 100)),
-
+                    new DerbyPatterns::BeatMovePattern(),
+                    new DerbyPatterns::RandomPositionPattern(),
+                    new DerbyPatterns::BeatFadePattern(),
+                    
                     new DerbyPatterns::OnPattern(200),
                     new DerbyPatterns::StrobePattern(240),
-                    new DerbyPatterns::StrobePattern(255),
-
-
-
-                    // new StaticPattern<Derby>(Derby(200, RGB(255, 255, 0), 50)),
-                    // new StaticPattern<Derby>(Derby(200, RGB(255, 255, 255), 100)),
-                    // new StaticPattern<Derby>(Derby(200, RGB(255, 255, 255), 255)),
+                    new DerbyPatterns::StrobePattern(255)
                 }),
             new DMXOutput(1)),
 
-        ///////////////////////
-        // STROBE
-        ///////////////////////
+        // ///////////////////////
+        // // STROBE
+        // ///////////////////////
 
-        new Pipe(
-            new LayeredApcminiInput<Strobe>(
-                1,
-                7,
-                new LayeredPattern<Strobe> *[8]
-                {
-                    new StaticPattern<Strobe>(Strobe(255, 50)),
-                        new StaticPattern<Strobe>(Strobe(200, 100)),
-                        new StaticPattern<Strobe>(Strobe(255, 175)),
-                        new StaticPattern<Strobe>(Strobe(125, 200)),
-                        new StaticPattern<Strobe>(Strobe(175, 255)),
-                        new StaticPattern<Strobe>(Strobe(255, 50)),
-                        new StaticPattern<Strobe>(Strobe(200, 127)),
-                        new StaticPattern<Strobe>(Strobe(255, 255)),
-                }),
-            new DMXOutput(25)),
+        // new Pipe(
+        //     new LayeredApcminiInput<Strobe>(
+        //         1,
+        //         7,
+        //         new LayeredPattern<Strobe> *[8]
+        //         {
+        //             new StaticPattern<Strobe>(Strobe(255, 50)),
+        //                 new StaticPattern<Strobe>(Strobe(200, 100)),
+        //                 new StaticPattern<Strobe>(Strobe(255, 175)),
+        //                 new StaticPattern<Strobe>(Strobe(125, 200)),
+        //                 new StaticPattern<Strobe>(Strobe(175, 255)),
+        //                 new StaticPattern<Strobe>(Strobe(255, 50)),
+        //                 new StaticPattern<Strobe>(Strobe(200, 127)),
+        //                 new StaticPattern<Strobe>(Strobe(255, 255)),
+        //         }),
+        //     new DMXOutput(25)),
 
     };
 }
