@@ -55,7 +55,15 @@ public:
             // apply dimming and copy to leddata buffer
             for (int i = 0; i < length; i++)
             {
-                leddata[i].dim((Midi::controllerValue(firstFader + pattern / 3) * Midi::controllerValue(masterDimController)) >> 6);
+                uint8_t dimValue = (Midi::controllerValue(firstFader + pattern / 3) * Midi::controllerValue(masterDimController)) >> 6;
+                //TODO give a good thought about when we want dimming and when we want to make things transparent. 
+                //how to support this in general?
+                if (std::is_same<T_COLOUR,RGBA>::value) {
+                    RGBA* l = &leddata[i];
+                    l->A = (l->A * dimValue) >> 8;
+                } else {
+                    leddata[i].dim(dimValue);
+                }
                 ((T_COLOUR *)dataPtr)[i] += leddata[i];
             }
         } 

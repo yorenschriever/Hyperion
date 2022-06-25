@@ -54,6 +54,8 @@ public:
 
     void SetDuration(int duration)
     {
+        if (duration == this->duration)
+            return;
         //correct the phase so the period change doesn't result in a phase change
         float phase = GetTimelinePosition();
         this->startingpoint = millis() - phase * duration;

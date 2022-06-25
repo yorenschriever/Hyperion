@@ -45,6 +45,11 @@ void LoadConfiguration()
                     new Ledster::ChevronsPattern(ledsterMap),
                     new Ledster::RadialRainbowPattern(ledsterMap),
 
+                    //mapped
+                    new Ledster::RadialFadePattern(ledsterMap),
+                    new Ledster::RadialGlitterFadePattern(ledsterMap),
+                    new Ledster::KonamiFadePattern(ledsterMap),
+
                     //inner
                     new Ledster::AdidasPattern(),
                     new Ledster::ConcentricChaserPattern(),
@@ -53,12 +58,12 @@ void LoadConfiguration()
                     //outer
                     new Ledster::PetalChasePattern(),
                     new Ledster::PetalRotatePattern(),
-                    new Ledster::RadialRainbowPattern(ledsterMap), //TODO
+                    new Ledster::PetalGlitchPattern(),
 
                     //sparse
                     new Ledster::SnowflakePattern(),
                     new Ledster::SnakePattern(),
-                    new Ledster::RadialRainbowPattern(ledsterMap), //TODO
+                    new Ledster::HexBeatPattern(),
 
                     //clive
                     new Ledster::RibbenClivePattern<SoftSquare>(),
@@ -66,15 +71,10 @@ void LoadConfiguration()
                     new Ledster::RibbenClivePattern<SinFast>(3000),
                     //new Ledster::ClivePattern<LFOPause<SinFast>>(481,10000,5,0.25),
 
-                    //map
-                    new Ledster::RadialFadePattern(ledsterMap),
-                    new Ledster::RadialGlitterFadePattern(ledsterMap),
-                    new Ledster::KonamiFadePattern(ledsterMap),
-
                     //flashes
                     new Ledster::RibbenClivePattern<LFOPause<SinFast>>(10000,1,0.25),
                     new Ledster::FlashesPattern(),
-                    new Ledster::RadialRainbowPattern(ledsterMap),//TODO
+                    new Ledster::RibbenFlashPattern(),
 
                     //strobes
                     new Ledster::StrobePattern(),

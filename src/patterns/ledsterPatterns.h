@@ -100,7 +100,7 @@ namespace Ledster
 
             for (int index = 0; index < std::min(width, (int)map.size()); index++)
             {
-                RGBA colour = Params::getSecondaryColour();
+                RGBA colour = Params::getPrimaryColour();
                 float lfoVal = lfo.getValue(scaledAngles[index]);
                 RGBA dimmedColour = colour * transition.getValue() * lfoVal;
                 pixels[index] += dimmedColour;
@@ -156,10 +156,39 @@ namespace Ledster
 
             for (int i = 0; i < 6; i++)
             {
-                RGBA col = Params::getSecondaryColour() * fade[i].getValue() * transition.getValue();
+                RGBA col = Params::getPrimaryColour() * fade[i].getValue() * transition.getValue();
                 for (int j = 0; j < 45; j++)
                     pixels[petals[i][j]] += col;
             }
+        }
+    };
+
+    class PetalGlitchPattern : public LayeredPattern<RGBA>
+    {
+        Transition transition = Transition(
+            200, Transition::none, 0,
+            1000, Transition::none, 0);
+        Timeline timeline = Timeline(1000);
+        int petal = 0;
+
+    public:
+        inline void Calculate(RGBA *pixels, int width, bool active) override
+        {
+            if (!transition.Calculate(active))
+                return;
+
+            //i made a timelineline longer than 60, and reset it here manually, 
+            //so it resets exactly during this frame instead of freely cycling at its own pace
+            timeline.FrameStart();
+            if (timeline.Happened(60))
+            {
+                timeline.reset();
+                petal = (petal + 1 + stableRandom(4)) % 6;
+            }
+
+            RGBA col = Params::getHighlightColour() * transition.getValue();
+            for (int j = 0; j < 45; j++)
+                pixels[petals[petal][j]] += col;
         }
     };
 
@@ -198,6 +227,37 @@ namespace Ledster
         }
     };
 
+    class HexBeatPattern : public LayeredPattern<RGBA>
+    {
+        Transition transition = Transition(
+            200, Transition::none, 0,
+            1000, Transition::none, 0);
+        FadeDown fade = FadeDown(200, WaitAtEnd);
+        TempoWatcher watcher = TempoWatcher();
+
+    public:
+        inline void Calculate(RGBA *pixels, int width, bool active) override
+        {
+            if (!transition.Calculate(active))
+                return;
+
+            if (watcher.Triggered()){
+                fade.reset();
+            }
+            fade.duration = Params::getIntensity(300,50);
+
+            int dist = Params::getVelocity(100,15);
+            for (int hex = 0; hex < 10; hex++)
+            {
+                RGBA colour = Params::getHighlightColour() * fade.getValue(hex * dist) * transition.getValue();
+                for (int i = 0; i < hexagons[hex].size(); i++)
+                {
+                    pixels[hexagons[hex][i]] += colour;
+                }
+            }
+        }
+    };
+
     class SnakePattern : public LayeredPattern<RGBA>
     {
         Transition transition = Transition(
@@ -222,7 +282,7 @@ namespace Ledster
 
             for (int i = 0; i < snake.size(); i++)
             {
-                pixels[snake[i]] += Params::getSecondaryColour() * lfo.getValue((float)i / snake.size() * variant);
+                pixels[snake[i]] += Params::getSecondaryColour() * lfo.getValue((float)i / snake.size() * variant) * transition.getValue();
             }
         }
     };
@@ -260,7 +320,7 @@ namespace Ledster
 
             for (int i = 0; i < normalizedRadii.size(); i++)
             {
-                pixels[i] += Params::getSecondaryColour() * fade.getValue(normalizedRadii[i] * velocity) * transition.getValue();
+                pixels[i] += Params::getPrimaryColour() * fade.getValue(normalizedRadii[i] * velocity) * transition.getValue();
             }
         }
     };
@@ -291,7 +351,7 @@ namespace Ledster
             for (int ribbe = 0; ribbe < numSegments; ribbe++)
             {
                 int interval = averagePeriod + perm.at[ribbe] * (averagePeriod * precision) / numSegments;
-                RGBA col = Params::getSecondaryColour() * lfo.getValue(0, interval);
+                RGBA col = Params::getPrimaryColour() * lfo.getValue(0, interval);
                 for (int j = 0; j < segmentSize; j++)
                 {
                     pixels[ribben[ribbe][j]] += col;
@@ -388,7 +448,7 @@ namespace Ledster
             if (!transition.Calculate(active))
                 return;
 
-            auto col = Params::getSecondaryColour() * transition.getValue();
+            auto col = Params::getPrimaryColour() * transition.getValue();
             for (auto petal : petals)
             {
                 for (int j = 0; j < 45; j++)
@@ -460,7 +520,7 @@ namespace Ledster
                 if (notfilled[notfilledIndex] == i)
                     notfilledIndex++;
                 else
-                    pixels[i] += Params::getPrimaryColour() * transition.getValue();
+                    pixels[i] += Params::getHighlightColour() * transition.getValue();
             }
 
             // auto hex = hexagons[9];
@@ -667,7 +727,7 @@ namespace Ledster
                     cumulativeFadeValue += fade[j].getValue((((float)map[i].x * directionsy[j] + map[i].y * directionsx[j]) + 1.0) * 300);
                 }
 
-                pixels[i] += Params::getSecondaryColour() * cumulativeFadeValue * transition.getValue();
+                pixels[i] += Params::getHighlightColour() * cumulativeFadeValue * transition.getValue();
             }
         }
     };
@@ -709,15 +769,35 @@ namespace Ledster
 
     class StrobePattern : public LayeredPattern<RGBA>
     {
-        Timeline timeline = Timeline(100);
+        // Timeline timeline = Timeline(100);
+
+        // inline void Calculate(RGBA *pixels, int width, bool active) override
+        // {
+        //     if (!active) return;
+
+        //     timeline.SetDuration(Params::getVelocity(400,100));
+
+        //     timeline.FrameStart();
+        //     RGBA color = timeline.GetTimelinePosition() < 40 ? Params::getHighlightColour() : RGBA(0,0,0,255);
+
+        //     for (int index = 0; index < width; index++)
+        //         pixels[index] = color;
+        // }
+
+        int framecounter = 1;
 
         inline void Calculate(RGBA *pixels, int width, bool active) override
         {
             if (!active) return;
-            timeline.SetDuration(Params::getVelocity(400,100));
 
-            timeline.FrameStart();
-            RGBA color = timeline.GetTimelinePosition() < 40 ? Params::getHighlightColour() : RGBA(0,0,0,255);
+            framecounter--;
+
+            RGBA color = RGBA(0,0,0,255);
+            if (framecounter <= 1)
+                color = Params::getPrimaryColour();
+
+            if (framecounter == 0)
+                framecounter = 5; //Params::getVelocity(40,4);
 
             for (int index = 0; index < width; index++)
                 pixels[index] = color;
@@ -732,7 +812,7 @@ namespace Ledster
         inline void Calculate(RGBA *pixels, int width, bool active) override
         {
             if (!active) return;
-            fade.duration = Params::getVelocity(1500,40);
+            fade.duration = Params::getVelocity(1500,100);
 
             if (watcher.Triggered())
                 fade.reset();
@@ -740,12 +820,46 @@ namespace Ledster
             RGBA color;
             float val = fade.getValue();
             if (val >= 0.5)
-                color = Params::getHighlightColour() + RGBA(255,255,255,255) * ((val - 0.5)*2);
+                color = Params::getSecondaryColour() + RGBA(255,255,255,255) * ((val - 0.5)*2);
             else 
-                color = Params::getHighlightColour() * ((val - 0.5)*2); 
+                color = Params::getSecondaryColour() * ((val - 0.5)*2); 
 
             for (int index = 0; index < width; index++)
                 pixels[index] = color;
+        }
+    };
+
+    class RibbenFlashPattern : public LayeredPattern<RGBA>
+    {
+        const int numSegments = 36;
+        const int segmentSize = 10;
+        Permute perm = Permute(36);
+        TempoWatcher watcher = TempoWatcher();
+        FadeDown fade = FadeDown(2400, WaitAtEnd);
+
+    public:
+        inline void Calculate(RGBA *pixels, int width, bool active) override
+        {
+            if (!active)
+                return;
+
+            if (watcher.Triggered()) {
+                perm.permute();
+                fade.reset();
+            }
+
+            fade.duration = Params::getVelocity(2500,100);
+
+            int numVisible = Params::getIntensity(1,numSegments);
+
+            for (int ribbe = 0; ribbe < numVisible; ribbe++)
+            {
+                RGBA col = Params::getHighlightColour() * fade.getValue();
+                for (int j = 0; j < segmentSize; j++)
+                {
+                    pixels[ribben[perm.at[ribbe]][j]] += col;
+                }
+            }
         }
     };
 
