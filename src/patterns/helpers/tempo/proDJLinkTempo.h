@@ -72,13 +72,13 @@ private:
                 }
             }
             this2->validSignal=true;
-            Debug.printf("len=%d, id=%d, beat=%d, device=%d, master=%d\n", len, buffer[0x21], buffer[0x5c], buffer[0x5f], this2->master);
+            Debug.printf("len=%d, id=%d, beat=%d, device=%d, master=%d\r\n", len, buffer[0x21], buffer[0x5c], buffer[0x5f], this2->master);
         }
 
         len = this2->statusSocket.parsePacketFast(buffer);
         if (len > 0)
         {
-            //Debug.printf("status %x, %x\n", len, buffer[0x0a]);
+            //Debug.printf("status %x, %x\r\n", len, buffer[0x0a]);
 
             if (len == 0x11c && buffer[0x0a] == 0x0a)
             {

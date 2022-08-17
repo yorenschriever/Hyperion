@@ -48,7 +48,7 @@ void click() {
 void press() { Debug.println("press"); }
 void release() { Debug.println("release"); }
 void longpress() { Debug.println("longpress"); }
-void rotate(int amount) { Debug.printf("rotate: %d\n", amount); }
+void rotate(int amount) { Debug.printf("rotate: %d\r\n", amount); }
 
 DebugClass Debug;
 
@@ -64,7 +64,7 @@ void setup()
     //update over usb
     pinMode(39,INPUT);
     if (digitalRead(39)){
-        Debug.println("\n\n================\n\nStarting safemode\n\n=======================\n\n");
+        Debug.println("\n\n================\n\n\rStarting safemode\n\n\r=======================\n\r\n");
         Display::Initialize(); 
         Display::setDFU(true,0);
         Ethernet::Initialize("Hyperion");
@@ -142,7 +142,7 @@ void setup()
     FirmwareUpdate::Initialize();
     Rotary::setColour(RGB(0,0,0));
 
-    Debug.printf("max udp connections: %d\n", MEMP_NUM_NETCONN);
+    Debug.printf("max udp connections: %d\r\n", MEMP_NUM_NETCONN);
 
     // WebsocketServer* sock = new WebsocketServer("/test");
     // sock->onMessage([](RemoteWebsocketClient *client, WebsocketServer* server, std::string msg) {
@@ -214,7 +214,7 @@ void UpdateDisplay(void *parameter)
             totalTotalframes += pipe->in->getTotalFrameCount();
             pipe->in->resetFrameCount();
 
-            //Debug.printf("pipe len %d\n",pipe->getNumPixels());
+            //Debug.printf("pipe len %d\r\n",pipe->getNumPixels());
             totalLength += pipe->getNumPixels();
         }
  
@@ -225,9 +225,9 @@ void UpdateDisplay(void *parameter)
 
         lastFpsUpdate = now;
 
-        Debug.printf("FPS: %d of %d (%d%% miss)\t interval: %dms \t freeHeap: %d \t avg length: %d \t channels: %d \n", (int)outfps, (int)infps, (int)misses, (int)elapsedTime, ESP.getFreeHeap(), avglength, activeChannels);
-        //Debug.printf("IPAddress: %s\n", Ethernet::GetIp().toString().c_str());
-        //Debug.printf("Tempo source: %s\n", Tempo::SourceName());
+        Debug.printf("FPS: %d of %d (%d%% miss)\t interval: %dms \t freeHeap: %d \t avg length: %d \t channels: %d \r\n", (int)outfps, (int)infps, (int)misses, (int)elapsedTime, ESP.getFreeHeap(), avglength, activeChannels);
+        //Debug.printf("IPAddress: %s\r\n", Ethernet::GetIp().toString().c_str());
+        //Debug.printf("Tempo source: %s\r\n", Tempo::SourceName());
 
         Display::setFPS(infps,outfps,misses);
         Display::setLeds(totalLength);

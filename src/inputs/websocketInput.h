@@ -39,7 +39,7 @@ public:
         bool gotFrame = false;
         if ((cbr = sock->readMessage(dataPtr)))
         {
-            // Debug.printf("got frame %d\n",cbr);
+            // Debug.printf("got frame %d\r\n",cbr);
 
             // Debug.printf("data = ",cbr);
             // for (int i=0; i < 50; i++)
@@ -59,7 +59,7 @@ public:
 
         usedframecount++;
         missedframecount--;
-        Debug.printf("returning %d\n",cb);
+        Debug.printf("returning %d\r\n",cb);
         return cb;
     }
 
