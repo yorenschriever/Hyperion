@@ -198,7 +198,7 @@ public:
 
         if (this->length != len / sizeof(T_COLOUR))
         {
-            Debug.printf("set len %d, %d, old=%d\n", len, len / sizeof(T_COLOUR), this->length);
+            Debug.printf("set len %d, %d, old=%d\r\n", len, len / sizeof(T_COLOUR), this->length);
             this->length = len / sizeof(T_COLOUR);
             
             pixelData = (T_COLOUR*) realloc(pixelData, len);

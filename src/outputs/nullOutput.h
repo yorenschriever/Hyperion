@@ -2,7 +2,6 @@
 
 #include "Output.h"
 #include <Arduino.h>
-#include <hardware/dmx/dmx.h>
 #include "debug.h"
 
 //nulloutput does not use the output. 

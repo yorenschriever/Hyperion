@@ -76,7 +76,7 @@ private:
         {
             this2->validSignal = true;
             this2->beat(this2->recvPacket.beatNumber, this2->recvPacket.timeBetweenBeats, false);
-            //Debug.printf("got udp beat %d %d\n", this2->recvPacket.beatNumber, this2->recvPacket.timeBetweenBeats);
+            //Debug.printf("got udp beat %d %d\r\n", this2->recvPacket.beatNumber, this2->recvPacket.timeBetweenBeats);
         }
     }
 };

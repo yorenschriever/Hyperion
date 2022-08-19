@@ -18,13 +18,13 @@ void Wifi::Initialize(const char* ssid, const char* psk, boolean isAccesspoint)
 {
     if (isAccesspoint)
     {
-        Debug.printf("Setting up wifi acess point: %s\n",ssid);
+        Debug.printf("Setting up wifi acess point: %s\r\n",ssid);
         WiFi.softAP(ssid,psk);
         IPAddress IP = WiFi.softAPIP();
         Debug.print("AP IP address: ");
         Debug.println(IP);
     } else {
-        Debug.printf("Connecting to wifi: %s\n",ssid);
+        Debug.printf("Connecting to wifi: %s\r\n",ssid);
         WiFi.begin(ssid, psk);
     }
 }

@@ -177,7 +177,7 @@ void Ethernet::event_handler(void *arg, esp_event_base_t event_base, int32_t eve
 
             break;
         case IP_EVENT_STA_GOT_IP:
-            Debug.printf("Wifi connected.\n");
+            Debug.printf("Wifi connected.\r\n");
             if (Ethernet::hostname)
             {
                 StartMdnsService(Ethernet::hostname);
@@ -223,7 +223,7 @@ void Ethernet::event_handler(void *arg, esp_event_base_t event_base, int32_t eve
         switch (event_id)
         {
         case WIFI_EVENT_AP_START:
-            Debug.printf("Wifi connected.\n");
+            Debug.printf("Wifi connected.\r\n");
             if (Ethernet::hostname)
             {
                 StartMdnsService(Ethernet::hostname);
@@ -243,7 +243,7 @@ void Ethernet::StartMdnsService(const char *name)
     }
     else
     {
-        Debug.printf("Hostname set: %s\n", name);
+        Debug.printf("Hostname set: %s\r\n", name);
     }
 }
 
@@ -281,7 +281,7 @@ IPAddress *Ethernet::ResolveNoWait(const char *hostname)
         xTaskCreate(ResolveTask, "ResolveTask", 3000, (void *)hostname, 0, NULL);
     }
 
-    // Debug.printf("return cached ip %s\n",it->second.ip.toString().c_str());
+    // Debug.printf("return cached ip %s\r\n",it->second.ip.toString().c_str());
     return &it->second.ip;
 }
 
@@ -324,7 +324,7 @@ IPAddress *Ethernet::Resolve(const char *hostname)
     std::string localHostname = std::string(hostname);
     localHostname.resize(localHostname.size() - 6);
 
-    // Debug.printf("querying: %s\n",localHostname.c_str());
+    // Debug.printf("querying: %s\r\n",localHostname.c_str());
 
     ip4_addr addr;
     addr.addr = 0;
@@ -339,7 +339,7 @@ IPAddress *Ethernet::Resolve(const char *hostname)
     }
 
     // Debug.printf(IPSTR, IP2STR(&addr));
-    // Debug.printf("ip found: %s\n",IPAddress(addr.addr).toString().c_str());
+    // Debug.printf("ip found: %s\r\n",IPAddress(addr.addr).toString().c_str());
 
     hostnameCache[hostname].ip = IPAddress(addr.addr);
     hostnameCache[hostname].updated = millis();

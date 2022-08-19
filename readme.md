@@ -64,7 +64,9 @@ You can upload by clicking the arrow icon in the status bar, or by typing
 
     pio run -e ota -t upload
 
-The device creates a mDNS record for 'Hyperion.local' on startup, and this command will upload to that address. If you have multiple devices on the network you have to modify the upload command to use the specific ip address. 
+The device creates a mDNS record for 'Hyperion.local' on startup, and this command will upload to that address. If you have multiple devices you can change the hostname in the configuration file. To upload to another device use the --upload_port argument. 
+
+    pio run -e ota -t upload --upload_port yourHostname.local
 
 Upload works best if you do not blast the device with pixel data during the upload. If you uploaded firmware that is not stable enough to run the firmware update during normal operation, you can boot the device in a 'safe mode' by pressing down the rotary button during power up. This will startup the device without starting the pipes and with a minimum of drivers. 
 

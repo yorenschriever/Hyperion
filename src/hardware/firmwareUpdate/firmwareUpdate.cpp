@@ -25,7 +25,7 @@ void FirmwareUpdate::Initialize()
     otaserver.on(
         "/update", HTTP_POST, []() {
     otaserver.sendHeader("Connection", "close");
-    otaserver.send(200, "text/plain", Update.hasError() ? (String("UPDATE FAILED: ") + Update.errorString() + "\n") : String("Update Successful\n"));
+    otaserver.send(200, "text/plain", Update.hasError() ? (String("UPDATE FAILED: ") + Update.errorString() + "\r\n") : String("Update Successf\r\n"));
     delay(1000);
     ESP.restart(); }, []() {
 //    otaActive = true;
@@ -39,8 +39,8 @@ void FirmwareUpdate::Initialize()
     //Debug.println("update");
     HTTPUpload& upload = otaserver.upload();
     if (upload.status == UPLOAD_FILE_START) {
-      Debug.printf("Update: %s\n", upload.filename.c_str());
-      //Debug.print(String("content-length: ") + otaserver.header("Content-Length") + "\n");
+      Debug.printf("Update: %s\r\n", upload.filename.c_str());
+      //Debug.print(String("content-length: ") + otaserver.header("Content-Length") + "\r\n");
       Display::setDFU(true,0);
       if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { //start with max available size
         //Update.printError(Debug);
@@ -50,7 +50,7 @@ void FirmwareUpdate::Initialize()
       /* flashing firmware to ESP*/
       static int decimate=0;
       if (decimate++%20==0) {
-        Debug.printf("progress: %d\n",upload.totalSize);
+        Debug.printf("progress: %d\r\n",upload.totalSize);
         Debug.println(otaserver.header("Content-Length"));
         Display::setDFU(true,50);
       }
@@ -60,7 +60,7 @@ void FirmwareUpdate::Initialize()
       }
     } else if (upload.status == UPLOAD_FILE_END) {
       if (Update.end(true)) { //true to set the size to the current progress
-        Debug.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
+        Debug.printf("Update Success: %u\r\nRebooting...\r\n", upload.totalSize);
         Display::setDFU(true,100);
       } else {
         //Update.printError(Debug);

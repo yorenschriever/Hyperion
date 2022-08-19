@@ -210,7 +210,7 @@ void DMX::Write(uint8_t *data, int size, int index)
 
     tx_size = std::max((int)tx_size, index + copylength);
 
-    //Debug.printf("DMX write %d\n",index);
+    //Debug.printf("DMX write %d\r\n",index);
 }
 
 void DMX::SendDMXAsync(void *param)

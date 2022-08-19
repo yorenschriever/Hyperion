@@ -315,7 +315,7 @@ boolean UDPFast::setMaxRxPackets(int value)
                    (void *)&xValue,
                    sizeof(xValue)) < 0)
     {
-        Serial.printf("could not set socket option: %d\n", errno);
+        Serial.printf("could not set socket option: %d\r\n", errno);
         return false;
     }
 

@@ -8,20 +8,25 @@
 class SPI
 {
 public:
-    static void Initialize(uint8_t dataPin, uint8_t clkPin, int frq);
+    static SPI *CreateInstance();
+    void Initialize(uint8_t dataPin, uint8_t clkPin, int frq);
 
-    static void Send(uint8_t *data, int length);
-    static bool IsReady();
-    static bool IsReadyForUs(unsigned int offset);
+    void Send(uint8_t *data, int length);
+    bool IsReady();
+    bool IsReadyForUs(unsigned int offset);
 
 private:
-    static bool initialized;
+    bool initialized = false;
+    int hostNumber;
 
-    static spi_device_handle_t spi;
-    static spi_transaction_t trans;
+    spi_device_handle_t spi;
+    spi_transaction_t trans;
 
-    static volatile bool sendFinished;
-    static volatile unsigned long sendFinishedAt;
+    volatile bool sendFinished = true;
+    volatile unsigned long sendFinishedAt = 0;
 
     static void sendFinishedCallback(spi_transaction_t *trans);
+
+    SPI(unsigned int number);
+    static int instance;
 };

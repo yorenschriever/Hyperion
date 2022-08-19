@@ -3,18 +3,33 @@
 #include <driver/spi_master.h>
 #include "debug.h"
 
-bool SPI::initialized = false;
+int SPI::instance = 0;
 
-volatile bool SPI::sendFinished = true;
-volatile unsigned long SPI::sendFinishedAt = 0;
+SPI *SPI::CreateInstance()
+{
+    if (instance >= 2)
+    {
+        Debug.printf("More SPI devices are requested than are available. Available devices: %d\r\n", instance);
+        return NULL;
+    }
+    return new SPI(instance++);
+}
 
-spi_device_handle_t SPI::spi;
-spi_transaction_t SPI::trans;
+SPI::SPI(unsigned int number)
+{
+    this->hostNumber = number;
+}
 
 void SPI::Initialize(uint8_t dataPin, uint8_t clkPin, int frq)
 {
     if (initialized)
         return;
+
+    if (hostNumber > 1)
+    {
+        Debug.printf("SPI not initialized, invalid number: %d\r\n", hostNumber);
+        return;
+    }
 
     spi_bus_config_t buscfg = {
         .mosi_io_num = dataPin,
@@ -28,8 +43,8 @@ void SPI::Initialize(uint8_t dataPin, uint8_t clkPin, int frq)
         .queue_size = 1,
         .post_cb = sendFinishedCallback};
 
-    ESP_ERROR_CHECK(spi_bus_initialize(HSPI_HOST, &buscfg, 2));
-    ESP_ERROR_CHECK(spi_bus_add_device(HSPI_HOST, &devcfg, &spi));
+    ESP_ERROR_CHECK(spi_bus_initialize(hostNumber == 0 ? HSPI_HOST : VSPI_HOST, &buscfg, hostNumber == 0 ? 1 : 2));
+    ESP_ERROR_CHECK(spi_bus_add_device(hostNumber == 0 ? HSPI_HOST : VSPI_HOST, &devcfg, &spi));
 
     initialized = true;
 }
@@ -43,7 +58,7 @@ void SPI::Send(uint8_t *data, int length)
 
     memset(&trans, 0, sizeof(spi_transaction_t));
     trans.length = length * 8;
-    trans.user = 0;
+    trans.user = (void *)this;
     trans.flags = 0;
     trans.tx_buffer = data;
 
@@ -52,8 +67,9 @@ void SPI::Send(uint8_t *data, int length)
 
 void IRAM_ATTR SPI::sendFinishedCallback(spi_transaction_t *trans)
 {
-    sendFinished = true;
-    sendFinishedAt = micros();
+    auto instance = (SPI *)trans->user;
+    instance->sendFinished = true;
+    instance->sendFinishedAt = micros();
 }
 
 bool SPI::IsReady()
