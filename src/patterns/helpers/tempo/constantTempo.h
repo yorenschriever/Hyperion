@@ -1,6 +1,5 @@
 #pragma once
 #include "abstractTempo.h"
-#include "hardware/rotary/rotary.h"
 #include "debug.h"
 
 #define DEFAULTPERIOD 0 // default off

@@ -1,8 +1,7 @@
 #pragma once
 
 #include "Arduino.h"
-#include "Tempo.h"
-
+#include "tempo.h"
 
 class AbstractTempo
 {

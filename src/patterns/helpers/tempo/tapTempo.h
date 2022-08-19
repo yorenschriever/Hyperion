@@ -1,6 +1,5 @@
 #pragma once
 #include "abstractTempo.h"
-#include "hardware/rotary/rotary.h"
 #include "debug.h"
 
 //#define DEFAULTPERIOD 480000 //default at 125BPM
