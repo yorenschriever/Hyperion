@@ -17,9 +17,18 @@ class InputSplitter
 {
 
 public:
-    InputSplitter(Input *sourceInput, std::vector<int> lengths)
+    /*
+    * - sourceInput is the input to distribute over the destination inputs
+    * - length is in bytes, not in lights
+    * - if sync is on, a new frame will not be loaded until all outputs have finished sending their data.
+    * This is useful when the sourceinput is an input that generates data on demand instead of listening
+    * to incoming data. Without sync it would generate a new frame when any of the destination outputs
+    * requests new data.
+    */
+    InputSplitter(Input *sourceInput, std::vector<int> lengths, bool sync = false)
     {
         this->sourceInput = sourceInput;
+        this->sync = sync;
         int start = 0;
         for (int length : lengths)
         {
@@ -39,6 +48,17 @@ public:
     static void LoadData(void *argument)
     {
         auto instance = (InputSplitter *)argument;
+
+        //check all outputs, and ask if there is still a frame pending
+        if (instance->sync){
+            for (auto di : instance->destinationInputs)
+            {
+                if (di->getFrameReady()){
+                    return;
+                }
+            }
+        }
+
         auto len = instance->sourceInput->loadData(instance->buffer);
         if (len > 0)
         {
@@ -55,8 +75,9 @@ public:
     }
 
 private:
-    Input *sourceInput;
+    Input *sourceInput = NULL;
     std::vector<BufferInput *> destinationInputs;
     static const int MTU = 3100;
     uint8_t buffer[MTU];
+    bool sync;
 };

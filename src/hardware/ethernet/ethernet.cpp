@@ -44,7 +44,7 @@ void Ethernet::Initialize(const char *hostname)
     eth_mac_config_t mac_config = ETH_MAC_DEFAULT_CONFIG();
     mac_config.smi_mdc_gpio_num = 23;
     mac_config.smi_mdio_gpio_num = 18;
-    mac_config.sw_reset_timeout_ms = 1000; // this timoeut is increased for stability
+    mac_config.sw_reset_timeout_ms = 1000; // this timeout is increased for stability
     esp_eth_mac_t *eth_mac = NULL;
 
     eth_mac = esp_eth_mac_new_esp32(&mac_config);

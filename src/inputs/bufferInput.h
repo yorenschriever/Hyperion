@@ -27,6 +27,11 @@ public:
         missedframecount++;
     }
 
+    bool getFrameReady()
+    {
+        return frameReady;
+    }
+
     virtual void begin()
     {
         if (beginCallback)
