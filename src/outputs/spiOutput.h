@@ -10,7 +10,7 @@
 class SpiOutput : public Output
 {
 public:
-    SpiOutput(uint8_t clkPin, uint8_t dataPin, int frq = 1000000)
+    SpiOutput(uint8_t clkPin, uint8_t dataPin, int frq = 500000)
     {
         spi = SPI::CreateInstance();
         this->clkPin = clkPin;

@@ -25,7 +25,9 @@ void SPI::Initialize(uint8_t dataPin, uint8_t clkPin, int frq)
     if (initialized)
         return;
 
-    if (hostNumber > 1)
+    //Debug.printf("Initializing SPI device: %d\r\n", hostNumber);
+
+    if (hostNumber >= 2)
     {
         Debug.printf("SPI not initialized, invalid number: %d\r\n", hostNumber);
         return;

@@ -12,7 +12,7 @@ LUT *PixelLut = new ColourCorrectionLUT(1.5, 255, 255, 255, 240);
 
 auto split = InputSplitter(
     new UDPInput(9601),
-    {271,210}
+    {271 * 3, 210 * 3}
 );
 
 void LoadConfiguration()
@@ -22,11 +22,9 @@ void LoadConfiguration()
     Configuration.pipes = {
         new Pipe(
             split.getInput(0),
-            new SpiOutput(0, 1, 500000)
-        ),
+            new SpiOutput(0, 1)),
         new Pipe(
             split.getInput(1),
-            new SpiOutput(4, 5, 500000)
-        )
+            new SpiOutput(4, 5))
     };
 }
