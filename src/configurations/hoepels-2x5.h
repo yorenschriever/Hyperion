@@ -15,7 +15,7 @@
 #include "inputs/patternInput.h"
 #include "patterns/rgbPatterns.h"
 
-//LUT *PixelLut = new ColourCorrectionLUT(1.5, 255, 255, 255, 240);
+// LUT *PixelLut = new ColourCorrectionLUT(1.5, 255, 255, 255, 240);
 
 void LoadConfiguration()
 {
@@ -28,58 +28,59 @@ void LoadConfiguration()
     Params::intensity = 0.7;
     Params::variant = 0.7;
 
-    Configuration.tapMidiNote = 41; //play
-    Configuration.tapStopMidiNote = 42; //stop
-    Configuration.tapAlignMidiNote = 43; //back
-    Configuration.tapBarAlignMidiNote = 44; //forward
+    Configuration.tapMidiNote = 41;         // play
+    Configuration.tapStopMidiNote = 42;     // stop
+    Configuration.tapAlignMidiNote = 43;    // back
+    Configuration.tapBarAlignMidiNote = 44; // forward
 
+    auto input = new NanoKontrolInput<RGBA>(
+        500, // number of leds
+        new LayeredPattern<RGBA> *[24]
+        {
+            // static
+            new Hoepels::MonochromePattern(),
+            new Hoepels::StereochromePattern(),
+            new Hoepels::GradientPattern(),
+
+            // rainbow
+            new Hoepels::Rainbow(),
+            new Hoepels::Rainbow2(),
+            new Hoepels::Rainbow3(),
+
+            // sin
+            new Hoepels::HoepelsTransition(),
+            new Hoepels::SinStripPattern(),
+            new Hoepels::SinStripPattern2(),
+
+            // beat
+            new Hoepels::OnbeatFadeAllPattern(),
+            new Hoepels::OnbeatFadePattern(),
+            new Hoepels::FireworkPattern(),
+
+            // chase
+            new Hoepels::SinPattern(),
+            new Hoepels::AntichasePattern(),
+            new Hoepels::ChasePattern(),
+
+            // glow
+            new Hoepels::ClivePattern<SinFast>(0, 500, 2000),
+            new Hoepels::ClivePattern<SinFast>(1, 10, 2000),
+            new Hoepels::GlowPulsePattern(),
+
+            // segment
+            new Hoepels::ClivePattern<SoftSquare>(0, 50, 10000, 1, 0.1),
+            new Hoepels::ClivePattern<SawDownShort>(1, 25, 1500, 1, 0.1),
+            new Hoepels::ClivePattern<SawDown>(2, 50, 1000),
+
+            // flash
+            new Hoepels::SlowStrobePattern(),
+            new Hoepels::SquareGlitchPattern(),
+            new Hoepels::ClivePattern<SawDownShort>(2, 25, 500, 1, 0.1),
+        });
     auto split = new InputSplitter(
-            new NanoKontrolInput<RGBA>(
-                500, //number of leds
-                new LayeredPattern<RGBA> *[24]{
-                    //
-                    new Hoepels::MonochromePattern(),
-                    new Hoepels::StereochromePattern(),
-                    new Hoepels::GradientPattern(),
-
-                    //
-                    new Hoepels::Rainbow(),
-                    new Hoepels::Rainbow2(),
-                    new Hoepels::HoepelsBase(),
-
-                    //inner
-                    new Hoepels::HoepelsTransition(),
-                    new Hoepels::SinStripPattern(),
-                    new Hoepels::SinStripPattern2(),
-
-                    //outer
-                    new Hoepels::OnbeatFadePattern(),
-                    new Hoepels::FirePattern(),
-                    new Hoepels::FireworkPattern(),
-
-                    //sparse
-                    new Hoepels::SinPattern(),
-                    new Hoepels::AntichasePattern(),
-                    new Hoepels::ClivePattern<SawDown>(50,1000),
-
-                    //clive
-                    new Hoepels::ClivePattern<SinFast>(500,2000),
-                    new Hoepels::ClivePattern<SinFast>(10,2000),
-                    new Hoepels::ClivePattern<SoftSquare>(50,10000,1,0.1),
-
-                    //flashes
-                    new Hoepels::SquareGlitchPattern(),
-                    new Hoepels::GlowPulsePattern(),//dubbel
-                    new Hoepels::SquareGlitchPattern(),
-
-                    //strobes
-                    new Hoepels::SlowStrobePattern(),
-                    new Hoepels::SquareGlitchPattern(),//dubbel
-                    new Hoepels::GlowPulsePattern(),
-
-                }
-            ),
-        {400, 400, 400, 400, 400},
+        input,
+        //{1440 * 4 / 3}, //
+        {400, 400, 400, 400, 400}, 
         true);
 
     Configuration.pipes = {
@@ -109,5 +110,11 @@ void LoadConfiguration()
             split->getInput(4),
             new UDPOutput("192.168.1.229", 9601, 50),
             Pipe::transfer<RGBA, RGB>),
+
+        // new Pipe(
+        //     split->getInput(0),
+        //     new UDPOutput("192.168.0.54", 9601, 50),
+        //     Pipe::transfer<RGBA, RGB>),
+
     };
 }

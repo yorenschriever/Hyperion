@@ -74,6 +74,7 @@ namespace Hoepels
 
     class Rainbow : public LayeredPattern<RGBA>
     {
+        LFO<SawDown> lfo;
         Transition transition = Transition(
             200, Transition::none, 0,
             1000, Transition::none, 0);
@@ -83,11 +84,13 @@ namespace Hoepels
             if (!transition.Calculate(active))
                 return;
 
+            lfo.setPeriod(Params::getVelocity(10000, 500));
+
             for (int hoepel = 0; hoepel < 10; hoepel++)
             {
                 for (int led = 0; led < 50; led++)
                 {
-                    RGBA col = Hue(led*255/50);
+                    RGBA col = Hue(led*255/50 + lfo.getValue()*255);
                     pixels[hoepel * 50 + led] = col * transition.getValue();
                 }
             }
@@ -96,6 +99,7 @@ namespace Hoepels
 
     class Rainbow2 : public LayeredPattern<RGBA>
     {
+        LFO<SawDown> lfo;
         Transition transition = Transition(
             200, Transition::none, 0,
             1000, Transition::none, 0);
@@ -105,11 +109,44 @@ namespace Hoepels
             if (!transition.Calculate(active))
                 return;
 
+            lfo.setPeriod(Params::getVelocity(10000, 500));
+
             for (int hoepel = 0; hoepel < 10; hoepel++)
             {
                 for (int led = 0; led < 50; led++)
                 {
-                    RGBA col = Hue(hoepel*255/10);
+                    int hoepel2 = hoepel / 2;
+                    RGBA col = Hue(hoepel2*255/5 + lfo.getValue()*255);
+                    pixels[hoepel * 50 + led] = col * transition.getValue();
+                }
+            }
+        }
+    };
+
+    class Rainbow3 : public LayeredPattern<RGBA>
+    {
+        LFO<SawDown> lfo;
+        Transition transition = Transition(
+            200, Transition::none, 0,
+            1000, Transition::none, 0);
+        const int hoepelmapping[10] = {0, 7,
+                                       2, 9,
+                                       4, 1,
+                                       6, 3, 
+                                       8, 5};
+
+        void Calculate(RGBA *pixels, int width, bool active) override
+        {
+            if (!transition.Calculate(active))
+                return;
+
+            lfo.setPeriod(Params::getVelocity(10000, 500));
+
+            for (int hoepel = 0; hoepel < 10; hoepel++)
+            {
+                for (int led = 0; led < 50; led++)
+                {
+                    RGBA col = Hue(hoepelmapping[hoepel]*255/10 + lfo.getValue()*255);
                     pixels[hoepel * 50 + led] = col * transition.getValue();
                 }
             }
@@ -151,7 +188,7 @@ namespace Hoepels
                 // RGBA col = Params::getPrimaryColour() * fade[hoepel].getValue() * transition.getValue();
                 for (int led = 0; led < 50; led++)
                 {
-                    RGBA col = Params::getPrimaryColour() * fade[hoepel].getValue(led * 50) * transition.getValue();
+                    RGBA col = Params::getHighlightColour() * fade[hoepel].getValue(led * 50) * transition.getValue();
                     pixels[hoepel * 50 + led] = col;
                 }
             }
@@ -185,14 +222,11 @@ namespace Hoepels
 
             for (int i = 0; i < 10; i++)
             {
-                // chase[i].Calculate(true); //Tempo::GetProgress(8) * 10 < i);
-                // chase[i].Calculate(Tempo::GetBeatNumber()%10 == i);
                 chase[i].Calculate(Tempo::GetBeatNumber() % 10 == perm.at[i]);
             }
 
             for (int hoepel = 0; hoepel < 10; hoepel++)
             {
-                // RGBA col = Params::getPrimaryColour() * fade[hoepel].getValue() * transition.getValue();
                 for (int led = 0; led < 50; led++)
                 {
                     RGBA col = Params::getPrimaryColour() * chase[hoepel].getValue(led, 50) * transition.getValue();
@@ -216,7 +250,8 @@ namespace Hoepels
             if (!transition.Calculate(active))
                 return;
 
-            RGBA col = Params::getPrimaryColour() * transition.getValue();
+            //lfo.setPeriod(Params::getVelocity(10000, 500));
+            RGBA col = Params::getSecondaryColour() * transition.getValue();
 
             for (int hoepel = 0; hoepel < 10; hoepel++)
             {
@@ -242,7 +277,8 @@ namespace Hoepels
             if (!transition.Calculate(active))
                 return;
 
-            RGBA col = Params::getPrimaryColour() * transition.getValue();
+            //lfo.setPeriod(Params::getVelocity(10000, 500));
+            RGBA col = Params::getHighlightColour() * transition.getValue();
 
             for (int hoepel = 0; hoepel < 10; hoepel++)
             {
@@ -294,10 +330,9 @@ namespace Hoepels
 
             for (int hoepel = 0; hoepel < 10; hoepel++)
             {
-                // RGBA col = Params::getPrimaryColour() * fade[hoepel].getValue() * transition.getValue();
                 for (int led = 0; led < 50; led++)
                 {
-                    RGBA col = Params::getPrimaryColour() * chase[hoepel].getValue(led, 50) * transition.getValue();
+                    RGBA col = Params::getSecondaryColour() * chase[hoepel].getValue(led, 50) * transition.getValue();
                     pixels[hoepel * 50 + led] = col;
                 }
             }
@@ -325,7 +360,7 @@ namespace Hoepels
                 perm[which].permute();
             }
 
-            RGBA baseCol = Params::getPrimaryColour() * transition.getValue();
+            RGBA baseCol = Params::getHighlightColour() * transition.getValue();
             for (int hoepel = 0; hoepel < 10; hoepel++)
             {
                 for (int led = 0; led < 50; led++)
@@ -357,12 +392,42 @@ namespace Hoepels
             if (!transition.Calculate(active))
                 return;
 
+            lfo.setPeriod(Params::getVelocity(5000, 500));
             for (int hoepel = 0; hoepel < 10; hoepel++)
             {
                 RGBA col = Params::getPrimaryColour() * lfo.getValue((float)(hoepel)/10) * transition.getValue();
                 for (int led = 0; led < 50; led++)
                     pixels[hoepel * 50 + led] = col;
             }
+        }
+    };
+
+
+    class ChasePattern : public LayeredPattern<RGBA>
+    {
+        const int numStrips = 10;
+        LFO<SawDown> lfo = LFO<SawDown>(5000);
+        Transition transition = Transition(
+            200, Transition::none, 0,
+            1000, Transition::none, 0);
+
+    public:
+        inline void Calculate(RGBA *pixels, int width, bool active) override
+        {
+            if (!transition.Calculate(active))
+                return;
+
+            lfo.setPeriod(Params::getVelocity(5000, 500));
+            RGBA col = Params::getHighlightColour() * transition.getValue();
+
+            for (int hoepel = 0; hoepel < 10; hoepel++)
+            {
+                float dir = 1; //hoepel % 2 ==0 ? 1 : -1;
+                for (int led = 0; led < 50; led++){
+                    pixels[hoepel * 50 + led] = col * lfo.getValue(dir * (float)led / 50);
+                }
+            }
+
         }
     };
 
@@ -380,7 +445,8 @@ namespace Hoepels
             if (!transition.Calculate(active))
                 return;
 
-            RGBA col = Params::getPrimaryColour() * transition.getValue();
+            lfo.setPeriod(Params::getVelocity(5000, 500));
+            RGBA col = Params::getSecondaryColour() * transition.getValue();
 
             for (int hoepel = 0; hoepel < 10; hoepel++)
             {
@@ -401,15 +467,17 @@ namespace Hoepels
         float precision;
         LFO<T> lfo;
         Permute perm;
+        int color;
 
     public:
-        ClivePattern(int numSegments = 10, int averagePeriod = 1000, float precision = 1, float pulsewidth = 1)
+        ClivePattern(int color = 0, int numSegments = 10, int averagePeriod = 1000, float precision = 1, float pulsewidth = 1)
         {
             this->numSegments = std::max(numSegments, 1);
             this->averagePeriod = averagePeriod;
             this->precision = precision;
             this->perm = Permute(numSegments);
             this->lfo.setPulseWidth(pulsewidth);
+            this->color = color;
         }
 
         inline void Calculate(RGBA *pixels, int width, bool active) override
@@ -417,11 +485,15 @@ namespace Hoepels
             if (!active)
                 return;
 
+            auto col = Params::getPrimaryColour();
+            if (color==1) col = Params::getSecondaryColour();
+            if (color==2) col = Params::getHighlightColour();
+
             for (int index = 0; index < width; index++)
             {
                 int permutedQuantized = perm.at[index * numSegments / width] * width / numSegments;
                 int interval = averagePeriod + permutedQuantized * (averagePeriod * precision) / width;
-                pixels[index] += Params::getSecondaryColour() * lfo.getValue(0, interval);
+                pixels[index] += col * lfo.getValue(0, interval);
             }
         }
     };
@@ -447,8 +519,28 @@ namespace Hoepels
                 int quantized = index / 10;
                 if (perm.at[quantized] > 25)
                     continue;
-                pixels[index] += Params::getHighlightColour() * transition.getValue();
+                pixels[index] += Params::getSecondaryColour() * transition.getValue();
             }
+        }
+    };
+
+    class OnbeatFadeAllPattern : public LayeredPattern<RGBA>
+    {
+        Transition transition = Transition(
+            200, Transition::none, 0,
+            1000, Transition::none, 0);
+        FadeDown fade =  FadeDown(1400, WaitAtEnd);
+        TempoWatcher tempo = TempoWatcher();
+
+    public:
+        inline void Calculate(RGBA *pixels, int width, bool active) override
+        {
+            if (!transition.Calculate(active)) return;
+            if (tempo.Triggered()) fade.reset();
+
+            RGBA col = Params::getPrimaryColour() * fade.getValue() * transition.getValue();
+            for (int i = 0; i < width; i++)
+                pixels[i] += col;
         }
     };
 

@@ -2,6 +2,8 @@
 #include "pattern.h"
 #include "helpers/pixelMap.h"
 #include "helpers/fade.h"
+#include "helpers/interval.h"
+#include "helpers/timeline.h"
 #include <vector>
 #include <math.h>
 
@@ -863,4 +865,72 @@ namespace Ledster
         }
     };
 
-} // namespace Mapped
+    class DoorPattern : public LayeredPattern<RGBA>
+    {
+        PixelMap map;
+        Transition transition = Transition(
+            1000, Transition::none, 0,
+            1000, Transition::none, 0);
+
+    public:
+        DoorPattern(PixelMap map, int period = 1000)
+        {
+            this->map = map;
+        }
+
+        inline void Calculate(RGBA *pixels, int width, bool active) override
+        {
+            if (!transition.Calculate(active))
+                return;
+
+            for (int index = 0; index < 271; index++)
+            {
+                auto col = 2*abs(map[index].y) < (transition.getValue()) ? RGBA(0,0,0,255) : RGBA(0,0,0,0);
+                pixels[index] += col ;
+            }
+
+        }
+    };
+
+    class RadialFadePattern2 : public LayeredPattern<RGBA>
+    {
+        Transition transition = Transition(
+            200, Transition::none, 0,
+            1000, Transition::none, 0);
+        PixelMap map;
+        FadeDown fade = FadeDown(200, WaitAtEnd);
+        std::vector<float> normalizedRadii;
+        Timeline interval = Timeline(500);
+
+    public:
+        RadialFadePattern2(PixelMap map)
+        {
+            this->map = map;
+            std::transform(map.begin(), map.end(), std::back_inserter(normalizedRadii), [](PixelPosition pos) -> float
+                           { return sqrt(pos.y * pos.y + pos.x * pos.x); });
+        }
+
+        inline void Calculate(RGBA *pixels, int width, bool active) override
+        {
+            fade.duration = Params::getIntensity(500,120);
+            int velocity = Params::getVelocity(500,50);
+            interval.SetDuration(Params::getVariant(500,2000));
+
+            if (!transition.Calculate(active))
+                return;
+
+            interval.FrameStart();
+            if (interval.Happened(0))
+            {
+                fade.reset();
+            }
+
+            for (int i = 0; i < normalizedRadii.size(); i++)
+            {
+                pixels[i] += Params::getPrimaryColour() * fade.getValue((1.-normalizedRadii[i]) * velocity) * transition.getValue();
+            }
+        }
+    };
+
+
+} // namespace

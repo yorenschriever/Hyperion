@@ -51,9 +51,13 @@ void LoadConfiguration()
                     new Ledster::KonamiFadePattern(ledsterMap),
 
                     //inner
-                    new Ledster::AdidasPattern(),
-                    new Ledster::ConcentricChaserPattern(),
-                    new Ledster::MandalaPattern(),
+                    //new Ledster::AdidasPattern(),
+                    //new Ledster::ConcentricChaserPattern(),
+                    //new Ledster::MandalaPattern(),
+                    new Ledster::ClivePattern<SinFast>(10000),
+                    new Ledster::RadialFadePattern2(ledsterMap),
+                    new Ledster::DoorPattern(ledsterMap),
+                   
 
                     //outer
                     new Ledster::PetalChasePattern(),
@@ -66,7 +70,7 @@ void LoadConfiguration()
                     new Ledster::HexBeatPattern(),
 
                     //clive
-                    new Ledster::RibbenClivePattern<SoftSquare>(),
+                    new Ledster::RibbenClivePattern<SoftSquare>(40000),
                     new Ledster::RibbenClivePattern<SawDown>(500),
                     new Ledster::RibbenClivePattern<SinFast>(3000),
                     //new Ledster::ClivePattern<LFOPause<SinFast>>(481,10000,5,0.25),
@@ -85,6 +89,8 @@ void LoadConfiguration()
             ),
             //new UDPOutput("192.168.0.76",9601,60),
             new UDPOutput("ledsterstandalone.local",9601,60),
+            //new UDPOutput("192.168.0.54",9601,60),
+            //new UDPOutput("m2.local",9601,60),
             //new SpiOutput(0,1,500000),
             Pipe::transfer<RGBA, RGB>
             //PixelLut
