@@ -21,8 +21,6 @@
 #include "luts/incandescentLut.h"
 #include "configurationStruct.h"
 #include "inputs/layeredPatternInput.h"
-#include "wifipassword.h"
-
 
 //I picked colour correction values that Fastled uses for neopixels "TypicalLEDStrip"
 //http://fastled.io/docs/3.1/group___color_enums.html
@@ -33,12 +31,12 @@ LUT *NeopixelLut = new ColourCorrectionLUT(1.5, 255, 255, 255, 255);
 //This config can receive mapping info over websocket, as well as display 
 //udp input. It is not very stable.
 //In the future it might be worth considering only receiving udp input,
-//and make a separate device to transform bla/websocket call into udp.
+//and make a separate device to transform ble/websocket call into udp.
 
 const int channelCount = 8;
 
 //number of leds on each output
-const int sizes[channelCount] = {100,100,150,150,150,150,100,200};
+const int sizes[channelCount] = {200,200,200,200,200,150,150,200};
 
 //websocket created below will put mapping data into this buffer
 //this buffer is then displayed on the leds because of the fallbackinput and
@@ -104,10 +102,6 @@ void LoadConfiguration()
     Params::velocity = 0.3;
 
     Configuration.hostname = "hyperion";
-
-    Configuration.wifiEnabled = false;
-    Configuration.wifissid = WIFI_SSID;
-    Configuration.wifipsk = WIFI_PSK;
 
     Configuration.paramCalculator = updateParams;
 
