@@ -18,6 +18,11 @@ public:
         this->length = length;
         this->patterns = patterns;
         this->leddata = (T_COLOUR *)malloc(length * sizeof(T_COLOUR));
+
+        if (!this->leddata){
+            Debug.printf("Unable to allocate memory for nanoKontrolInput, free heap = %d\n",ESP.getFreeHeap());
+            ESP.restart();
+        }
     }
 
     virtual void begin()

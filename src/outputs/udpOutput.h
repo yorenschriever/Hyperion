@@ -63,6 +63,11 @@ public:
 
             buffer = (uint8_t*) realloc(buffer,len);
 
+            if (!buffer){
+                Debug.printf("Unable to allocate memory for UdpOutput, free heap = %d\n",ESP.getFreeHeap());
+                ESP.restart();
+            }
+
             this->length = len;
         }
     }
