@@ -21,7 +21,7 @@ public:
     * - sourceInput is the input to distribute over the destination inputs
     * - length is in bytes, not in lights
     * - if sync is on, a new frame will not be loaded until all outputs have finished sending their data.
-    * This is useful when the sourceinput is an input that generates data on demand instead of listening
+    * This is useful when the sourceInput is an input that generates data on demand instead of listening
     * to incoming data. Without sync it would generate a new frame when any of the destination outputs
     * requests new data.
     */
@@ -33,7 +33,7 @@ public:
         for (int length : lengths)
         {
             auto bi = new BufferInput(this->buffer + start, length);
-            bi->setCallbacks(LoadData, Begin, (void *)this);
+            bi->setCallbacks(LoadData, Begin, this);
             this->destinationInputs.push_back(bi);
             start += length;
         }
@@ -42,11 +42,15 @@ public:
     static void Begin(void *argument)
     {
         auto instance = (InputSplitter *)argument;
+        if (instance->begun)
+          return;
+
+        instance->begun = true;
         instance->sourceInput->begin();
     }
 
     static void LoadData(void *argument)
-    {
+    {       
         auto instance = (InputSplitter *)argument;
 
         //check all outputs, and ask if there is still a frame pending
@@ -61,7 +65,7 @@ public:
 
         auto len = instance->sourceInput->loadData(instance->buffer);
         if (len > 0)
-        {
+        {   
             for (auto di : instance->destinationInputs)
             {
                 di->setFrameReady();
@@ -77,7 +81,8 @@ public:
 private:
     Input *sourceInput = NULL;
     std::vector<BufferInput *> destinationInputs;
-    static const int MTU = 3100;
+    static const int MTU = 1500*4;
     uint8_t buffer[MTU];
     bool sync;
+    bool begun = false;
 };

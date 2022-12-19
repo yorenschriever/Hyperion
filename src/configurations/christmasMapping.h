@@ -54,7 +54,7 @@ void initBufferInputs()
     for (int i = 0; i < channelCount; i++)
         mappingBufferSize += sizes[i] * 3;
 
-    mappingBuffer = (uint8_t*) malloc(mappingBufferSize * 3);
+    mappingBuffer = (uint8_t*) malloc(mappingBufferSize * 3); //do i multiple here by 3 twice? bug?
 
     int bufferStart = 0;
     for (int i = 0; i < channelCount; i++)

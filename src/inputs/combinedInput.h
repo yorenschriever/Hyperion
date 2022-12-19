@@ -22,6 +22,11 @@ public:
         this->parts = parts;
         this->bufferSize = bufferSize;
         dataBuffer = (uint8_t*) malloc(bufferSize);
+
+        if (!dataBuffer){
+            Debug.printf("Unable to allocate memory for patternInput, free heap = %d\n",ESP.getFreeHeap());
+            ESP.restart();
+        }
     }
 
     virtual void begin()

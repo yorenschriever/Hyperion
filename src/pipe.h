@@ -7,7 +7,7 @@
 
 using HandlerFunc = int (*)(uint8_t *data, int length, Output *out, LUT *lut);
 
-const int MTU = 3100;
+const int MTU = 1500*4;
 uint8_t data[MTU]; //i used to malloc this, but the MTU is 1500, so i just set it to the upped bound
 
 //Pipes are object that tie everything together: a pipe has an input and an output.
