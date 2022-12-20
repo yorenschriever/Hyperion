@@ -186,6 +186,22 @@ public:
     }
 };
 
+class SoftPWM
+{
+public:
+    static float getValue(float phase, float pulsewidth)
+    {
+        float softWidth = 0.1;
+        if (phase < softWidth)
+            return phase / softWidth;
+        if (phase < pulsewidth)
+            return 1;
+        if (phase < pulsewidth + softWidth)
+            return 1 - (phase - pulsewidth) / softWidth;
+        return 0;
+    }
+};
+
 template <class INNER>
 class LFOPause
 {

@@ -219,4 +219,39 @@ namespace Mapped
         }
     };
 
+    template <class T>
+    class DiagonalWavePattern : public LayeredPattern<RGBA>
+    {
+        PixelMap map;
+        LFO<T> lfo;
+        float numWaves;
+        Transition transition = Transition(
+            200, Transition::none, 0,
+            1000, Transition::none, 0);
+
+    public:
+        DiagonalWavePattern(PixelMap map, int period = 5000, float numWaves = 1, float pulseWidth = 0.5, float skew = 1)
+        {
+            this->map = map;
+            this->lfo = LFO<T>(period);
+            this->numWaves = numWaves;
+            this->lfo.setPulseWidth(pulseWidth);
+            this->lfo.setSkew(skew);
+        }
+
+        inline void Calculate(RGBA *pixels, int width, bool active) override
+        {
+            if (!transition.Calculate(active))
+                return;
+
+            for (int index = 0; index < std::min(width, (int)map.size()); index++)
+            {
+                float phase = (map[index].x + map[index].y + 2) * numWaves;
+                RGBA colour = Params::getPrimaryColour() + Params::getSecondaryColour() * lfo.getValue(phase); 
+                RGBA dimmedColour = colour * transition.getValue();
+                pixels[index] += dimmedColour;
+            }
+        }
+    };
+
 } // namespace Mapped

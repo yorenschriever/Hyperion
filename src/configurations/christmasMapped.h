@@ -74,7 +74,7 @@ void LoadConfiguration()
                 new Mapped::HorizontalDitheredGradientPattern(treeDesk),
                 new Mapped::HorizontalGradientPattern(treeDesk),
                 new Mapped::ConcentricWavePattern<SawDown>(treeDesk, 1, 5000),
-                // new Mapped::HorizontalWavePattern<SinFast>(treeDesk, 5000),
+                new Mapped::DiagonalWavePattern<SoftPWM>(treeDesk,5000,-2,0.66)
             }),
         sizesInBytes);
 
