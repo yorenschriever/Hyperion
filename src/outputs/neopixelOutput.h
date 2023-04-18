@@ -148,6 +148,12 @@ public:
             buffer = (uint8_t *)realloc(buffer, len);
             frontBuffer = (uint8_t *)realloc(frontBuffer, len);
 
+            if (!buffer || !frontBuffer)
+            {
+                Debug.printf("Unable to allocate memory for neoPixelOutput, free heap = %d\n",ESP.getFreeHeap());
+                ESP.restart(); 
+            }
+
             memset(frontBuffer, 0x00, len);
 
             this->length = len;

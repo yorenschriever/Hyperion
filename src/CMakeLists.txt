@@ -11,7 +11,7 @@ set(app_sources
 	"hardware/ethernet/ethernet.cpp"
 	"hardware/wifi/wifi.cpp"
 	"hardware/firmwareUpdate/firmwareUpdate.cpp"
-	#"hardware/websocket/websocket.cpp"
+	"hardware/websocket/websocket.cpp"
 	"hardware/UDPFast/UDPFast.cpp"
 	"hardware/display/display.cpp"
 	"hardware/display/Adafruit_GFX.cpp"

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
@@ -36,14 +38,15 @@ uint32_t IRAM_ATTR esp_randomStable(void)
      * than the number of cycles we need to wait here.
      */
     int esp_clk_apb_freq_val = esp_clk_apb_freq();
-    if (esp_clk_apb_freq_val==0)
-        esp_clk_apb_freq_val=1;
+    if (esp_clk_apb_freq_val == 0)
+        esp_clk_apb_freq_val = 1;
     uint32_t cpu_to_apb_freq_ratio = esp_clk_cpu_freq() / esp_clk_apb_freq_val;
 
     static uint32_t last_ccount = 0;
     uint32_t ccount;
     uint32_t result = 0;
-    do {
+    do
+    {
         ccount = XTHAL_GET_CCOUNT();
         result ^= REG_READ(WDEV_RND_REG);
     } while (ccount - last_ccount < cpu_to_apb_freq_ratio * 16);
@@ -56,14 +59,17 @@ long stableRandom(long howbig)
     uint32_t x = esp_randomStable();
     uint64_t m = uint64_t(x) * uint64_t(howbig);
     uint32_t l = uint32_t(m);
-    if (l < howbig) {
+    if (l < howbig)
+    {
         uint32_t t = -howbig;
-        if (t >= howbig) {
+        if (t >= howbig)
+        {
             t -= howbig;
-            if (t >= howbig) 
+            if (t >= howbig)
                 t %= howbig;
         }
-        while (l < t) {
+        while (l < t)
+        {
             x = esp_randomStable();
             m = uint64_t(x) * uint64_t(howbig);
             l = uint32_t(m);
@@ -72,3 +78,8 @@ long stableRandom(long howbig)
     return m >> 32;
 }
 
+float stableRandomFloat()
+{
+    const unsigned int max = 10000;
+    return ((float)stableRandom(max)) / max;
+}
