@@ -21,6 +21,11 @@ public:
         this->patterns = patterns;
         this->column = column;
         this->leddata = (T_COLOUR *)malloc(length * sizeof(T_COLOUR));
+
+        if (!this->leddata){
+            Debug.printf("Unable to allocate memory for layeredAPCMiniInput, free heap = %d\n",ESP.getFreeHeap());
+            ESP.restart();
+        }
     }
 
     virtual void begin()

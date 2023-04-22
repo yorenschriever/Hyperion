@@ -16,6 +16,11 @@ public:
         this->length = length;
         this->pattern = pattern;
         this->leddata = (T_COLOUR *)malloc(length * sizeof(T_COLOUR));
+
+        if (!this->leddata){
+            Debug.printf("Unable to allocate memory for patternInput, free heap = %d\n",ESP.getFreeHeap());
+            ESP.restart();
+        }
     }
 
     virtual void begin()

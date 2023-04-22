@@ -30,6 +30,7 @@ class Monochrome;
 class RGB;
 class GRBW;
 class GRB;
+class BGR;
 class Monochrome12;
 class RGB12;
 class RGBA;
@@ -126,6 +127,7 @@ public:
 
     operator RGB12();
     operator GRB();
+    operator BGR();
     operator Monochrome();
     operator Monochrome12();
     operator RGBA();
@@ -171,6 +173,45 @@ public:
     operator Monochrome12();
 
     uint8_t G, R, B;
+};
+
+class BGR : Colour
+{
+public:
+    BGR()
+    {
+        this->B = 0;
+        this->G = 0;
+        this->R = 0;
+    }
+
+    BGR(uint8_t B, uint8_t G, uint8_t R)
+    {
+        this->B = B;
+        this->G = G;
+        this->R = R;
+    }
+
+    inline void ApplyLut(LUT *lut)
+    {
+        G = lut->luts[1 % lut->Dimension][G];
+        R = lut->luts[0 % lut->Dimension][R];
+        B = lut->luts[2 % lut->Dimension][B];
+    }
+
+    inline void dim(uint8_t value)
+    {
+        G = (G * value) >> 8;
+        R = (R * value) >> 8;
+        B = (B * value) >> 8;
+    }
+
+    operator RGB12();
+    operator RGB();
+    operator Monochrome();
+    operator Monochrome12();
+
+    uint8_t B, G, R;
 };
 
 class RGB12 : Colour
@@ -812,6 +853,7 @@ inline RGB::operator Monochrome() { return Monochrome((R + G + B) / 3); }
 inline RGB::operator RGB12() { return RGB12(R * CONV8TO12, G * CONV8TO12, B * CONV8TO12); }
 inline RGB::operator Monochrome12() { return Monochrome12(((R + G + B) * CONV8TO12) / 3); }
 inline RGB::operator GRB() { return GRB(G, R, B); }
+inline RGB::operator BGR() { return BGR(B, G, R); }
 inline RGB::operator RGBA() { return RGBA(R, G, B, 255); }
 inline RGB::operator GRBW()
 {

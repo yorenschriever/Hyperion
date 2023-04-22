@@ -64,6 +64,11 @@ public:
 
             buffer = (uint8_t *)heap_caps_realloc(buffer, len, MALLOC_CAP_DMA | MALLOC_CAP_32BIT);
 
+            if (!buffer){
+                Debug.printf("Unable to allocate memory for SpiOutput, free heap = %d\n",ESP.getFreeHeap());
+                ESP.restart();
+            }
+
             this->length = len;
         }
     }
