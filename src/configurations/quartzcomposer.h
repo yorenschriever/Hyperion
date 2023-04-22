@@ -20,7 +20,13 @@ LUT* IncandescentLut = new IncandescentLUT(2.5, 4096, 400);
 
 void LoadConfiguration()
 {
-
+    Params::primaryColour = RGBA(255, 200, 0, 255);
+    Params::secondaryColour = RGBA(0, 255, 255, 255);
+    Params::highlightColour = RGBA(0, 0, 255, 255);
+    Params::velocity = 0.3;
+    Params::intensity = 0.7;
+    Params::variant = 0.7;
+    
     Configuration.hostname = "hyperion";
     Configuration.pwmFrequency = 1500;
 

@@ -18,15 +18,30 @@
 #include "inputs/layeredPatternInput.h"
 #include "inputs/layeredApcminiInput.h"
 #include "inputs/switchableInput.h"
+#include "maps/ledsterMap.h"
+#include "patterns/helpers/pixelMap.h"
+#include "patterns/ledsterPatterns.h"
+#include "inputs/patternCycleInput.h"
+#include "patterns/helpers/tempo/constantTempo.h"
 
 LUT *SunstripLut = new GammaLUT(2.6, 255);
 LUT *GammaLut12 = new GammaLUT(2.5, 4096);
+LUT *PixelLut = new ColourCorrectionLUT(1.5, 255, 255, 255, 255);
 
 void LoadConfiguration()
 {
+    Params::primaryColour = RGBA(255, 100, 0, 255);
+    Params::secondaryColour = RGBA(255, 0, 255, 255);
+    Params::highlightColour = RGBA(0, 0, 255, 255);
+    Params::velocity = 0.3;
+    Params::intensity = 0.7;
+    Params::variant = 0.7;
 
     Configuration.hostname = "minimini";
     
+    Tempo::AddSource(ConstantTempo::getInstance());
+    ConstantTempo::getInstance()->setBpm(120);
+
     Configuration.tapMidiNote = 98;
     Configuration.tapStopMidiNote = 89;
     Configuration.tapAlignMidiNote = 88;
@@ -69,6 +84,7 @@ void LoadConfiguration()
         //     Pipe::transfer<Monochrome,Monochrome>,
         //     SunstripLut),
 
+        //SUNSTRIP
 
         new Pipe(
             new SwitchableInput(
@@ -92,6 +108,31 @@ void LoadConfiguration()
             new NeopixelOutput<Kpbs800>(7),
             Pipe::transfer<Monochrome,Monochrome>,
             SunstripLut),
+
+        //LEDSTER
+
+        new Pipe(
+            //new SwitchableInput(
+            //    new UDPInput(9601),
+                new PatternCycleInput<RGBA>(
+                    481,
+                    std::vector<LayeredPattern<RGBA> *>{
+                        new Ledster::RadarPattern(ledsterMap),
+                        new Ledster::PetalChasePattern(),
+                        //new Ledster::ConcentricChaserPattern(),
+                        new Ledster::SnakePattern(),
+                        new Ledster::RadialFadePattern(ledsterMap),
+                        new Ledster::RibbenClivePattern<SoftSquare>(),
+                        new Ledster::SnowflakePattern(),
+                        //new Ledster::PetalRotatePattern(),
+                        new Ledster::ClivePattern<LFOPause<SinFast>>(481, 10000, 5, 0.25)},
+                    30000 // duration
+             //       )
+                ),
+            new NeopixelOutput<Kpbs800>(1),
+            Pipe::transfer<RGBA,GRB>,
+            PixelLut
+        ),
 
         ///////////////////////
         // BPM PULSE INDICATOR

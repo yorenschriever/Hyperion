@@ -48,26 +48,31 @@ void LoadConfiguration()
     Configuration.pipes = {
 
         new Pipe(
-            new FallbackInput(
-                new UDPInput(9601),
-                new PatternCycleInput<RGBA>(
-                    numLeds,
-                    std::vector<LayeredPattern<RGBA> *>{
-                        new Ledster::RadarPattern(ledsterMap),
-                        new Ledster::PetalChasePattern(),
-                        new Ledster::ConcentricChaserPattern(),
-                        new Ledster::SnakePattern(),
-                        new Ledster::RadialFadePattern(ledsterMap),
-                        new Ledster::RibbenClivePattern<SoftSquare>(),
-                        new Ledster::SnowflakePattern(),
-                        new Ledster::PetalRotatePattern(),
-                        new Ledster::ClivePattern<LFOPause<SinFast>>(numLeds, 10000, 5, 0.25)},
-                    30000 // duration
-                    )
-                ),
-            new SpiOutput(0, 1, 500000),
-            dynamicColorConversionTransfer,
-            PixelLut
+            new UDPInput(9601),
+            new SpiOutput(0, 1, 500000)
         )
+
+        // new Pipe(
+        //     new FallbackInput(
+        //         new UDPInput(9601),
+        //         new PatternCycleInput<RGBA>(
+        //             numLeds,
+        //             std::vector<LayeredPattern<RGBA> *>{
+        //                 new Ledster::RadarPattern(ledsterMap),
+        //                 new Ledster::PetalChasePattern(),
+        //                 new Ledster::ConcentricChaserPattern(),
+        //                 new Ledster::SnakePattern(),
+        //                 new Ledster::RadialFadePattern(ledsterMap),
+        //                 new Ledster::RibbenClivePattern<SoftSquare>(),
+        //                 new Ledster::SnowflakePattern(),
+        //                 new Ledster::PetalRotatePattern(),
+        //                 new Ledster::ClivePattern<LFOPause<SinFast>>(numLeds, 10000, 5, 0.25)},
+        //             30000 // duration
+        //             )
+        //         ),
+        //     new SpiOutput(0, 1, 500000),
+        //     dynamicColorConversionTransfer,
+        //     PixelLut
+        // )
     };
 }

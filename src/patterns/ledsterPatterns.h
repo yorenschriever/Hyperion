@@ -272,7 +272,7 @@ namespace Ledster
         {
             lfo.setPeriod(Params::getVelocity(10000, 500));
             lfo.setSkew(Params::getIntensity());
-            lfo.setPulseWidth(1);
+            lfo.setPulseWidth(0.5);
             int variant = Params::getVariant() * 7 + 1;
 
             // lfo.setSkew(0.5);
