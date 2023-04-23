@@ -9,16 +9,10 @@
 #include "luts/incandescentLut.h"
 #include "configurationStruct.h"
 
-//I picked colour correction values that Fastled uses for neopixels "TypicalLEDStrip"
-//http://fastled.io/docs/3.1/group___color_enums.html
-//note the different order, fastled uses RGB, luts are in ouput order (GRB)
-//when i calibrated myself i found different values, see standalone.h
-LUT* HaloLut = new ColourCorrectionLUT(1.5,255, 176, 255, 240); 
-
 void LoadConfiguration()
 {
 
-    Configuration.hostname = "hyperslave5";
+    Configuration.hostname = "hyperslave2";
     Configuration.pwmFrequency = 1500;
 
     Configuration.pipes = {
@@ -26,8 +20,7 @@ void LoadConfiguration()
     new Pipe(
         new UDPInput(9611),
         new NeopixelOutput<Kpbs800>(1),
-        Pipe::transfer<RGB,BGR>,
-        HaloLut
+        Pipe::transfer<RGB,BGR>
         ),
 
     new Pipe(
